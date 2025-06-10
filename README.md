@@ -1,3 +1,5 @@
+# UNDER DEVELOPMENT! - NOT FULLY TESTED!
+
 # 💕 Streamlit Swipe Cards
 
 A Tinder-like swipe cards component for Streamlit! Create beautiful, interactive card interfaces with smooth swipe animations.
