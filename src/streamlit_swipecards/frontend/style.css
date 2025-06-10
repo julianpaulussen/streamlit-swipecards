@@ -188,20 +188,28 @@ body {
 }
 
 /* Stacking effect for cards behind */
-.swipe-card:nth-child(1) {
-  z-index: 3;
-}
-
-.swipe-card:nth-child(2) {
-  transform: scale(0.96) translateY(8px);
-  z-index: 2;
-}
-
-.swipe-card:nth-child(3) {
-  transform: scale(0.92) translateY(16px);
+.swipe-card {
+  /* Base positioning for all cards */
   z-index: 1;
 }
 
+/* Use position classes instead of nth-child for consistent sizing */
+.card-front {
+  z-index: 3;
+  /* Front card keeps normal size */
+}
+
+.card-second {
+  transform: scale(1) translateY(0px);
+  z-index: 2;
+}
+
+.card-third {
+  transform: scale(1) translateY(0px);
+  z-index: 1;
+}
+
+/* Hide any additional cards beyond the third */
 .swipe-card:nth-child(n+4) {
   display: none;
 }

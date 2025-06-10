@@ -49,8 +49,14 @@ class SwipeCards {
       
       console.log('Creating card for index:', cardIndex, 'Card name:', card.name);
       
+      // Add position classes for consistent sizing
+      let positionClass = '';
+      if (i === 0) positionClass = 'card-front';
+      else if (i === 1) positionClass = 'card-second';
+      else if (i === 2) positionClass = 'card-third';
+      
       cardsHTML += `
-        <div class="swipe-card" data-index="${cardIndex}">
+        <div class="swipe-card ${positionClass}" data-index="${cardIndex}">
           <img src="${card.image}" alt="${card.name}" class="card-image" 
                onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
           <div class="card-content">
