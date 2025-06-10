@@ -18,7 +18,7 @@ body {
 .swipe-container {
   width: 100%;
   max-width: 400px;
-  height: 600px;
+  height: 700px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -101,6 +101,42 @@ body {
   align-items: center;
   width: 200px;
   margin-top: 20px;
+}
+
+.results-section {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.results-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.results-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.results-btn:active {
+  transform: scale(0.95);
+}
+
+.swipe-counter {
+  color: white;
+  font-size: 12px;
+  opacity: 0.8;
+  text-align: center;
 }
 
 .action-btn {
@@ -241,5 +277,14 @@ body {
     width: 45px;
     height: 45px;
     font-size: 18px;
+  }
+  
+  .results-btn {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+  
+  .swipe-counter {
+    font-size: 11px;
   }
 }

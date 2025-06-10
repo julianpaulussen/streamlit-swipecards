@@ -18,6 +18,7 @@ class SwipeCards {
     this.startY = 0;
     this.currentX = 0;
     this.currentY = 0;
+    this.lastAction = null; // Store the last action without sending immediately
     
     this.init();
   }
@@ -35,6 +36,10 @@ class SwipeCards {
         <div class="no-more-cards">
           <h3>🎉 All done!</h3>
           <p>No more cards to swipe</p>
+          <div class="results-section">
+            <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
+            <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
+          </div>
         </div>
       `;
       return;
@@ -77,6 +82,10 @@ class SwipeCards {
         <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()">❌</button>
         <button class="action-btn btn-back" onclick="swipeCards.goBack()">↶</button>
         <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">💚</button>
+      </div>
+      <div class="results-section">
+        <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
+        <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
       </div>
     `;
   }
@@ -191,12 +200,12 @@ class SwipeCards {
           index: this.currentIndex
         });
         
-        // Send result to Streamlit
-        sendValue({
+        // Store the last action but don't send to Streamlit immediately
+        this.lastAction = {
           card: card,
           action: 'right',
           cardIndex: this.currentIndex
-        });
+        };
         
         this.currentIndex++;
         this.render();
@@ -219,12 +228,12 @@ class SwipeCards {
           index: this.currentIndex
         });
         
-        // Send result to Streamlit
-        sendValue({
+        // Store the last action but don't send to Streamlit immediately
+        this.lastAction = {
           card: card,
           action: 'left',
           cardIndex: this.currentIndex
-        });
+        };
         
         this.currentIndex++;
         this.render();
@@ -239,15 +248,29 @@ class SwipeCards {
     const lastSwiped = this.swipedCards.pop();
     this.currentIndex = lastSwiped.index;
     
-    // Send result to Streamlit
-    sendValue({
+    // Store the last action but don't send to Streamlit immediately
+    this.lastAction = {
       card: lastSwiped.card,
       action: 'back',
       cardIndex: this.currentIndex
-    });
+    };
     
     this.render();
     this.bindEvents();
+  }
+  
+  getResults() {
+    // Return all swiped cards and the last action
+    const results = {
+      swipedCards: this.swipedCards,
+      lastAction: this.lastAction,
+      totalSwiped: this.swipedCards.length,
+      remainingCards: this.cards.length - this.currentIndex
+    };
+    
+    // Send results to Streamlit
+    sendValue(results);
+    return results;
   }
 }
 
@@ -271,6 +294,9 @@ function onRender(event) {
       <div class="no-more-cards">
         <h3>📱 No Cards Available</h3>
         <p>Please provide card data to start swiping!</p>
+        <div class="results-section">
+          <div class="swipe-counter">Ready to swipe when you add cards</div>
+        </div>
       </div>
     `;
     return;
@@ -280,7 +306,7 @@ function onRender(event) {
   swipeCards = new SwipeCards(container, cards);
   
   // Set the frame height based on content
-  Streamlit.setFrameHeight(650);
+  Streamlit.setFrameHeight(750);
 }
 
 // Render the component whenever python send a "render event"
@@ -288,4 +314,4 @@ Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender)
 // Tell Streamlit that the component is ready to receive events
 Streamlit.setComponentReady()
 // Initial frame height
-Streamlit.setFrameHeight(650)
+Streamlit.setFrameHeight(750)
