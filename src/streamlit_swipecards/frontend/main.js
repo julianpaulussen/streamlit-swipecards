@@ -7,6 +7,71 @@ function sendValue(value) {
   Streamlit.setComponentValue(value)
 }
 
+// Theme detection and application
+function detectAndApplyTheme() {
+  // Try to detect theme from Streamlit's CSS variables or parent styles
+  let isDark = false;
+  
+  try {
+    // Multiple detection methods for robustness
+    const parentDoc = window.parent.document;
+    
+    // Method 1: Check for explicit theme attributes
+    if (parentDoc.documentElement.hasAttribute('data-theme')) {
+      isDark = parentDoc.documentElement.getAttribute('data-theme') === 'dark';
+    }
+    // Method 2: Check for dark class names
+    else if (parentDoc.documentElement.classList.contains('dark') || 
+             parentDoc.body.classList.contains('dark-theme') ||
+             parentDoc.body.classList.contains('dark')) {
+      isDark = true;
+    }
+    // Method 3: Check Streamlit app background color
+    else {
+      const streamlitApp = parentDoc.querySelector('.stApp, .main, [data-testid="stAppViewContainer"], .css-1d391kg, .css-fg4pbf');
+      if (streamlitApp) {
+        const computedStyle = window.parent.getComputedStyle(streamlitApp);
+        const bgColor = computedStyle.backgroundColor;
+        
+        // Parse RGB to determine brightness
+        const rgbMatch = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+          const [, r, g, b] = rgbMatch.map(Number);
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          isDark = brightness < 128;
+        }
+        // Check for known dark colors
+        else if (bgColor.includes('14, 17, 23') || bgColor.includes('38, 39, 48') || bgColor.includes('11, 11, 11')) {
+          isDark = true;
+        }
+      }
+    }
+    
+    // Method 4: Check CSS custom properties
+    if (!isDark) {
+      const rootStyle = window.parent.getComputedStyle(parentDoc.documentElement);
+      const colorScheme = rootStyle.getPropertyValue('color-scheme');
+      if (colorScheme === 'dark') {
+        isDark = true;
+      }
+    }
+  } catch (e) {
+    console.log('Theme detection fallback:', e);
+    // Fallback: use system preference
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    isDark = mediaQuery.matches;
+  }
+  
+  // Apply theme to the document
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  
+  // Also set it on body for compatibility
+  document.body.className = isDark ? 'dark-theme' : 'light-theme';
+  
+  console.log('Applied theme:', isDark ? 'dark' : 'light');
+  return isDark;
+}
+
 class SwipeCards {
   constructor(container, cards) {
     this.container = container;
@@ -24,6 +89,8 @@ class SwipeCards {
   }
   
   init() {
+    // Apply theme detection
+    detectAndApplyTheme();
     this.render();
     this.bindEvents();
   }
@@ -284,6 +351,12 @@ let swipeCards = null;
 function onRender(event) {
   const { cards = [] } = event.detail.args;
   
+  // Apply theme detection immediately
+  detectAndApplyTheme();
+  
+  // Set up theme monitoring for dynamic updates
+  setupThemeMonitoring();
+  
   const root = document.getElementById('root');
   root.innerHTML = '<div class="swipe-container"></div>';
   
@@ -305,13 +378,49 @@ function onRender(event) {
   // Always create a fresh instance to avoid state persistence issues
   swipeCards = new SwipeCards(container, cards);
   
-  // Set the frame height based on content
-  Streamlit.setFrameHeight(750);
+  // Set the frame height based on content (reduced for tighter spacing)
+  Streamlit.setFrameHeight(620);
+}
+
+// Setup theme monitoring for dynamic theme changes
+function setupThemeMonitoring() {
+  // Monitor system color scheme changes
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  mediaQuery.addListener(detectAndApplyTheme);
+  
+  // Monitor parent document changes (for Streamlit theme switching)
+  try {
+    const parentDoc = window.parent.document;
+    const observer = new MutationObserver(() => {
+      setTimeout(detectAndApplyTheme, 100); // Small delay to let changes settle
+    });
+    
+    // Watch for class changes on documentElement and body
+    observer.observe(parentDoc.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme', 'style']
+    });
+    observer.observe(parentDoc.body, {
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+    
+    // Watch for style changes on main app container
+    const appContainer = parentDoc.querySelector('.stApp, .main, [data-testid="stAppViewContainer"]');
+    if (appContainer) {
+      observer.observe(appContainer, {
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+  } catch (e) {
+    console.log('Could not set up theme monitoring:', e);
+  }
 }
 
 // Render the component whenever python send a "render event"
 Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender)
 // Tell Streamlit that the component is ready to receive events
 Streamlit.setComponentReady()
-// Initial frame height
-Streamlit.setFrameHeight(750)
+// Initial frame height (reduced for tighter spacing)
+Streamlit.setFrameHeight(620)
