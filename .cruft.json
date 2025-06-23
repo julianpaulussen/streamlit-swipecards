@@ -1,0 +1,21 @@
+{
+  "template": "https://github.com/blackary/cookiecutter-streamlit-component/",
+  "commit": "c972054b7b0890a1aa1c02e792bedc71c525ea87",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "author_name": "Julian",
+      "author_email": "",
+      "project_name": "Streamlit Swipecards",
+      "package_name": "streamlit-swipecards",
+      "import_name": "streamlit_swipecards",
+      "description": "Streamlit Swipecards allow you to add interactive swipeable cards to your app.",
+      "deployment_via_github_actions": "y",
+      "working_with_dataframes": "n",
+      "open_source_license": "MIT license",
+      "_template": "https://github.com/blackary/cookiecutter-streamlit-component/",
+      "_commit": "c972054b7b0890a1aa1c02e792bedc71c525ea87"
+    }
+  },
+  "directory": null
+}
