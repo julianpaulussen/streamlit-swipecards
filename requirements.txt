@@ -1,2 +1,4 @@
 streamlit>=1.2
 jinja2
+# Install streamlit-swipecards from this repository
+-e .
