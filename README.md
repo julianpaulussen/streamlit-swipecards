@@ -10,8 +10,9 @@ A swipe cards component for Streamlit! Create beautiful, interactive card interf
 - 🎨 **Beautiful animations** - Smooth swipe animations with visual feedback
 - 📱 **Mobile responsive** - Works great on all devices
 - 🖼️ **Image support** - Upload files or use URLs
-- 📊 **Table mode** - Swipe through dataset rows with highlighting
-- 🎯 **Cell highlighting** - Highlight specific cells in table mode
+- 📊 **Table mode** - Swipe through dataset rows with AG-Grid
+- 🎯 **Cell highlighting** - Highlight specific cells in table mode  
+- 🔧 **AG-Grid powered** - Professional data grid with sorting and scrolling
 - ⚡ **Easy to use** - Simple Python API
 
 ## Installation instructions 
@@ -61,14 +62,16 @@ if result:
 import streamlit as st
 from streamlit_swipecards import streamlit_swipecards
 
-# Swipe through CSV/Excel data
+# Simple cell highlighting - one cell per card
 highlight_cells = [
-    {'row': 0, 'column': 'salary', 'color': '#90EE90'},  # Green highlight
-    {'row': 2, 'column': 'age', 'color': '#FFB6C1'},     # Pink highlight
+    {'row': 0, 'column': 'Salary', 'color': '#FFB6C1'},    # Alice's salary - Light Pink
+    {'row': 1, 'column': 'Rating', 'color': '#98FB98'},    # Bob's rating - Pale Green  
+    {'row': 2, 'column': 'Experience', 'color': '#87CEEB'}, # Carol's experience - Sky Blue
+    {'row': 3, 'column': 'Projects', 'color': '#DDA0DD'},  # David's projects - Plum
 ]
 
 result = streamlit_swipecards(
-    dataset_path="path/to/your/data.csv",
+    dataset_path="sample_data.csv",
     highlight_cells=highlight_cells,
     display_mode="table",
     key="table_swiper"
@@ -88,6 +91,8 @@ streamlit_swipecards(
     cards=None,
     dataset_path=None,
     highlight_cells=None,
+    highlight_rows=None,
+    highlight_columns=None,
     display_mode="cards",
     key=None
 )
@@ -98,6 +103,8 @@ streamlit_swipecards(
 - `cards` (list, optional): List of card dictionaries for image mode
 - `dataset_path` (str, optional): Path to CSV/Excel file for table mode
 - `highlight_cells` (list, optional): List of cells to highlight in table mode
+- `highlight_rows` (list, optional): List of rows to highlight in table mode
+- `highlight_columns` (list, optional): List of columns to highlight in table mode
 - `display_mode` (str): Either "cards" or "table" (default: "cards")
 - `key` (str, optional): Unique key for the component
 
@@ -118,17 +125,82 @@ Each card should be a dictionary with these required fields:
 For table mode, use `dataset_path` to point to your CSV or Excel file. The component will automatically convert each row into a swipeable card.
 
 ### Cell Highlighting
-Highlight specific cells in table mode:
+
+Highlight specific cells in table mode to draw attention to important data:
 
 ```python
+# Individual cell highlighting
 highlight_cells = [
     {
-        "row": 0,           # Row index (0-based)
-        "column": "salary", # Column name or index
-        "color": "#90EE90"  # CSS color (optional, defaults to yellow)
+        "row": 0,               # Row index (0-based)
+        "column": "salary",     # Column name or index
+        "color": "#90EE90"      # CSS color (optional)
+    },
+    {
+        "row": 1,
+        "column": "department", 
+        "color": "random"       # Use 'random' for auto-generated colors
+    },
+    {
+        "row": 2,
+        "column": "skills"      # No color = default yellow highlighting
     }
 ]
 ```
+
+**Advanced: Row and Column Highlighting**
+
+For advanced use cases, you can also highlight entire rows and columns:
+
+```python
+# Entire row highlighting
+highlight_rows = [
+    {
+        "row": 0,               # Row index to highlight
+        "color": "#E3F2FD"      # Light blue background
+    }
+]
+
+# Entire column highlighting  
+highlight_columns = [
+    {
+        "column": "salary",     # Column name to highlight
+        "color": "#E8F5E8"      # Light green background
+    }
+]
+```
+
+### Row and Column Highlighting
+Highlight entire rows or columns:
+
+```python
+# Highlight specific rows
+highlight_rows = [
+    {"row": 0, "color": "#E3F2FD"},    # Light blue
+    {"row": 2, "color": "random"}      # Random color
+]
+
+# Highlight specific columns
+highlight_columns = [
+    {"column": "salary", "color": "#E8F5E8"},     # Light green
+    {"column": "department", "color": "#FFF8DC"}  # Light gold
+]
+
+result = streamlit_swipecards(
+    dataset_path="data.csv",
+    highlight_cells=highlight_cells,
+    highlight_rows=highlight_rows,
+    highlight_columns=highlight_columns,
+    display_mode="table",
+    key="enhanced_swiper"
+)
+```
+
+**Color Options:**
+- **Hex codes**: `#FF6B6B`, `#4ECDC4`, etc.
+- **CSS names**: `red`, `blue`, `green`, etc.
+- **`"random"`**: Automatically generates random colors
+- **Omit color**: Uses defaults (yellow for cells, light blue for rows, light green for columns)
 
 ## Quick Start
 
@@ -141,17 +213,32 @@ This will launch a demo with both image cards and table modes.
 
 ### Table-specific examples:
 ```bash
-# Fixed dataset with highlighting
+# Enhanced demos with coordinated highlighting
+streamlit run enhanced_table_demo.py
+
+# Interactive cell/row/column selection
+streamlit run interactive_highlighting_demo.py
+
+# Fixed dataset with multiple highlights per card
 streamlit run table_example.py
 
-# CSV file upload interface  
-streamlit run csv_upload_example.py
+# Simple demo with random highlights
+streamlit run simple_demo.py
+
+# AG-Grid integration test
+streamlit run aggrid_test.py
 ```
 
 The examples demonstrate:
-- Image cards with real Unsplash photos
-- Table cards with sample employee data
-- Cell highlighting functionality
+- **Simple cell highlighting**: One cell highlighted per card
+- **30 rows of employee data** for extensive scrolling
+- **Fixed highlighting patterns** that don't reset on reload
+- **Multiple color schemes** for visual variety
+- **AG-Grid integration** with professional data display
+- **Advanced features** (row/column highlighting) in specialized demos
+- Professional scrolling and data presentation
+- Single cell highlighting per card (not full rows)
+- Various color options including random colors
 - CSV file upload and processing
 
 ## Return Value

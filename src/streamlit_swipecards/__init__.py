@@ -17,6 +17,8 @@ def streamlit_swipecards(
     cards: Optional[list] = None,
     dataset_path: Optional[str] = None,
     highlight_cells: Optional[List[dict]] = None,
+    highlight_rows: Optional[List[dict]] = None,
+    highlight_columns: Optional[List[dict]] = None,
     display_mode: str = "cards",
     key: Optional[str] = None,
 ):
@@ -36,7 +38,15 @@ def streamlit_swipecards(
         List of dictionaries specifying cells to highlight. Each dict should have:
         - row: int (row index)
         - column: str or int (column name or index)
-        - color: str (optional, default is yellow)
+        - color: str (optional, CSS color, 'random' for random color, default is gold)
+    highlight_rows : list, optional
+        List of dictionaries specifying rows to highlight. Each dict should have:
+        - row: int (row index)
+        - color: str (optional, CSS color, 'random' for random color, default is light blue)
+    highlight_columns : list, optional
+        List of dictionaries specifying columns to highlight. Each dict should have:
+        - column: str or int (column name or index)
+        - color: str (optional, CSS color, 'random' for random color, default is light green)
     display_mode : str
         Display mode: "cards" for image cards, "table" for table display
     key : str, optional
@@ -89,6 +99,8 @@ def streamlit_swipecards(
         cards=cards,
         table_data=table_data,
         highlight_cells=highlight_cells or [],
+        highlight_rows=highlight_rows or [],
+        highlight_columns=highlight_columns or [],
         display_mode=display_mode,
         key=key,
         default=None

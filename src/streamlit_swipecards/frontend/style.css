@@ -332,36 +332,35 @@ body {
 }
 
 /* Table card styles */
-.table-card-content {
-  height: 100%;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
+.table-card-image {
+  width: 100%;
+  height: 75%;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
   background: var(--card-bg);
-}
-
-.table-card-header {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-  text-align: center;
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--border-color);
+  position: relative;
 }
 
 .table-container {
-  flex: 1;
+  height: 100%;
   overflow: auto;
-  margin: 8px 0;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+[data-theme="dark"] .table-container {
+  background: linear-gradient(135deg, #1a1d23 0%, #262730 100%);
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-primary);
   background: var(--card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .data-table th {
@@ -370,55 +369,84 @@ body {
   padding: 8px 6px;
   text-align: left;
   font-weight: 600;
-  font-size: 11px;
-  border: 1px solid var(--border-color);
+  font-size: 10px;
+  border: none;
   position: sticky;
   top: 0;
   z-index: 10;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .data-table td {
-  padding: 8px 6px;
+  padding: 6px 6px;
   border: 1px solid var(--border-color);
   word-wrap: break-word;
-  max-width: 120px;
+  max-width: 80px;
   vertical-align: top;
   background: var(--card-bg);
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-size: 10px;
 }
 
-.data-table td:hover {
+.data-table tbody tr:hover {
   background-color: var(--bg-color);
+  transform: scale(1.02);
+}
+
+.data-table tbody tr.current-row {
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 2px solid var(--button-gradient);
+  font-weight: 600;
+}
+
+.data-table tbody tr.current-row td {
+  border-color: rgba(102, 126, 234, 0.3);
+  background: rgba(102, 126, 234, 0.05);
+}
+
+/* Highlighted cells with better styling */
+.data-table td[style*="background-color"] {
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.data-table td[style*="background-color"]::before {
+  content: '✨';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 8px;
+  opacity: 0.7;
 }
 
 /* Scrollbar styling for table */
 .table-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 .table-container::-webkit-scrollbar-track {
-  background: var(--bg-color);
-  border-radius: 3px;
+  background: transparent;
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 2px;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: rgba(102, 126, 234, 0.5);
 }
 
 /* Adjust card size for table mode */
 .swipe-container.table-mode {
-  max-width: 500px;
+  max-width: 450px;
 }
 
 .swipe-container.table-mode .cards-stack {
-  width: 420px;
-  height: 500px;
+  width: 380px;
+  height: 480px;
 }
 
 /* Mobile responsiveness for table cards */
@@ -429,24 +457,147 @@ body {
   
   .swipe-container.table-mode .cards-stack {
     width: 320px;
-    height: 450px;
-  }
-  
-  .table-card-header {
-    font-size: 16px;
+    height: 420px;
   }
   
   .data-table {
-    font-size: 10px;
+    font-size: 9px;
   }
   
   .data-table th {
-    font-size: 9px;
-    padding: 6px 4px;
+    font-size: 8px;
+    padding: 4px 3px;
   }
   
   .data-table td {
-    padding: 6px 4px;
-    max-width: 80px;
+    padding: 4px 3px;
+    max-width: 60px;
+    font-size: 8px;
   }
+  
+  .table-container {
+    padding: 8px;
+  }
+}
+
+/* AG-Grid Integration Styles */
+.ag-grid-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+/* AG-Grid theme customization to match our design */
+.ag-grid-container .ag-theme-alpine {
+  --ag-background-color: var(--card-bg);
+  --ag-header-background-color: transparent;
+  --ag-header-foreground-color: white;
+  --ag-odd-row-background-color: var(--card-bg);
+  --ag-row-hover-color: var(--bg-color);
+  --ag-selected-row-background-color: rgba(0, 123, 255, 0.1);
+  --ag-border-color: var(--border-color);
+  --ag-foreground-color: var(--text-primary);
+  --ag-secondary-foreground-color: var(--text-secondary);
+  --ag-font-size: 10px;
+  --ag-font-family: inherit;
+  font-family: inherit;
+  border-radius: 8px;
+}
+
+/* Custom header styling to match our gradient */
+.ag-grid-container .ag-header {
+  background: var(--button-gradient) !important;
+  border-radius: 8px 8px 0 0;
+}
+
+.ag-grid-container .ag-header-cell {
+  background: transparent !important;
+  color: white !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+  border-right: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+.ag-grid-container .ag-header-cell-label {
+  color: white !important;
+}
+
+/* Row styling */
+.ag-grid-container .ag-row {
+  border-bottom: 1px solid var(--border-color) !important;
+  transition: all 0.3s ease;
+}
+
+.ag-grid-container .ag-row:hover {
+  background-color: var(--bg-color) !important;
+  transform: scale(1.01);
+}
+
+/* Cell styling */
+.ag-grid-container .ag-cell {
+  border-right: 1px solid var(--border-color) !important;
+  font-size: 10px !important;
+  padding: 4px 6px !important;
+}
+
+/* Remove default focus outline */
+.ag-grid-container .ag-cell:focus {
+  outline: none !important;
+}
+
+/* Custom styling for highlighted cells in AG-Grid */
+.ag-grid-container .ag-cell.highlighted-cell {
+  font-weight: bold !important;
+  position: relative;
+}
+
+.ag-grid-container .ag-cell.highlighted-cell::after {
+  content: '✨';
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+/* Scrollbar styling for AG-Grid */
+.ag-grid-container .ag-body-horizontal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+}
+
+.ag-grid-container .ag-body-vertical-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+}
+
+.ag-grid-container .ag-body-horizontal-scroll::-webkit-scrollbar,
+.ag-grid-container .ag-body-vertical-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.ag-grid-container .ag-body-horizontal-scroll::-webkit-scrollbar-track,
+.ag-grid-container .ag-body-vertical-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ag-grid-container .ag-body-horizontal-scroll::-webkit-scrollbar-thumb,
+.ag-grid-container .ag-body-vertical-scroll::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 2px;
+}
+
+.ag-grid-container .ag-body-horizontal-scroll::-webkit-scrollbar-thumb:hover,
+.ag-grid-container .ag-body-vertical-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .ag-grid-container .ag-theme-alpine {
+  --ag-background-color: var(--card-bg);
+  --ag-odd-row-background-color: var(--card-bg);
+  --ag-row-hover-color: rgba(255, 255, 255, 0.05);
 }

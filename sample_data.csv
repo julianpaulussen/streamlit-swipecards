@@ -1,6 +1,31 @@
-Name,Age,Department,Salary,Experience
-Alice Johnson,28,Engineering,75000,5
-Bob Smith,34,Sales,65000,8
-Carol Davis,26,Marketing,58000,3
-David Wilson,31,Engineering,82000,7
-Eve Brown,29,HR,62000,4
+Name,Age,Department,Salary,Experience,Location,Skills,Status,Rating,Projects
+Alice Johnson,28,Engineering,75000,5,New York,Python JavaScript React,Active,4.8,12
+Bob Smith,34,Sales,65000,8,California,Sales CRM Negotiation,Active,4.5,25
+Carol Davis,26,Marketing,58000,3,Texas,Marketing Analytics SEO,Active,4.2,8
+David Wilson,31,Engineering,82000,7,New York,Java Python AWS,Active,4.9,18
+Eve Brown,29,HR,62000,4,Florida,Recruiting Training Management,Active,4.1,15
+Frank Miller,35,Engineering,95000,10,Seattle,DevOps Kubernetes Docker,Active,4.7,22
+Grace Lee,27,Design,67000,4,California,UI/UX Figma Adobe Creative Suite,Active,4.6,14
+Henry Taylor,32,Finance,73000,6,New York,Excel Financial Analysis Budgeting,Active,4.3,19
+Iris Chen,30,Data Science,88000,7,California,Python R Machine Learning SQL,Active,4.8,16
+Jack Wilson,26,Marketing,55000,2,Texas,Content Marketing Social Media,Active,4.0,6
+Kate Brown,33,Engineering,89000,8,Seattle,React Node.js MongoDB,Active,4.7,21
+Liam Davis,29,Sales,69000,5,Florida,B2B Sales Account Management,Active,4.4,13
+Maya Patel,31,Data Science,92000,6,California,Python TensorFlow Deep Learning,Active,4.9,17
+Noah Garcia,28,Design,61000,3,New York,Graphic Design Branding,Active,4.2,9
+Olivia Martinez,30,Finance,76000,5,Texas,Investment Analysis Risk Management,Active,4.5,11
+Paul Thompson,26,Engineering,68000,3,Seattle,Go Rust Blockchain,Active,4.4,7
+Quinn Lee,33,Marketing,62000,6,California,Digital Marketing SEO Analytics,Active,4.6,19
+Rachel Green,29,Data Science,85000,5,New York,Python Tableau Statistics,Active,4.7,15
+Sam Rodriguez,35,Sales,71000,9,Texas,Enterprise Sales SaaS,Active,4.8,28
+Tina Wang,27,Design,59000,2,Florida,Web Design UX Research,Active,4.1,5
+Ursula Clark,32,HR,64000,7,New York,Talent Acquisition People Analytics,Active,4.3,20
+Victor Hugo,28,Engineering,77000,4,California,React TypeScript GraphQL,Active,4.5,10
+Wendy Adams,31,Finance,79000,6,Seattle,Corporate Finance M&A,Active,4.6,16
+Xavier Cruz,30,Data Science,91000,8,Texas,AI Deep Learning NLP,Active,4.9,24
+Yuki Tanaka,26,Marketing,56000,1,Florida,Social Media Content Creation,Active,3.9,3
+Zoe Mitchell,34,Engineering,94000,11,New York,System Architecture Cloud Computing,Active,4.8,29
+Aaron Bell,29,Sales,66000,4,California,B2B SaaS Customer Success,Active,4.2,12
+Bella Chen,27,Design,63000,3,Seattle,Product Design Prototyping,Active,4.4,8
+Carlos Dias,33,HR,68000,8,Texas,HR Analytics Compensation,Active,4.5,22
+Diana Foster,28,Finance,72000,5,New York,Financial Planning Analysis,Active,4.7,14

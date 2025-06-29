@@ -62,31 +62,43 @@ def main():
     else:  # Table Cards
         st.subheader("📊 Table Cards Mode")
         
-        # Create sample dataset
-        data = {
-            'Name': ['Alice Johnson', 'Bob Smith', 'Carol Davis', 'David Wilson'],
-            'Age': [28, 34, 26, 31],
-            'Department': ['Engineering', 'Sales', 'Marketing', 'Engineering'],
-            'Salary': [75000, 65000, 58000, 82000],
-            'Experience': [5, 8, 3, 7]
-        }
-        df = pd.DataFrame(data)
+        # Create sample dataset with more data - use session state to prevent reloading
+        if 'table_data' not in st.session_state:
+            data = {
+                'Name': ['Alice Johnson', 'Bob Smith', 'Carol Davis', 'David Wilson', 'Eve Brown', 'Frank Miller', 'Grace Lee', 'Henry Taylor', 'Iris Chen', 'Jack Wilson'],
+                'Age': [28, 34, 26, 31, 29, 35, 27, 32, 30, 26],
+                'Department': ['Engineering', 'Sales', 'Marketing', 'Engineering', 'HR', 'Engineering', 'Design', 'Finance', 'Data Science', 'Marketing'],
+                'Salary': [75000, 65000, 58000, 82000, 62000, 95000, 67000, 73000, 88000, 55000],
+                'Experience': [5, 8, 3, 7, 4, 10, 4, 6, 7, 2],
+                'Location': ['New York', 'California', 'Texas', 'New York', 'Florida', 'Seattle', 'California', 'New York', 'California', 'Texas'],
+                'Skills': ['Python JavaScript', 'Sales CRM', 'Marketing Analytics', 'Java Python AWS', 'Recruiting Training', 'DevOps Kubernetes', 'UI/UX Design', 'Financial Analysis', 'Machine Learning', 'Content Marketing'],
+                'Rating': [4.8, 4.5, 4.2, 4.9, 4.1, 4.7, 4.6, 4.3, 4.8, 4.0],
+                'Projects': [12, 25, 8, 18, 15, 22, 14, 19, 16, 6]
+            }
+            st.session_state.table_data = pd.DataFrame(data)
+            
+            # Save to temporary CSV file and store path in session state
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+                st.session_state.table_data.to_csv(f.name, index=False)
+                st.session_state.csv_path = f.name
+        
+        df = st.session_state.table_data
+        csv_path = st.session_state.csv_path
         
         st.write("**Sample Dataset:**")
         st.dataframe(df)
         
-        # Save to temporary CSV file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            df.to_csv(f.name, index=False)
-            csv_path = f.name
-        
-        # Define cells to highlight
+        # Define fixed highlighting - one cell per card
         highlight_cells = [
-            {'row': 0, 'column': 'Salary', 'color': '#90EE90'},  # Light green for Alice's salary
-            {'row': 2, 'column': 'Age', 'color': '#FFB6C1'},     # Light pink for Carol's age
+            {'row': 0, 'column': 'Salary', 'color': '#FFB6C1'},    # Alice's salary - Light Pink
+            {'row': 1, 'column': 'Rating', 'color': '#98FB98'},    # Bob's rating - Pale Green  
+            {'row': 2, 'column': 'Experience', 'color': '#87CEEB'}, # Carol's experience - Sky Blue
+            {'row': 3, 'column': 'Projects', 'color': '#DDA0DD'},  # David's projects - Plum
+            {'row': 4, 'column': 'Salary', 'color': '#F0E68C'},    # Eve's salary - Khaki
+            {'row': 5, 'column': 'Rating', 'color': '#FFA07A'},    # Frank's rating - Light Salmon
         ]
         
-        st.write("**Highlighted Cells:** Alice's Salary (Green), Carol's Age (Pink)")
+        st.write("**🎯 Fixed Highlighting:** Each card highlights one specific cell with a unique color")
         
         st.markdown("### Instructions:")
         st.markdown("- 👆 **Swipe right** or click 💚 to like the row")
@@ -101,12 +113,6 @@ def main():
             display_mode="table",
             key="table_example"
         )
-        
-        # Clean up temporary file
-        try:
-            os.unlink(csv_path)
-        except:
-            pass
     
     # Show the result
     if result:
