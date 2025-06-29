@@ -8,11 +8,11 @@ from streamlit_swipecards import streamlit_swipecards
 def main():
     st.set_page_config(
         page_title="Swipe Cards Example",
-        page_icon="💕",
+        # page_icon="",
         layout="centered"
     )
     
-    st.title("💕 Swipe Cards Example")
+    st.title("Swipe Cards Example")
     st.write("Here's a simple example of the Tinder-like swipe cards!")
     
     # Sample cards data
