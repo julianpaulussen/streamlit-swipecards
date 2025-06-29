@@ -1,6 +1,6 @@
 # Streamlit Swipe Cards
 
-A swipe cards component for Streamlit! Create beautiful, interactive card interfaces with smooth swipe animations.
+A swipe cards component for Streamlit! Create beautiful, interactive card interfaces with smooth swipe animations. Now supports both image cards and table row swiping!
 
 ## Features
 
@@ -10,6 +10,8 @@ A swipe cards component for Streamlit! Create beautiful, interactive card interf
 - 🎨 **Beautiful animations** - Smooth swipe animations with visual feedback
 - 📱 **Mobile responsive** - Works great on all devices
 - 🖼️ **Image support** - Upload files or use URLs
+- 📊 **Table mode** - Swipe through dataset rows with highlighting
+- 🎯 **Cell highlighting** - Highlight specific cells in table mode
 - ⚡ **Easy to use** - Simple Python API
 
 ## Installation instructions 
@@ -19,6 +21,8 @@ pip install streamlit-swipecards
 ```
 
 ## Usage
+
+### Image Cards Mode
 
 ```python
 import streamlit as st
@@ -35,16 +39,15 @@ cards = [
         "name": "Bob Smith", 
         "description": "Chef and foodie exploring the world",
         "image": "https://example.com/bob.jpg"
-    },
-    {
-        "name": "Carol Davis",
-        "description": "Artist and musician exploring creativity",
-        "image": "https://example.com/carol.jpg"
     }
 ]
 
 # Create the swipe interface
-result = streamlit_swipecards(cards=cards, key="swipe_cards")
+result = streamlit_swipecards(
+    cards=cards, 
+    display_mode="cards",
+    key="swipe_cards"
+)
 
 # Handle the result
 if result:
@@ -52,8 +55,55 @@ if result:
     st.json(result)
 ```
 
+### Table Mode
+
+```python
+import streamlit as st
+from streamlit_swipecards import streamlit_swipecards
+
+# Swipe through CSV/Excel data
+highlight_cells = [
+    {'row': 0, 'column': 'salary', 'color': '#90EE90'},  # Green highlight
+    {'row': 2, 'column': 'age', 'color': '#FFB6C1'},     # Pink highlight
+]
+
+result = streamlit_swipecards(
+    dataset_path="path/to/your/data.csv",
+    highlight_cells=highlight_cells,
+    display_mode="table",
+    key="table_swiper"
+)
+```
+if result:
+    st.write("### Last action:")
+    st.json(result)
+```
+
+## API Reference
+
+### streamlit_swipecards()
+
+```python
+streamlit_swipecards(
+    cards=None,
+    dataset_path=None,
+    highlight_cells=None,
+    display_mode="cards",
+    key=None
+)
+```
+
+**Parameters:**
+
+- `cards` (list, optional): List of card dictionaries for image mode
+- `dataset_path` (str, optional): Path to CSV/Excel file for table mode
+- `highlight_cells` (list, optional): List of cells to highlight in table mode
+- `display_mode` (str): Either "cards" or "table" (default: "cards")
+- `key` (str, optional): Unique key for the component
+
 ## Card Data Format
 
+### Image Cards Mode
 Each card should be a dictionary with these required fields:
 
 ```python
@@ -64,14 +114,45 @@ Each card should be a dictionary with these required fields:
 }
 ```
 
+### Table Mode
+For table mode, use `dataset_path` to point to your CSV or Excel file. The component will automatically convert each row into a swipeable card.
+
+### Cell Highlighting
+Highlight specific cells in table mode:
+
+```python
+highlight_cells = [
+    {
+        "row": 0,           # Row index (0-based)
+        "column": "salary", # Column name or index
+        "color": "#90EE90"  # CSS color (optional, defaults to yellow)
+    }
+]
+```
+
 ## Quick Start
 
-### Run the example:
+### Run the main example:
 ```bash
 streamlit run example.py
 ```
 
-This will launch a demo with three sample profiles using real Unsplash images, complete with instructions and action feedback.
+This will launch a demo with both image cards and table modes.
+
+### Table-specific examples:
+```bash
+# Fixed dataset with highlighting
+streamlit run table_example.py
+
+# CSV file upload interface  
+streamlit run csv_upload_example.py
+```
+
+The examples demonstrate:
+- Image cards with real Unsplash photos
+- Table cards with sample employee data
+- Cell highlighting functionality
+- CSV file upload and processing
 
 ## Return Value
 

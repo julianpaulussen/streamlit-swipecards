@@ -330,3 +330,123 @@ body {
     font-size: 11px;
   }
 }
+
+/* Table card styles */
+.table-card-content {
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+}
+
+.table-card-header {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.table-container {
+  flex: 1;
+  overflow: auto;
+  margin: 8px 0;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--card-bg);
+}
+
+.data-table th {
+  background: var(--button-gradient);
+  color: white;
+  padding: 8px 6px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  border: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.data-table td {
+  padding: 8px 6px;
+  border: 1px solid var(--border-color);
+  word-wrap: break-word;
+  max-width: 120px;
+  vertical-align: top;
+  background: var(--card-bg);
+  transition: background-color 0.3s ease;
+}
+
+.data-table td:hover {
+  background-color: var(--bg-color);
+}
+
+/* Scrollbar styling for table */
+.table-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: var(--bg-color);
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Adjust card size for table mode */
+.swipe-container.table-mode {
+  max-width: 500px;
+}
+
+.swipe-container.table-mode .cards-stack {
+  width: 420px;
+  height: 500px;
+}
+
+/* Mobile responsiveness for table cards */
+@media (max-width: 480px) {
+  .swipe-container.table-mode {
+    max-width: 95%;
+  }
+  
+  .swipe-container.table-mode .cards-stack {
+    width: 320px;
+    height: 450px;
+  }
+  
+  .table-card-header {
+    font-size: 16px;
+  }
+  
+  .data-table {
+    font-size: 10px;
+  }
+  
+  .data-table th {
+    font-size: 9px;
+    padding: 6px 4px;
+  }
+  
+  .data-table td {
+    padding: 6px 4px;
+    max-width: 80px;
+  }
+}

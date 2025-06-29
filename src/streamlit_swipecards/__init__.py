@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Union
+import pandas as pd
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -13,19 +14,31 @@ _component_func = components.declare_component(
 
 # Create the python function that will be called
 def streamlit_swipecards(
-    cards: list = None,
+    cards: Optional[list] = None,
+    dataset_path: Optional[str] = None,
+    highlight_cells: Optional[List[dict]] = None,
+    display_mode: str = "cards",
     key: Optional[str] = None,
 ):
     """
-    Create a Tinder-like swipe card component.
+    Create a Tinder-like swipe card component or table display.
     
     Parameters:
     -----------
-    cards : list
+    cards : list, optional
         List of dictionaries containing card data. Each dict should have:
         - name: str (required)
         - description: str (required) 
         - image: str (required - URL or base64 image)
+    dataset_path : str, optional
+        Path to a CSV/Excel dataset to display as table cards
+    highlight_cells : list, optional
+        List of dictionaries specifying cells to highlight. Each dict should have:
+        - row: int (row index)
+        - column: str or int (column name or index)
+        - color: str (optional, default is yellow)
+    display_mode : str
+        Display mode: "cards" for image cards, "table" for table display
     key : str, optional
         Unique key for the component
         
@@ -38,8 +51,45 @@ def streamlit_swipecards(
     if cards is None:
         cards = []
     
+    # Load dataset if path is provided
+    table_data = None
+    if dataset_path:
+        try:
+            if dataset_path.endswith('.csv'):
+                df = pd.read_csv(dataset_path)
+            elif dataset_path.endswith(('.xlsx', '.xls')):
+                df = pd.read_excel(dataset_path)
+            else:
+                raise ValueError("Unsupported file format. Use CSV or Excel files.")
+            
+            # Convert DataFrame to table data format
+            table_data = {
+                'columns': df.columns.tolist(),
+                'rows': df.values.tolist(),
+                'total_rows': len(df),
+                'total_columns': len(df.columns)
+            }
+            
+            # If display_mode is table, convert table data to cards format
+            if display_mode == "table":
+                cards = []
+                for i, row in enumerate(df.values):
+                    card_data = {
+                        'row_index': i,
+                        'data': dict(zip(df.columns, row)),
+                        'table_row': row.tolist()
+                    }
+                    cards.append(card_data)
+                    
+        except Exception as e:
+            st.error(f"Error loading dataset: {str(e)}")
+            table_data = None
+    
     component_value = _component_func(
         cards=cards,
+        table_data=table_data,
+        highlight_cells=highlight_cells or [],
+        display_mode=display_mode,
         key=key,
         default=None
     )

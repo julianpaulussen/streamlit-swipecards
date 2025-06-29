@@ -1,4 +1,6 @@
 streamlit>=1.2
+pandas
+openpyxl
 jinja2
 # Install streamlit-swipecards from this repository
 -e .

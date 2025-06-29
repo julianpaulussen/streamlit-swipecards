@@ -73,9 +73,12 @@ function detectAndApplyTheme() {
 }
 
 class SwipeCards {
-  constructor(container, cards) {
+  constructor(container, cards, tableData = null, highlightCells = [], displayMode = 'cards') {
     this.container = container;
     this.cards = cards;
+    this.tableData = tableData;
+    this.highlightCells = highlightCells;
+    this.displayMode = displayMode;
     this.currentIndex = 0;
     this.swipedCards = [];
     this.isDragging = false;
@@ -96,7 +99,7 @@ class SwipeCards {
   }
   
   render() {
-    console.log('Rendering cards. CurrentIndex:', this.currentIndex, 'Total cards:', this.cards.length);
+    console.log('Rendering cards. CurrentIndex:', this.currentIndex, 'Total cards:', this.cards.length, 'Display mode:', this.displayMode);
     
     if (this.currentIndex >= this.cards.length) {
       this.container.innerHTML = `
@@ -119,7 +122,7 @@ class SwipeCards {
       const cardIndex = this.currentIndex + i;
       const card = this.cards[cardIndex];
       
-      console.log('Creating card for index:', cardIndex, 'Card name:', card.name);
+      console.log('Creating card for index:', cardIndex, 'Display mode:', this.displayMode);
       
       // Add position classes for consistent sizing
       let positionClass = '';
@@ -127,14 +130,19 @@ class SwipeCards {
       else if (i === 1) positionClass = 'card-second';
       else if (i === 2) positionClass = 'card-third';
       
+      let cardContent = '';
+      
+      if (this.displayMode === 'table' && card.data) {
+        // Render table card
+        cardContent = this.renderTableCard(card, cardIndex);
+      } else {
+        // Render traditional image card
+        cardContent = this.renderImageCard(card);
+      }
+      
       cardsHTML += `
         <div class="swipe-card ${positionClass}" data-index="${cardIndex}">
-          <img src="${card.image}" alt="${card.name}" class="card-image" 
-               onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
-          <div class="card-content">
-            <h3 class="card-name">${card.name}</h3>
-            <p class="card-description">${card.description}</p>
-          </div>
+          ${cardContent}
           <div class="action-indicator like">💚</div>
           <div class="action-indicator pass">❌</div>
         </div>
@@ -155,6 +163,74 @@ class SwipeCards {
         <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
       </div>
     `;
+  }
+  
+  renderImageCard(card) {
+    return `
+      <img src="${card.image}" alt="${card.name}" class="card-image" 
+           onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
+      <div class="card-content">
+        <h3 class="card-name">${card.name}</h3>
+        <p class="card-description">${card.description}</p>
+      </div>
+    `;
+  }
+  
+  renderTableCard(card, cardIndex) {
+    const rowIndex = card.row_index;
+    let tableHTML = '<div class="table-card-content">';
+    tableHTML += `<div class="table-card-header">Row ${rowIndex + 1}</div>`;
+    tableHTML += '<div class="table-container">';
+    tableHTML += '<table class="data-table">';
+    
+    // Header row
+    if (this.tableData && this.tableData.columns) {
+      tableHTML += '<thead><tr>';
+      this.tableData.columns.forEach(col => {
+        tableHTML += `<th>${col}</th>`;
+      });
+      tableHTML += '</tr></thead>';
+    }
+    
+    // Data row
+    tableHTML += '<tbody><tr>';
+    if (this.tableData && this.tableData.columns) {
+      this.tableData.columns.forEach((col, colIndex) => {
+        const cellValue = card.data[col] || '';
+        const isHighlighted = this.isCellHighlighted(rowIndex, col, colIndex);
+        const highlightStyle = isHighlighted ? this.getHighlightStyle(rowIndex, col, colIndex) : '';
+        
+        tableHTML += `<td style="${highlightStyle}">${cellValue}</td>`;
+      });
+    }
+    tableHTML += '</tr></tbody>';
+    
+    tableHTML += '</table>';
+    tableHTML += '</div>';
+    tableHTML += '</div>';
+    
+    return tableHTML;
+  }
+  
+  isCellHighlighted(rowIndex, columnName, columnIndex) {
+    return this.highlightCells.some(highlight => {
+      const matchesRow = highlight.row === rowIndex;
+      const matchesColumn = highlight.column === columnName || highlight.column === columnIndex;
+      return matchesRow && matchesColumn;
+    });
+  }
+  
+  getHighlightStyle(rowIndex, columnName, columnIndex) {
+    const highlight = this.highlightCells.find(h => {
+      const matchesRow = h.row === rowIndex;
+      const matchesColumn = h.column === columnName || h.column === columnIndex;
+      return matchesRow && matchesColumn;
+    });
+    
+    if (highlight && highlight.color) {
+      return `background-color: ${highlight.color}; border: 2px solid ${highlight.color};`;
+    }
+    return 'background-color: #ffff99; border: 2px solid #ffd700;'; // default yellow highlight
   }
   
   bindEvents() {
@@ -349,7 +425,12 @@ let swipeCards = null;
  * component gets new data from Python.
  */
 function onRender(event) {
-  const { cards = [] } = event.detail.args;
+  const { 
+    cards = [], 
+    table_data = null, 
+    highlight_cells = [], 
+    display_mode = 'cards' 
+  } = event.detail.args;
   
   // Apply theme detection immediately
   detectAndApplyTheme();
@@ -361,6 +442,11 @@ function onRender(event) {
   root.innerHTML = '<div class="swipe-container"></div>';
   
   const container = root.querySelector('.swipe-container');
+  
+  // Add table-mode class if needed
+  if (display_mode === 'table') {
+    container.classList.add('table-mode');
+  }
   
   if (cards.length === 0) {
     container.innerHTML = `
@@ -376,10 +462,11 @@ function onRender(event) {
   }
   
   // Always create a fresh instance to avoid state persistence issues
-  swipeCards = new SwipeCards(container, cards);
+  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, display_mode);
   
-  // Set the frame height based on content (reduced for tighter spacing)
-  Streamlit.setFrameHeight(620);
+  // Set the frame height based on content (adjust for table mode)
+  const frameHeight = display_mode === 'table' ? 720 : 620;
+  Streamlit.setFrameHeight(frameHeight);
 }
 
 // Setup theme monitoring for dynamic theme changes
