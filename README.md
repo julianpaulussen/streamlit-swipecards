@@ -1,6 +1,6 @@
 # UNDER DEVELOPMENT! - NOT FULLY TESTED!
 
-# 💕 Streamlit Swipe Cards
+# Streamlit Swipe Cards
 
 A swipe cards component for Streamlit! Create beautiful, interactive card interfaces with smooth swipe animations.
 
