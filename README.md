@@ -12,6 +12,7 @@ A swipe cards component for Streamlit! Create beautiful, interactive card interf
 - 🖼️ **Image support** - Upload files or use URLs
 - 📊 **Table mode** - Swipe through dataset rows with AG-Grid
 - 🎯 **Cell highlighting** - Highlight specific cells in table mode  
+-  व्यू **Table View Centering** - Center the table on a specific row or column
 - 🔧 **AG-Grid powered** - Professional data grid with sorting and scrolling
 - ⚡ **Easy to use** - Simple Python API
 
@@ -94,6 +95,8 @@ streamlit_swipecards(
     highlight_rows=None,
     highlight_columns=None,
     display_mode="cards",
+    center_table_row=None,
+    center_table_column=None,
     key=None
 )
 ```
@@ -106,6 +109,8 @@ streamlit_swipecards(
 - `highlight_rows` (list, optional): List of rows to highlight in table mode
 - `highlight_columns` (list, optional): List of columns to highlight in table mode
 - `display_mode` (str): Either "cards" or "table" (default: "cards")
+- `center_table_row` (int, optional): Row index to center the table view on.
+- `center_table_column` (str or int, optional): Column name or index to center the table view on.
 - `key` (str, optional): Unique key for the component
 
 ## Card Data Format
@@ -193,6 +198,27 @@ result = streamlit_swipecards(
     highlight_columns=highlight_columns,
     display_mode="table",
     key="enhanced_swiper"
+)
+```
+
+### Table View Centering
+
+You can control the initial viewport of the AG-Grid table to center on a specific row or column. This is useful for guiding the user's focus to a particular area of the dataset.
+
+-   `center_table_row`: The row index to be vertically centered.
+-   `center_table_column`: The column name or index to be horizontally centered.
+
+If both are provided, the grid will attempt to center the specified cell in the viewport.
+
+**Example:**
+
+```python
+result = streamlit_swipecards(
+    dataset_path="data.csv",
+    display_mode="table",
+    center_table_row=5,
+    center_table_column="Salary",
+    key="centering_example"
 )
 ```
 

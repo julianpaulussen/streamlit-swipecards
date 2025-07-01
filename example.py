@@ -106,11 +106,17 @@ def main():
         st.markdown("- 🔄 Click ↶ to go back")
         st.markdown("- 📊 Click to get results when done")
         
+        # Add centering options
+        center_on_row = st.slider("Center on Row", 0, len(df) - 1, 0)
+        center_on_col = st.selectbox("Center on Column", df.columns, index=0)
+
         # Create the table swipe cards
         result = streamlit_swipecards(
             dataset_path=csv_path,
             highlight_cells=highlight_cells,
             display_mode="table",
+            center_table_row=center_on_row,
+            center_table_column=center_on_col,
             key="table_example"
         )
     

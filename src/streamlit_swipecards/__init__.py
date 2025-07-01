@@ -20,6 +20,8 @@ def streamlit_swipecards(
     highlight_rows: Optional[List[dict]] = None,
     highlight_columns: Optional[List[dict]] = None,
     display_mode: str = "cards",
+    center_table_row: Optional[int] = None,
+    center_table_column: Optional[Union[str, int]] = None,
     key: Optional[str] = None,
 ):
     """
@@ -49,6 +51,10 @@ def streamlit_swipecards(
         - color: str (optional, CSS color, 'random' for random color, default is light green)
     display_mode : str
         Display mode: "cards" for image cards, "table" for table display
+    center_table_row : int, optional
+        Row index to center the table view on.
+    center_table_column : str or int, optional
+        Column name or index to center the table view on.
     key : str, optional
         Unique key for the component
         
@@ -102,10 +108,12 @@ def streamlit_swipecards(
         highlight_rows=highlight_rows or [],
         highlight_columns=highlight_columns or [],
         display_mode=display_mode,
+        centerTableRow=center_table_row,
+        centerTableColumn=center_table_column,
         key=key,
         default=None
     )
-
+    
     return component_value
 
 

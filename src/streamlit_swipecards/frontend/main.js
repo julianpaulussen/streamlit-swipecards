@@ -73,7 +73,7 @@ function detectAndApplyTheme() {
 }
 
 class SwipeCards {
-  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards') {
+src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null) {
     this.container = container;
     this.cards = cards;
     this.tableData = tableData;
@@ -81,6 +81,8 @@ class SwipeCards {
     this.highlightRows = highlightRows;
     this.highlightColumns = highlightColumns;
     this.displayMode = displayMode;
+    this.centerTableRow = centerTableRow;
+    this.centerTableColumn = centerTableColumn;
     this.currentIndex = 0;
     this.swipedCards = [];
     this.isDragging = false;
@@ -302,10 +304,18 @@ class SwipeCards {
         // Auto-size columns to fit
         params.api.sizeColumnsToFit();
         
-        // Scroll to current row
-        if (currentRowIndex >= 0) {
+        // Scroll to current row or centered view
+        const rowIndexToCenter = this.centerTableRow !== null ? this.centerTableRow : currentRowIndex;
+        const colIdToCenter = this.centerTableColumn;
+
+        if (rowIndexToCenter >= 0) {
           setTimeout(() => {
-            params.api.ensureIndexVisible(currentRowIndex, 'middle');
+            params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
+          }, 100);
+        }
+        if (colIdToCenter) {
+          setTimeout(() => {
+            params.api.ensureColumnVisible(colIdToCenter, 'middle');
           }, 100);
         }
       },
@@ -727,7 +737,9 @@ function onRender(event) {
     highlight_cells = [], 
     highlight_rows = [],
     highlight_columns = [],
-    display_mode = 'cards' 
+    display_mode = 'cards',
+    centerTableRow = null,
+    centerTableColumn = null
   } = event.detail.args;
   
   // Apply theme detection immediately
@@ -760,7 +772,7 @@ function onRender(event) {
   }
   
   // Always create a fresh instance to avoid state persistence issues
-  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode);
+  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode, centerTableRow, centerTableColumn);
   
   // Set the frame height based on content (adjust for table mode)
   const frameHeight = display_mode === 'table' ? 720 : 620;
