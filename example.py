@@ -106,9 +106,13 @@ def main():
         st.markdown("- 🔄 Click ↶ to go back")
         st.markdown("- 📊 Click to get results when done")
         
-        # Add centering options
-        center_on_row = st.slider("Center on Row", 0, len(df) - 1, 0)
-        center_on_col = st.selectbox("Center on Column", df.columns, index=0)
+        # Add centering options (commented out for fixed centering)
+        # center_on_row = st.slider("Center on Row", 0, len(df) - 1, 0)
+        # center_on_col = st.selectbox("Center on Column", df.columns, index=0)
+        
+        # Fixed centering values
+        center_on_row = 9  # Center on row 3 (Carol Davis)
+        center_on_col = "Salary"  # Center on Salary column
 
         # Create the table swipe cards
         result = streamlit_swipecards(
@@ -120,9 +124,9 @@ def main():
             key="table_example"
         )
     
-    # Show the result
-    if result:
-        st.write("### Last action:")
+    # Show the result only when explicitly requested (when Get Results is clicked)
+    if result and result.get('totalSwiped', 0) > 0:
+        st.write("### Results:")
         st.json(result)
 
 if __name__ == "__main__":

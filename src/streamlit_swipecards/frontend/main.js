@@ -73,7 +73,7 @@ function detectAndApplyTheme() {
 }
 
 class SwipeCards {
-src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null) {
+  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null) {
     this.container = container;
     this.cards = cards;
     this.tableData = tableData;
@@ -125,8 +125,8 @@ src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = 
     
     let cardsHTML = '';
     
-    // Show up to 3 cards in the stack
-    for (let i = 0; i < Math.min(3, this.cards.length - this.currentIndex); i++) {
+    // Show up to 5 cards in the stack for smoother animations
+    for (let i = 0; i < Math.min(5, this.cards.length - this.currentIndex); i++) {
       const cardIndex = this.currentIndex + i;
       const card = this.cards[cardIndex];
       
@@ -203,9 +203,9 @@ src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = 
   renderTableCard(card, cardIndex) {
     const rowIndex = card.row_index;
     
-    // Create AG-Grid container
+    // Create AG-Grid container, initially hidden
     let tableHTML = '<div class="table-card-image">';
-    tableHTML += `<div class="ag-grid-container" id="ag-grid-${cardIndex}"></div>`;
+    tableHTML += `<div class="ag-grid-container" id="ag-grid-${cardIndex}" style="visibility: hidden;"></div>`;
     tableHTML += '</div>';
     
     // Add card content section like image cards
@@ -297,11 +297,16 @@ src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = 
       animateRows: false,
       suppressMovableColumns: true,
       suppressMenuHide: true,
+      suppressColumnVirtualisation: true,
+      suppressRowVirtualisation: true,
       suppressContextMenu: true,
       enableCellTextSelection: true,
       rowSelection: 'none',
       onGridReady: (params) => {
         // Auto-size columns to fit
+        params.api.sizeColumnsToFit();
+      },
+      onFirstDataRendered: (params) => {
         params.api.sizeColumnsToFit();
         
         // Scroll to current row or centered view
@@ -309,18 +314,16 @@ src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = 
         const colIdToCenter = this.centerTableColumn;
 
         if (rowIndexToCenter >= 0) {
-          setTimeout(() => {
-            params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
-          }, 100);
+          params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
         }
         if (colIdToCenter) {
-          setTimeout(() => {
-            params.api.ensureColumnVisible(colIdToCenter, 'middle');
-          }, 100);
+          params.api.ensureColumnVisible(colIdToCenter, 'middle');
         }
-      },
-      onFirstDataRendered: (params) => {
-        params.api.sizeColumnsToFit();
+
+        // Make the grid visible after it has been centered
+        setTimeout(() => {
+          gridContainer.style.visibility = 'visible';
+        }, 50); // A small delay to ensure scrolling is complete
       }
     };
     
@@ -642,55 +645,47 @@ src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = 
     if (topCard && card) {
       topCard.classList.add('swiped-right');
       
+      this.swipedCards.push({ card: card, action: 'right', index: this.currentIndex });
+      this.lastAction = { card: card, action: 'right', cardIndex: this.currentIndex };
+      
       setTimeout(() => {
-        this.swipedCards.push({
-          card: card,
-          action: 'right',
-          index: this.currentIndex
-        });
-        
-        // Store the last action but don't send to Streamlit immediately
-        this.lastAction = {
-          card: card,
-          action: 'right',
-          cardIndex: this.currentIndex
-        };
-        
         this.currentIndex++;
-        this.render();
+        topCard.remove(); // Remove the swiped card from the DOM
+        this.addNewCardToStack(); // Add a new card to the bottom
+        this.updateCardStackClasses();
         this.bindEvents();
+
+        if (this.currentIndex >= this.cards.length) {
+          this.render(); // Render the 'All done' message
+        }
       }, 300);
     }
   }
-  
+
   swipeLeft() {
     const topCard = this.container.querySelector('.swipe-card:first-child');
     const card = this.cards[this.currentIndex];
     
     if (topCard && card) {
       topCard.classList.add('swiped-left');
-      
+
+      this.swipedCards.push({ card: card, action: 'left', index: this.currentIndex });
+      this.lastAction = { card: card, action: 'left', cardIndex: this.currentIndex };
+
       setTimeout(() => {
-        this.swipedCards.push({
-          card: card,
-          action: 'left',
-          index: this.currentIndex
-        });
-        
-        // Store the last action but don't send to Streamlit immediately
-        this.lastAction = {
-          card: card,
-          action: 'left',
-          cardIndex: this.currentIndex
-        };
-        
         this.currentIndex++;
-        this.render();
+        topCard.remove();
+        this.addNewCardToStack();
+        this.updateCardStackClasses();
         this.bindEvents();
+
+        if (this.currentIndex >= this.cards.length) {
+          this.render();
+        }
       }, 300);
     }
   }
-  
+
   goBack() {
     if (this.swipedCards.length === 0) return;
     
@@ -706,6 +701,41 @@ src/streamlit_swipecards/__init__.py  constructor(container, cards, tableData = 
     
     this.render();
     this.bindEvents();
+  }
+
+  addNewCardToStack() {
+    const stack = this.container.querySelector('.cards-stack');
+    const nextCardIndex = this.currentIndex + 4; // The 5th card from the new current
+
+    if (nextCardIndex < this.cards.length && stack) {
+      const card = this.cards[nextCardIndex];
+      let cardContent = '';
+
+      if (this.displayMode === 'table' && card.data) {
+        cardContent = this.renderTableCard(card, nextCardIndex);
+      } else {
+        cardContent = this.renderImageCard(card);
+      }
+
+      const newCardHTML = `
+        <div class="swipe-card" data-index="${nextCardIndex}">
+          ${cardContent}
+          <div class="action-indicator like">💚</div>
+          <div class="action-indicator pass">❌</div>
+        </div>
+      `;
+      stack.insertAdjacentHTML('beforeend', newCardHTML);
+    }
+  }
+
+  updateCardStackClasses() {
+    const cards = this.container.querySelectorAll('.swipe-card');
+    cards.forEach((card, i) => {
+      card.classList.remove('card-front', 'card-second', 'card-third');
+      if (i === 0) card.classList.add('card-front');
+      else if (i === 1) card.classList.add('card-second');
+      else if (i === 2) card.classList.add('card-third');
+    });
   }
   
   getResults() {
