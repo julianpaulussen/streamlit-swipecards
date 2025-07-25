@@ -115,6 +115,7 @@ class SwipeCards {
           <h3>🎉 All done!</h3>
           <p>No more cards to swipe</p>
           <div class="results-section">
+            <button class="results-btn" onclick="swipeCards.goBack()" ${this.swipedCards.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>↶ Go Back</button>
             <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
             <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
           </div>
