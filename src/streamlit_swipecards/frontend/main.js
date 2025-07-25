@@ -853,6 +853,13 @@ class SwipeCards {
         </div>
       `;
       stack.insertAdjacentHTML('beforeend', newCardHTML);
+
+      // Ensure new table cards are centered after being added to the DOM
+      if (this.displayMode === 'table' && card.data) {
+        setTimeout(() => {
+          this.initializeAgGrid(nextCardIndex, card.row_index);
+        }, 20);
+      }
     }
   }
 

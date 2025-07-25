@@ -286,8 +286,8 @@ body {
   z-index: 1;
 }
 
-/* Hide any additional cards beyond the third */
-.swipe-card:nth-child(n+4) {
+/* Hide any additional cards beyond the third in non-table mode */
+.swipe-container:not(.table-mode) .swipe-card:nth-child(n+4) {
   display: none;
 }
 
