@@ -1,134 +1,132 @@
 # Streamlit Swipe Cards
 
-A swipe cards component for Streamlit! Create beautiful, interactive card interfaces with smooth swipe animations.
+A modern card-swiping component for Streamlit. Build swipe interfaces using images or rows from a data table.
 
 ## Features
+- **Stacked card interface** with smooth animations
+- Works on both **touch** and **mouse** devices
+- **Like**, **pass** and **undo** actions
+- Optional **table view** powered by AG‑Grid
+- **Cell, row and column highlighting** support
 
-- 🎴 **Stacked card interface** - Cards stack behind each other
-- 👆 **Touch & mouse support** - Swipe with finger or mouse
-- 🎯 **Three actions** - Like (right), Pass (left), and Back
-- 🎨 **Beautiful animations** - Smooth swipe animations with visual feedback
-- 📱 **Mobile responsive** - Works great on all devices
-- 🖼️ **Image support** - Upload files or use URLs
-- ⚡ **Easy to use** - Simple Python API
-
-## Installation instructions 
-
-```sh
+## Installation
+```bash
 pip install streamlit-swipecards
 ```
 
-## Usage
-
-```python
-import streamlit as st
-from streamlit_swipecards import streamlit_swipecards
-
-# Define your cards
-cards = [
-    {
-        "name": "Alice Johnson",
-        "description": "Software Engineer who loves hiking and photography",
-        "image": "https://example.com/alice.jpg"
-    },
-    {
-        "name": "Bob Smith", 
-        "description": "Chef and foodie exploring the world",
-        "image": "https://example.com/bob.jpg"
-    },
-    {
-        "name": "Carol Davis",
-        "description": "Artist and musician exploring creativity",
-        "image": "https://example.com/carol.jpg"
-    }
-]
-
-# Create the swipe interface
-result = streamlit_swipecards(cards=cards, key="swipe_cards")
-
-# Handle the result
-if result:
-    st.write("### Last action:")
-    st.json(result)
-```
-
-## Card Data Format
-
-Each card should be a dictionary with these required fields:
-
-```python
-{
-    "name": str,        # Person's name (required)
-    "description": str, # Description text (required)
-    "image": str       # Image URL or base64 data (required)
-}
-```
-
-## Quick Start
-
-### Run the example:
+## Quick demo
+Launch the sample app to see both modes in action:
 ```bash
 streamlit run example.py
 ```
 
-This will launch a demo with three sample profiles using real Unsplash images, complete with instructions and action feedback.
+## Usage
+### Image cards
+```python
+import streamlit as st
+from streamlit_swipecards import streamlit_swipecards
 
-## Return Value
+cards = [
+    {"name": "Alice", "description": "Loves hiking", "image": "https://.../alice.jpg"\},
+    {"name": "Bob", "description": "Chef and foodie", "image": "https://.../bob.jpg"\},
+]
 
-The component returns a comprehensive dictionary with all swipe session data:
+result = streamlit_swipecards(cards=cards, display_mode="cards", key="people")
+if result:
+    st.json(result)
+```
+
+### Table cards
+Provide a list of card dictionaries. Each card points to the dataset and the row it should display. Highlighting and centering options are set per card.
 
 ```python
-{
-    "swipedCards": [    
-        {
-            "card": {
-                "name": "Alice",
-                "description": "Loves hiking and photography",
-                "image": "https://example.com/alice.jpg"
-            },
-            "action": "right", # "right" (like), "left" (pass), or "back" (undo)
-            "index": 0 # Original index in the cards array
-        },
-        {
-            "card": {
-                "name": "Bob",
-                "description": "Chef and food enthusiast", 
-                "image": "https://example.com/bob.jpg"
-            },
-            "action": "right",
-            "index": 1
-        }
-    ],
-    "lastAction": {
-        "card": {
-            "name": "Bob",
-            "description": "Chef and food enthusiast",
-            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces"
-        },
-        "action": "right",
-        "cardIndex": 1
+csv_path = "sample_data.csv"
+
+cards = [
+    {
+        "dataset_path": csv_path,
+        "row_index": 0,
+        "name": "Alice Johnson",
+        "description": "Engineering professional from New York",
+        "highlight_cells": [{"row": 0, "column": "Salary", "color": "#FFB6C1"}],
+        "center_table_row": 0,
+        "center_table_column": "Salary",
     },
-    "totalSwiped": 2, 
-    "remainingCards": 1 
+    {
+        "dataset_path": csv_path,
+        "row_index": 1,
+        "name": "Bob Smith",
+        "description": "Sales professional from California",
+        "highlight_cells": [{"row": 1, "column": "Rating", "color": "#98FB98"}],
+        "center_table_row": 1,
+        "center_table_column": "Rating",
+    },
+]
+
+result = streamlit_swipecards(cards=cards, display_mode="table", key="table")
+if result:
+    st.json(result)
+```
+
+## Card dictionaries
+### Image card
+```python
+{
+    "name": "Alice",       # required
+    "description": "Text", # required
+    "image": "URL or base64"
 }
 ```
 
-This comprehensive data structure allows you to:
-- Track all user interactions with `swipedCards`
-- React to the most recent action with `lastAction`
-- Display progress with `totalSwiped` and `remainingCards`
-- Build features like undo, analytics, or recommendation systems
+### Table card
+```python
+{
+    "dataset_path": "data.csv",               # required
+    "row_index": 0,                            # row to display
+    "name": "Row title",                      # optional
+    "description": "Row description",         # optional
+    "highlight_cells": [{"row": 0, "column": "Salary", "color": "#FFB6C1"}],
+    "highlight_rows": [{"row": 0, "color": "#E3F2FD"}],
+    "highlight_columns": [{"column": "Rating", "color": "#E8F5E8"}],
+    "center_table_row": 0,
+    "center_table_column": "Salary"
+}
+```
 
-You can use `st.json(result)` to display the full result object for debugging, as shown in the example above.
+## API reference
+```python
+streamlit_swipecards(
+    cards=None,
+    dataset_path=None,         # legacy single-dataset mode
+    highlight_cells=None,
+    highlight_rows=None,
+    highlight_columns=None,
+    display_mode="cards",      # "cards" or "table"
+    center_table_row=None,
+    center_table_column=None,
+    key=None,
+)
+```
 
+## Return value
+The component returns a dictionary:
+```python
+{
+    "swipedCards": [{"index": 0, "action": "right"}, ...],
+    "lastAction": {"cardIndex": 0, "action": "right"},
+    "totalSwiped": 3,
+    "remainingCards": 7
+}
+```
+Use this information to build analytics, undo functionality or any custom logic.
 ## How to Use
 
 1. **Swipe right** 💚 or click the like button to like a card
-2. **Swipe left** ❌ or click the pass button to pass on a card  
+2. **Swipe left** ❌ or click the pass button to pass on a card
 3. **Click back** ↶ to undo your last action
 4. Cards stack behind each other for a realistic experience
 5. Smooth animations provide visual feedback
 
----
 
-Made with ❤️ for the Streamlit community
+---
+Released under the MIT License.
