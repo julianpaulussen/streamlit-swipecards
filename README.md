@@ -118,7 +118,7 @@ The component returns a dictionary:
     "remainingCards": 7
 }
 ```
-Use this information to build analytics, undo functionality or any custom logic.
+
 ## How to Use
 
 1. **Swipe right** 💚 or click the like button to like a card
