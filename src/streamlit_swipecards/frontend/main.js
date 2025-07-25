@@ -653,6 +653,7 @@ class SwipeCards {
         topCard.remove(); // Remove the swiped card from the DOM
         this.addNewCardToStack(); // Add a new card to the bottom
         this.updateCardStackClasses();
+        this.updateSwipeCounter(); // Update the counter
         this.bindEvents();
 
         if (this.currentIndex >= this.cards.length) {
@@ -677,6 +678,7 @@ class SwipeCards {
         topCard.remove();
         this.addNewCardToStack();
         this.updateCardStackClasses();
+        this.updateSwipeCounter(); // Update the counter
         this.bindEvents();
 
         if (this.currentIndex >= this.cards.length) {
@@ -736,6 +738,13 @@ class SwipeCards {
       else if (i === 1) card.classList.add('card-second');
       else if (i === 2) card.classList.add('card-third');
     });
+  }
+  
+  updateSwipeCounter() {
+    const swipeCounter = this.container.querySelector('.swipe-counter');
+    if (swipeCounter) {
+      swipeCounter.textContent = `Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}`;
+    }
   }
   
   getResults() {
