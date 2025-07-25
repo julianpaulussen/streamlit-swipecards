@@ -206,6 +206,10 @@ class SwipeCards {
     
     // Create AG-Grid container, initially hidden
     let tableHTML = '<div class="table-card-image">';
+    tableHTML += '<div class="loading-overlay">';
+    tableHTML += '<div class="loading-snake"></div>';
+    tableHTML += '<button class="loading-btn">Loading data...</button>';
+    tableHTML += '</div>';
     tableHTML += `<div class="ag-grid-container" id="ag-grid-${cardIndex}" style="visibility: hidden;"></div>`;
     tableHTML += '</div>';
     
@@ -331,6 +335,12 @@ class SwipeCards {
         gridContainer.style.visibility = 'visible';
         gridContainer.style.opacity = '1';
         gridContainer.style.zIndex = '9999';
+
+        const overlay = gridContainer.parentElement.querySelector('.loading-overlay');
+        if (overlay) {
+          overlay.classList.add('fade-out');
+          setTimeout(() => overlay.remove(), 300);
+        }
 
         if (rowIndexToCenter >= 0) {
           params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
