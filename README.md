@@ -38,6 +38,7 @@ if result:
 
 ### Table cards
 Provide a list of card dictionaries. Each card points to the dataset and the row it should display. Highlighting and centering options are set per card.
+
 ```python
 csv_path = "sample_data.csv"
 
