@@ -92,6 +92,7 @@ class SwipeCards {
     this.currentY = 0;
     this.lastAction = null; // Store the last action without sending immediately
     this.agGridInstances = new Map(); // Store AG-Grid instances for cleanup
+    this.isAnimating = false; // Prevent rapid repeated actions
     
     this.init();
   }
@@ -775,6 +776,8 @@ class SwipeCards {
   }
   
   swipeRight() {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
     const topCard = this.container.querySelector('.swipe-card:first-child');
     const card = this.cards[this.currentIndex];
     
@@ -795,11 +798,14 @@ class SwipeCards {
         if (this.currentIndex >= this.cards.length) {
           this.render(); // Render the 'All done' message
         }
+        this.isAnimating = false;
       }, 300);
     }
   }
 
   swipeLeft() {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
     const topCard = this.container.querySelector('.swipe-card:first-child');
     const card = this.cards[this.currentIndex];
     
@@ -820,11 +826,14 @@ class SwipeCards {
         if (this.currentIndex >= this.cards.length) {
           this.render();
         }
+        this.isAnimating = false;
       }, 300);
     }
   }
 
   goBack() {
+    if (this.isAnimating) return;
+    this.isAnimating = true;
     if (this.swipedCards.length === 0) return;
     
     const lastSwiped = this.swipedCards.pop();
@@ -838,6 +847,7 @@ class SwipeCards {
     
     this.render();
     this.bindEvents();
+    this.isAnimating = false;
   }
 
   addNewCardToStack() {
@@ -941,7 +951,7 @@ class SwipeCards {
     const results = {
       swipedCards: minimalSwipes,
       lastAction: this.lastAction,
-      totalSwiped: minimalSwipesREADME.mdREADME.md.length,
+      totalSwiped: minimalSwipes.length,totalSwiped: minimalSwipes.length,
       remainingCards: this.cards.length - this.currentIndex
     };
     
