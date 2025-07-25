@@ -73,7 +73,7 @@ def main():
         # Load and display the dataset
         try:
             df = pd.read_csv(csv_path)
-            st.write("**Sample Dataset:**")
+            st.write("**Head of Sample Dataset:**")
             st.dataframe(df.head())  # Show only first 5 rows in preview
         except Exception as e:
             st.error(f"Error loading sample data: {str(e)}")
@@ -167,9 +167,18 @@ def main():
                 "highlight_cells": [{"row": 9, "column": "Experience", "color": "#FFA500"}],
                 "center_table_row": 9,
                 "center_table_column": "Experience"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 10,
+                "name": "Henry Taylor",
+                "description": "Financial analyst from New York",
+                "highlight_cells": [{"row": 10, "column": "Location", "color": "#E6E6FA"}],
+                "center_table_row": 10,
+                "center_table_column": "Location"
             }
         ]
-        
+
         # Create the table swipe cards
         result = streamlit_swipecards(
             cards=table_cards,

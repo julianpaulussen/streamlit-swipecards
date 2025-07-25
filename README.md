@@ -7,14 +7,14 @@ A swipe cards component for Streamlit! Create beautiful, interactive card interf
 - 🎴 **Stacked card interface** - Cards stack behind each other
 - 👆 **Touch & mouse support** - Swipe with finger or mouse
 - 🎯 **Three actions** - Like (right), Pass (left), and Back
-- 🎨 **Beautiful animations** - Smooth swipe animations with visual feedback
-- 📱 **Mobile responsive** - Works great on all devices
-- 🖼️ **Image support** - Upload files or use URLs
-- 📊 **Table mode** - Swipe through dataset rows with AG-Grid
-- 🎯 **Cell highlighting** - Highlight specific cells in table mode  
--  व्यू **Table View Centering** - Center the table on a specific row or column
-- 🔧 **AG-Grid powered** - Professional data grid with sorting and scrolling
-- ⚡ **Easy to use** - Simple Python API
+ 🎨 **Beautiful animations** - Smooth swipe animations with visual feedback
+ 📱 **Mobile responsive** - Works great on all devices
+ 🖼️ **Image support** - Upload files or use URLs
+ 📊 **Table mode** - Swipe through dataset rows with AG-Grid
+ 🎯 **Cell highlighting** - Highlight specific cells in table mode, per card
+ 🧭 **Per-card centering** - Each table card can be centered on a specific row and column, and all cards are pre-centered for smooth swiping
+ 🔧 **AG-Grid powered** - Professional data grid with sorting and scrolling
+ ⚡ **Easy to use** - Simple Python API
 
 ## Installation instructions 
 
@@ -63,25 +63,37 @@ if result:
 import streamlit as st
 from streamlit_swipecards import streamlit_swipecards
 
-# Simple cell highlighting - one cell per card
-highlight_cells = [
-    {'row': 0, 'column': 'Salary', 'color': '#FFB6C1'},    # Alice's salary - Light Pink
-    {'row': 1, 'column': 'Rating', 'color': '#98FB98'},    # Bob's rating - Pale Green  
-    {'row': 2, 'column': 'Experience', 'color': '#87CEEB'}, # Carol's experience - Sky Blue
-    {'row': 3, 'column': 'Projects', 'color': '#DDA0DD'},  # David's projects - Plum
+# Per-card configuration for table mode
+table_cards = [
+    {
+        "dataset_path": "sample_data.csv",
+        "row_index": 0,
+        "name": "Alice Johnson",
+        "description": "Engineering professional from New York",
+        "highlight_cells": [{"row": 0, "column": "Salary", "color": "#FFB6C1"}],
+        "center_table_row": 0,
+        "center_table_column": "Salary"
+    },
+    {
+        "dataset_path": "sample_data.csv",
+        "row_index": 1,
+        "name": "Bob Smith",
+        "description": "Sales professional from California",
+        "highlight_cells": [{"row": 1, "column": "Rating", "color": "#98FB98"}],
+        "center_table_row": 1,
+        "center_table_column": "Rating"
+    },
+    # ... more cards ...
 ]
 
 result = streamlit_swipecards(
-    dataset_path="sample_data.csv",
-    highlight_cells=highlight_cells,
+    cards=table_cards,
     display_mode="table",
     key="table_swiper"
 )
-```
 if result:
     st.write("### Last action:")
     st.json(result)
-```
 
 ## API Reference
 
@@ -236,24 +248,6 @@ streamlit run example.py
 ```
 
 This will launch a demo with both image cards and table modes.
-
-### Table-specific examples:
-```bash
-# Enhanced demos with coordinated highlighting
-streamlit run enhanced_table_demo.py
-
-# Interactive cell/row/column selection
-streamlit run interactive_highlighting_demo.py
-
-# Fixed dataset with multiple highlights per card
-streamlit run table_example.py
-
-# Simple demo with random highlights
-streamlit run simple_demo.py
-
-# AG-Grid integration test
-streamlit run aggrid_test.py
-```
 
 The examples demonstrate:
 - **Simple cell highlighting**: One cell highlighted per card
