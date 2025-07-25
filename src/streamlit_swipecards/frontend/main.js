@@ -276,13 +276,7 @@ class SwipeCards {
           return style;
         }
         
-        // Highlight current row being swiped
-        if (rowIndex === currentRowIndex) {
-          return {
-            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-            border: '1px solid rgba(0, 123, 255, 0.3)'
-          };
-        }
+
         
         return null;
       }
@@ -403,20 +397,17 @@ class SwipeCards {
     tableHTML += '<tbody>';
     if (this.tableData && this.tableData.rows) {
       this.tableData.rows.forEach((row, rIndex) => {
-        const isCurrentRow = rIndex === currentRowIndex;
-        const rowClass = isCurrentRow ? 'current-row' : '';
-        
-        tableHTML += `<tr class="${rowClass}">`;
+        tableHTML += '<tr>';
         this.tableData.columns.forEach((col, colIndex) => {
           const cellValue = row[colIndex] || '';
-          
+
           // Check for cell highlighting first (highest priority)
           const isCellHighlighted = this.isCellHighlighted(rIndex, col, colIndex);
           // Check for row highlighting
           const isRowHighlighted = this.isRowHighlighted(rIndex);
           // Check for column highlighting
           const isColumnHighlighted = this.isColumnHighlighted(col);
-          
+
           let style = '';
           if (isCellHighlighted) {
             style = this.getHighlightStyle(rIndex, col, colIndex);
@@ -429,7 +420,7 @@ class SwipeCards {
             const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E8F5E8');
             style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
           }
-          
+
           tableHTML += `<td style="${style}">${cellValue}</td>`;
         });
         tableHTML += '</tr>';

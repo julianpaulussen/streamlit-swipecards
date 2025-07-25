@@ -92,16 +92,21 @@ def main():
                 "row_index": 0,  # Alice Johnson
                 "name": "Alice Johnson",
                 "description": "Engineering professional from New York",
-                "highlight_cells": [{'row': 0, 'column': 'Salary', 'color': '#FFB6C1'}],
+                # Demonstrates default highlighting colors for cell, row and column
+                "highlight_cells": [{'row': 0, 'column': 'Salary'}],
+                "highlight_rows": [{"row": 0}],
+                "highlight_columns": [{"column": "Salary"}],
                 "center_table_row": 0,
                 "center_table_column": "Salary"
             },
             {
                 "dataset_path": csv_path,
                 "row_index": 1,  # Bob Smith
-                "name": "Bob Smith", 
+                "name": "Bob Smith",
                 "description": "Sales professional from California",
                 "highlight_cells": [{'row': 1, 'column': 'Rating', 'color': '#98FB98'}],
+                "highlight_rows": [{"row": 1}],
+                "highlight_columns": [{"column": "Rating"}],
                 "center_table_row": 1,
                 "center_table_column": "Rating"
             },
@@ -109,8 +114,10 @@ def main():
                 "dataset_path": csv_path,
                 "row_index": 2,  # Carol Davis
                 "name": "Carol Davis",
-                "description": "Marketing specialist from Texas", 
+                "description": "Marketing specialist from Texas",
                 "highlight_cells": [{'row': 2, 'column': 'Experience', 'color': '#87CEEB'}],
+                "highlight_rows": [{"row": 2}],
+                "highlight_columns": [{"column": "Experience"}],
                 "center_table_row": 2,
                 "center_table_column": "Experience"
             },
@@ -120,6 +127,8 @@ def main():
                 "name": "David Wilson",
                 "description": "Engineering manager from New York",
                 "highlight_cells": [{'row': 3, 'column': 'Projects', 'color': '#DDA0DD'}],
+                "highlight_rows": [{"row": 3}],
+                "highlight_columns": [{"column": "Projects"}],
                 "center_table_row": 3,
                 "center_table_column": "Projects"
             },
@@ -129,42 +138,52 @@ def main():
                 "name": "Eve Brown",
                 "description": "HR specialist from Florida",
                 "highlight_cells": [{'row': 4, 'column': 'Salary', 'color': '#F0E68C'}],
+                "highlight_rows": [{"row": 4}],
+                "highlight_columns": [{"column": "Salary"}],
                 "center_table_row": 4,
                 "center_table_column": "Salary"
             },
             {
                 "dataset_path": csv_path,
-                "row_index": 5,  
+                "row_index": 5,
                 "name": "Frank Miller",
                 "description": "Senior engineer from Seattle",
                 "highlight_cells": [{"row": 5, "column": "Salary", "color": "#FFD700"}],
+                "highlight_rows": [{"row": 5}],
+                "highlight_columns": [{"column": "Salary"}],
                 "center_table_row": 5,
                 "center_table_column": "Salary"
             },
             {
                 "dataset_path": csv_path,
-                "row_index": 6,  
+                "row_index": 6,
                 "name": "Grace Lee",
                 "description": "UI/UX designer based in California",
                 "highlight_cells": [{"row": 6, "column": "Skills", "color": "#87CEEB"}],
+                "highlight_rows": [{"row": 6}],
+                "highlight_columns": [{"column": "Skills"}],
                 "center_table_row": 6,
                 "center_table_column": "Skills"
             },
             {
                 "dataset_path": csv_path,
-                "row_index": 8,  
+                "row_index": 8,
                 "name": "Iris Chen",
                 "description": "Data scientist specializing in ML & SQL",
                 "highlight_cells": [{"row": 8, "column": "Rating", "color": "#98FB98"}],
+                "highlight_rows": [{"row": 8}],
+                "highlight_columns": [{"column": "Rating"}],
                 "center_table_row": 8,
                 "center_table_column": "Rating"
             },
             {
                 "dataset_path": csv_path,
-                "row_index": 9, 
+                "row_index": 9,
                 "name": "Jack Wilson",
                 "description": "Marketing associate from Texas",
                 "highlight_cells": [{"row": 9, "column": "Experience", "color": "#FFA500"}],
+                "highlight_rows": [{"row": 9}],
+                "highlight_columns": [{"column": "Experience"}],
                 "center_table_row": 9,
                 "center_table_column": "Experience"
             },
@@ -174,6 +193,8 @@ def main():
                 "name": "Henry Taylor",
                 "description": "Financial analyst from New York",
                 "highlight_cells": [{"row": 10, "column": "Location", "color": "#E6E6FA"}],
+                "highlight_rows": [{"row": 10}],
+                "highlight_columns": [{"column": "Location"}],
                 "center_table_row": 10,
                 "center_table_column": "Location"
             }
