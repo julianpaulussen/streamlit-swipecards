@@ -131,6 +131,42 @@ def main():
                 "highlight_cells": [{'row': 4, 'column': 'Salary', 'color': '#F0E68C'}],
                 "center_table_row": 4,
                 "center_table_column": "Salary"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 5,  
+                "name": "Frank Miller",
+                "description": "Senior engineer from Seattle",
+                "highlight_cells": [{"row": 5, "column": "Salary", "color": "#FFD700"}],
+                "center_table_row": 5,
+                "center_table_column": "Salary"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 6,  
+                "name": "Grace Lee",
+                "description": "UI/UX designer based in California",
+                "highlight_cells": [{"row": 6, "column": "Skills", "color": "#87CEEB"}],
+                "center_table_row": 6,
+                "center_table_column": "Skills"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 8,  
+                "name": "Iris Chen",
+                "description": "Data scientist specializing in ML & SQL",
+                "highlight_cells": [{"row": 8, "column": "Rating", "color": "#98FB98"}],
+                "center_table_row": 8,
+                "center_table_column": "Rating"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 9, 
+                "name": "Jack Wilson",
+                "description": "Marketing associate from Texas",
+                "highlight_cells": [{"row": 9, "column": "Experience", "color": "#FFA500"}],
+                "center_table_row": 9,
+                "center_table_column": "Experience"
             }
         ]
         
