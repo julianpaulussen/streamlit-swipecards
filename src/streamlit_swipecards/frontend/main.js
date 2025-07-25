@@ -781,9 +781,9 @@ class SwipeCards {
     if (topCard && card) {
       topCard.classList.add('swiped-right');
       
-      this.swipedCards.push({ card: card, action: 'right', index: this.currentIndex });
-      this.lastAction = { card: card, action: 'right', cardIndex: this.currentIndex };
-      
+      this.swipedCards.push({ index: this.currentIndex, action: 'right' });
+      this.lastAction = { action: 'right', cardIndex: this.currentIndex };
+
       setTimeout(() => {
         this.currentIndex++;
         topCard.remove(); // Remove the swiped card from the DOM
@@ -806,8 +806,8 @@ class SwipeCards {
     if (topCard && card) {
       topCard.classList.add('swiped-left');
 
-      this.swipedCards.push({ card: card, action: 'left', index: this.currentIndex });
-      this.lastAction = { card: card, action: 'left', cardIndex: this.currentIndex };
+      this.swipedCards.push({ index: this.currentIndex, action: 'left' });
+      this.lastAction = { action: 'left', cardIndex: this.currentIndex };
 
       setTimeout(() => {
         this.currentIndex++;
@@ -832,7 +832,6 @@ class SwipeCards {
     
     // Store the last action but don't send to Streamlit immediately
     this.lastAction = {
-      card: lastSwiped.card,
       action: 'back',
       cardIndex: this.currentIndex
     };
@@ -937,10 +936,12 @@ class SwipeCards {
   
   getResults() {
     // Return all swiped cards and the last action
+    // Return all swiped cards and the last action in a minimal form
+    const minimalSwipes = this.swipedCards.map(({ index, action }) => ({ index, action }));
     const results = {
-      swipedCards: this.swipedCards,
+      swipedCards: minimalSwipes,
       lastAction: this.lastAction,
-      totalSwiped: this.swipedCards.length,
+      totalSwiped: minimalSwipesREADME.mdREADME.md.length,
       remainingCards: this.cards.length - this.currentIndex
     };
     
