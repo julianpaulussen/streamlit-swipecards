@@ -487,6 +487,16 @@ body {
   border-radius: 8px;
   overflow: hidden;
   background: var(--card-bg);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Hidden state for background cards */
+.ag-grid-container[style*="visibility: hidden"] {
+  pointer-events: none;
+}
+
+.ag-grid-container[style*="opacity: 0"] {
+  pointer-events: none;
 }
 
 /* AG-Grid theme customization to match our design */

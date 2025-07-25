@@ -4,7 +4,6 @@ Simple example of the Tinder-like Swipe Cards component
 """
 import streamlit as st
 import pandas as pd
-import tempfile
 import os
 from streamlit_swipecards import streamlit_swipecards
 
@@ -62,43 +61,23 @@ def main():
     else:  # Table Cards
         st.subheader("📊 Table Cards Mode")
         
-        # Create sample dataset with more data - use session state to prevent reloading
-        if 'table_data' not in st.session_state:
-            data = {
-                'Name': ['Alice Johnson', 'Bob Smith', 'Carol Davis', 'David Wilson', 'Eve Brown', 'Frank Miller', 'Grace Lee', 'Henry Taylor', 'Iris Chen', 'Jack Wilson'],
-                'Age': [28, 34, 26, 31, 29, 35, 27, 32, 30, 26],
-                'Department': ['Engineering', 'Sales', 'Marketing', 'Engineering', 'HR', 'Engineering', 'Design', 'Finance', 'Data Science', 'Marketing'],
-                'Salary': [75000, 65000, 58000, 82000, 62000, 95000, 67000, 73000, 88000, 55000],
-                'Experience': [5, 8, 3, 7, 4, 10, 4, 6, 7, 2],
-                'Location': ['New York', 'California', 'Texas', 'New York', 'Florida', 'Seattle', 'California', 'New York', 'California', 'Texas'],
-                'Skills': ['Python JavaScript', 'Sales CRM', 'Marketing Analytics', 'Java Python AWS', 'Recruiting Training', 'DevOps Kubernetes', 'UI/UX Design', 'Financial Analysis', 'Machine Learning', 'Content Marketing'],
-                'Rating': [4.8, 4.5, 4.2, 4.9, 4.1, 4.7, 4.6, 4.3, 4.8, 4.0],
-                'Projects': [12, 25, 8, 18, 15, 22, 14, 19, 16, 6]
-            }
-            st.session_state.table_data = pd.DataFrame(data)
-            
-            # Save to temporary CSV file and store path in session state
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-                st.session_state.table_data.to_csv(f.name, index=False)
-                st.session_state.csv_path = f.name
+        # Load sample data from CSV file
+        csv_path = os.path.join(os.path.dirname(__file__), "sample_data.csv")
         
-        df = st.session_state.table_data
-        csv_path = st.session_state.csv_path
+        # Check if CSV file exists, if not create it
+        if not os.path.exists(csv_path):
+            st.error(f"Sample data file not found at {csv_path}")
+            st.write("Please make sure sample_data.csv exists in the project directory.")
+            return
         
-        st.write("**Sample Dataset:**")
-        st.dataframe(df)
-        
-        # Define fixed highlighting - one cell per card
-        highlight_cells = [
-            {'row': 0, 'column': 'Salary', 'color': '#FFB6C1'},    # Alice's salary - Light Pink
-            {'row': 1, 'column': 'Rating', 'color': '#98FB98'},    # Bob's rating - Pale Green  
-            {'row': 2, 'column': 'Experience', 'color': '#87CEEB'}, # Carol's experience - Sky Blue
-            {'row': 3, 'column': 'Projects', 'color': '#DDA0DD'},  # David's projects - Plum
-            {'row': 4, 'column': 'Salary', 'color': '#F0E68C'},    # Eve's salary - Khaki
-            {'row': 5, 'column': 'Rating', 'color': '#FFA07A'},    # Frank's rating - Light Salmon
-        ]
-        
-        st.write("**🎯 Fixed Highlighting:** Each card highlights one specific cell with a unique color")
+        # Load and display the dataset
+        try:
+            df = pd.read_csv(csv_path)
+            st.write("**Sample Dataset:**")
+            st.dataframe(df.head())  # Show only first 5 rows in preview
+        except Exception as e:
+            st.error(f"Error loading sample data: {str(e)}")
+            return
         
         st.markdown("### Instructions:")
         st.markdown("- 👆 **Swipe right** or click 💚 to like the row")
@@ -106,21 +85,59 @@ def main():
         st.markdown("- 🔄 Click ↶ to go back")
         st.markdown("- 📊 Click to get results when done")
         
-        # Add centering options (commented out for fixed centering)
-        # center_on_row = st.slider("Center on Row", 0, len(df) - 1, 0)
-        # center_on_col = st.selectbox("Center on Column", df.columns, index=0)
+        # Create table cards - each card represents a different row with its own configuration
+        table_cards = [
+            {
+                "dataset_path": csv_path,
+                "row_index": 0,  # Alice Johnson
+                "name": "Alice Johnson",
+                "description": "Engineering professional from New York",
+                "highlight_cells": [{'row': 0, 'column': 'Salary', 'color': '#FFB6C1'}],
+                "center_table_row": 0,
+                "center_table_column": "Salary"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 1,  # Bob Smith
+                "name": "Bob Smith", 
+                "description": "Sales professional from California",
+                "highlight_cells": [{'row': 1, 'column': 'Rating', 'color': '#98FB98'}],
+                "center_table_row": 1,
+                "center_table_column": "Rating"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 2,  # Carol Davis
+                "name": "Carol Davis",
+                "description": "Marketing specialist from Texas", 
+                "highlight_cells": [{'row': 2, 'column': 'Experience', 'color': '#87CEEB'}],
+                "center_table_row": 2,
+                "center_table_column": "Experience"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 3,  # David Wilson
+                "name": "David Wilson",
+                "description": "Engineering manager from New York",
+                "highlight_cells": [{'row': 3, 'column': 'Projects', 'color': '#DDA0DD'}],
+                "center_table_row": 3,
+                "center_table_column": "Projects"
+            },
+            {
+                "dataset_path": csv_path,
+                "row_index": 4,  # Eve Brown
+                "name": "Eve Brown",
+                "description": "HR specialist from Florida",
+                "highlight_cells": [{'row': 4, 'column': 'Salary', 'color': '#F0E68C'}],
+                "center_table_row": 4,
+                "center_table_column": "Salary"
+            }
+        ]
         
-        # Fixed centering values
-        center_on_row = 9  # Center on row 3 (Carol Davis)
-        center_on_col = "Salary"  # Center on Salary column
-
         # Create the table swipe cards
         result = streamlit_swipecards(
-            dataset_path=csv_path,
-            highlight_cells=highlight_cells,
+            cards=table_cards,
             display_mode="table",
-            center_table_row=center_on_row,
-            center_table_column=center_on_col,
             key="table_example"
         )
     

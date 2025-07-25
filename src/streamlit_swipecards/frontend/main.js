@@ -211,11 +211,11 @@ class SwipeCards {
     
     // Add card content section like image cards
     tableHTML += '<div class="card-content">';
-    tableHTML += `<h3 class="card-name">Row ${rowIndex + 1}</h3>`;
-    tableHTML += `<p class="card-description">Swipe to evaluate this data row</p>`;
+    tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
+    tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
     tableHTML += '</div>';
     
-    // Initialize AG-Grid after rendering
+    // Initialize AG-Grid after rendering - pre-center all cards, not just visible ones
     setTimeout(() => {
       this.initializeAgGrid(cardIndex, rowIndex);
     }, 10);
@@ -225,10 +225,21 @@ class SwipeCards {
   
   initializeAgGrid(cardIndex, currentRowIndex) {
     const gridContainer = document.getElementById(`ag-grid-${cardIndex}`);
-    if (!gridContainer || !this.tableData) return;
+    if (!gridContainer) return;
+    
+    // Get the table data for this specific card using the correct card index
+    const card = this.cards[cardIndex];
+    const tableData = card.table_data || this.tableData;
+    
+    if (!tableData) return;
+    
+    // Use card-specific highlight configurations
+    const highlightCells = card.highlight_cells || this.highlightCells;
+    const highlightRows = card.highlight_rows || this.highlightRows;
+    const highlightColumns = card.highlight_columns || this.highlightColumns;
     
     // Prepare column definitions
-    const columnDefs = this.tableData.columns.map(col => ({
+    const columnDefs = tableData.columns.map(col => ({
       field: col,
       headerName: col,
       width: 120,
@@ -240,23 +251,23 @@ class SwipeCards {
         const columnField = params.colDef.field;
         
         // Apply cell highlighting first (highest priority)
-        const isCellHighlighted = this.isCellHighlighted(rowIndex, columnField, columnField);
+        const isCellHighlighted = this.isCellHighlightedForCard(rowIndex, columnField, columnField, highlightCells);
         if (isCellHighlighted) {
-          const style = this.getHighlightStyleObject(rowIndex, columnField, columnField);
+          const style = this.getHighlightStyleObjectForCard(rowIndex, columnField, columnField, highlightCells);
           return style;
         }
         
         // Apply row highlighting
-        const isRowHighlighted = this.isRowHighlighted(rowIndex);
+        const isRowHighlighted = this.isRowHighlightedForCard(rowIndex, highlightRows);
         if (isRowHighlighted) {
-          const style = this.getRowHighlightStyleObject(rowIndex);
+          const style = this.getRowHighlightStyleObjectForCard(rowIndex, highlightRows);
           return style;
         }
         
         // Apply column highlighting
-        const isColumnHighlighted = this.isColumnHighlighted(columnField);
+        const isColumnHighlighted = this.isColumnHighlightedForCard(columnField, highlightColumns);
         if (isColumnHighlighted) {
-          const style = this.getColumnHighlightStyleObject(columnField);
+          const style = this.getColumnHighlightStyleObjectForCard(columnField, highlightColumns);
           return style;
         }
         
@@ -273,9 +284,9 @@ class SwipeCards {
     }));
     
     // Prepare row data
-    const rowData = this.tableData.rows.map(row => {
+    const rowData = tableData.rows.map(row => {
       const rowObj = {};
-      this.tableData.columns.forEach((col, index) => {
+      tableData.columns.forEach((col, index) => {
         rowObj[col] = row[index] || '';
       });
       return rowObj;
@@ -311,8 +322,15 @@ class SwipeCards {
         params.api.sizeColumnsToFit();
         
         // Scroll to current row or centered view
-        const rowIndexToCenter = this.centerTableRow !== null ? this.centerTableRow : currentRowIndex;
-        const colIdToCenter = this.centerTableColumn;
+        const rowIndexToCenter = card.center_table_row !== null ? card.center_table_row : (this.centerTableRow !== null ? this.centerTableRow : currentRowIndex);
+        const colIdToCenter = card.center_table_column || this.centerTableColumn;
+
+        console.log(`Centering card ${cardIndex}: row=${rowIndexToCenter}, col=${colIdToCenter}`);
+
+        // Force the grid to be fully visible for centering
+        gridContainer.style.visibility = 'visible';
+        gridContainer.style.opacity = '1';
+        gridContainer.style.zIndex = '9999';
 
         if (rowIndexToCenter >= 0) {
           params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
@@ -321,10 +339,23 @@ class SwipeCards {
           params.api.ensureColumnVisible(colIdToCenter, 'middle');
         }
 
-        // Make the grid visible after it has been centered
+        // After centering, adjust visibility based on card position
         setTimeout(() => {
-          gridContainer.style.visibility = 'visible';
-        }, 50); // A small delay to ensure scrolling is complete
+          if (cardIndex <= this.currentIndex + 2) {
+            // Keep visible for first 3 cards
+            gridContainer.style.visibility = 'visible';
+            gridContainer.style.opacity = '1';
+            gridContainer.style.zIndex = '';
+          } else {
+            // Hide background cards but keep them rendered
+            gridContainer.style.visibility = 'hidden';
+            gridContainer.style.opacity = '0';
+            gridContainer.style.zIndex = '-1';
+          }
+          
+          // Always store grid reference
+          this.agGridInstances.set(`${cardIndex}_centered`, true);
+        }, 200); // Longer delay to ensure centering is complete
       }
     };
     
@@ -531,6 +562,100 @@ class SwipeCards {
     return colors[Math.floor(Math.random() * colors.length)];
   }
   
+  // Card-specific highlighting methods
+  isCellHighlightedForCard(rowIndex, columnName, columnIndex, highlightCells) {
+    return highlightCells.some(highlight => {
+      const matchesRow = highlight.row === rowIndex;
+      const matchesColumn = highlight.column === columnName || highlight.column === columnIndex;
+      return matchesRow && matchesColumn;
+    });
+  }
+  
+  getHighlightStyleObjectForCard(rowIndex, columnName, columnIndex, highlightCells) {
+    const highlight = highlightCells.find(h => {
+      const matchesRow = h.row === rowIndex;
+      const matchesColumn = h.column === columnName || h.column === columnIndex;
+      return matchesRow && matchesColumn;
+    });
+    
+    if (highlight) {
+      let color = highlight.color;
+      
+      // Handle random color
+      if (color === 'random') {
+        color = this.getRandomColor();
+      }
+      
+      // Use provided color or default
+      color = color || '#FFD700'; // Gold as default
+      
+      return {
+        backgroundColor: color,
+        border: `2px solid ${this.darkenColor(color, 20)}`,
+        fontWeight: 'bold'
+      };
+    }
+    return null;
+  }
+  
+  isRowHighlightedForCard(rowIndex, highlightRows) {
+    return highlightRows.some(highlight => highlight.row === rowIndex);
+  }
+  
+  getRowHighlightStyleObjectForCard(rowIndex, highlightRows) {
+    const highlight = highlightRows.find(h => h.row === rowIndex);
+    
+    if (highlight) {
+      let color = highlight.color;
+      
+      // Handle random color
+      if (color === 'random') {
+        color = this.getRandomColor();
+      }
+      
+      // Use provided color or default light blue
+      color = color || '#E3F2FD'; // Light blue as default for rows
+      
+      return {
+        backgroundColor: color,
+        border: `1px solid ${this.darkenColor(color, 20)}`,
+        fontWeight: '500'
+      };
+    }
+    return null;
+  }
+  
+  isColumnHighlightedForCard(columnName, highlightColumns) {
+    return highlightColumns.some(highlight => {
+      return highlight.column === columnName || highlight.column === columnName;
+    });
+  }
+  
+  getColumnHighlightStyleObjectForCard(columnName, highlightColumns) {
+    const highlight = highlightColumns.find(h => {
+      return h.column === columnName || h.column === columnName;
+    });
+    
+    if (highlight) {
+      let color = highlight.color;
+      
+      // Handle random color
+      if (color === 'random') {
+        color = this.getRandomColor();
+      }
+      
+      // Use provided color or default light green
+      color = color || '#E8F5E8'; // Light green as default for columns
+      
+      return {
+        backgroundColor: color,
+        border: `1px solid ${this.darkenColor(color, 20)}`,
+        fontWeight: '500'
+      };
+    }
+    return null;
+  }
+  
   darkenColor(color, percent) {
     // Simple color darkening function
     const num = parseInt(color.replace("#", ""), 16);
@@ -735,16 +860,61 @@ class SwipeCards {
     const cards = this.container.querySelectorAll('.swipe-card');
     cards.forEach((card, i) => {
       card.classList.remove('card-front', 'card-second', 'card-third');
-      if (i === 0) card.classList.add('card-front');
-      else if (i === 1) card.classList.add('card-second');
-      else if (i === 2) card.classList.add('card-third');
+      
+      // Update visibility for table cards
+      if (this.displayMode === 'table') {
+        const cardIndex = parseInt(card.getAttribute('data-index'));
+        const gridContainer = card.querySelector(`#ag-grid-${cardIndex}`);
+        
+        if (gridContainer) {
+          if (i <= 2) {
+            // Show the first 3 cards
+            gridContainer.style.visibility = 'visible';
+            gridContainer.style.opacity = '1';
+            gridContainer.style.zIndex = '';
+          } else {
+            // Hide cards beyond the third position but keep them rendered
+            gridContainer.style.visibility = 'hidden';
+            gridContainer.style.opacity = '0';
+            gridContainer.style.zIndex = '-1';
+          }
+        }
+      }
+      
+      if (i === 0) {
+        card.classList.add('card-front');
+        // Re-center the new front card if it needs recentering
+        this.recenterFrontCard(card);
+      } else if (i === 1) {
+        card.classList.add('card-second');
+      } else if (i === 2) {
+        card.classList.add('card-third');
+      }
     });
+  }
+  
+  recenterFrontCard(cardElement) {
+    if (this.displayMode !== 'table') return;
+    
+    const cardIndex = parseInt(cardElement.getAttribute('data-index'));
+    const gridContainer = cardElement.querySelector(`#ag-grid-${cardIndex}`);
+    
+    // Simply ensure the grid is visible when it becomes the front card
+    if (gridContainer) {
+      gridContainer.style.visibility = 'visible';
+      gridContainer.style.opacity = '1';
+      gridContainer.style.zIndex = '';
+      console.log(`Made card ${cardIndex} visible as front card`);
+    }
   }
   
   updateSwipeCounter() {
     const swipeCounter = this.container.querySelector('.swipe-counter');
     if (swipeCounter) {
       swipeCounter.textContent = `Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}`;
+      console.log('Updated counter:', swipeCounter.textContent);
+    } else {
+      console.warn('Swipe counter element not found');
     }
   }
   
