@@ -960,15 +960,16 @@ let swipeCards = null;
  * component gets new data from Python.
  */
 function onRender(event) {
-  const { 
-    cards = [], 
-    table_data = null, 
-    highlight_cells = [], 
+  const {
+    cards = [],
+    table_data = null,
+    highlight_cells = [],
     highlight_rows = [],
     highlight_columns = [],
     display_mode = 'cards',
     centerTableRow = null,
-    centerTableColumn = null
+    centerTableColumn = null,
+    window_size = 'mobile'
   } = event.detail.args;
   
   // Apply theme detection immediately
@@ -979,9 +980,13 @@ function onRender(event) {
   
   const root = document.getElementById('root');
   root.innerHTML = '<div class="swipe-container"></div>';
-  
+
   const container = root.querySelector('.swipe-container');
-  
+
+  if (window_size === 'desktop') {
+    container.classList.add('desktop');
+  }
+
   // Add table-mode class if needed
   if (display_mode === 'table') {
     container.classList.add('table-mode');

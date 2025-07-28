@@ -49,6 +49,22 @@ body {
   justify-content: center;
 }
 
+.swipe-container.desktop {
+  max-width: none;
+}
+
+.swipe-container.desktop .cards-stack {
+  width: 100%;
+}
+
+.swipe-container.desktop.table-mode {
+  max-width: none;
+}
+
+.swipe-container.desktop.table-mode .cards-stack {
+  width: 100%;
+}
+
 .cards-stack {
   position: relative;
   width: 320px;
@@ -297,10 +313,18 @@ body {
     max-width: 95%;
     height: 550px;
   }
-  
+
+  .swipe-container.desktop {
+    max-width: 95%;
+  }
+
   .cards-stack {
     width: 280px;
     height: 400px;
+  }
+
+  .swipe-container.desktop .cards-stack {
+    width: 280px;
   }
   
   .card-name {
@@ -444,10 +468,18 @@ body {
   .swipe-container.table-mode {
     max-width: 95%;
   }
-  
+
+  .swipe-container.desktop.table-mode {
+    max-width: 95%;
+  }
+
   .swipe-container.table-mode .cards-stack {
     width: 320px;
     height: 420px;
+  }
+
+  .swipe-container.desktop.table-mode .cards-stack {
+    width: 320px;
   }
   
   .data-table {

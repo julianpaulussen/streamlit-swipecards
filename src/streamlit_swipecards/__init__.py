@@ -22,6 +22,7 @@ def streamlit_swipecards(
     display_mode: str = "cards",
     center_table_row: Optional[int] = None,
     center_table_column: Optional[Union[str, int]] = None,
+    window_size: str = "mobile",
     key: Optional[str] = None,
 ):
     """
@@ -66,6 +67,11 @@ def streamlit_swipecards(
         Row index to center the table view on (legacy mode).
     center_table_column : str or int, optional
         Column name or index to center the table view on (legacy mode).
+    window_size : str, optional
+        Controls how wide the cards appear.
+        - "mobile" (default) keeps the mobile layout even on wide screens.
+        - "desktop" stretches to fill the available width and switches back to
+          the mobile layout when the window is narrower than 480px.
     key : str, optional
         Unique key for the component
         
@@ -177,6 +183,7 @@ def streamlit_swipecards(
         display_mode=display_mode,
         centerTableRow=center_table_row,
         centerTableColumn=center_table_column,
+        window_size=window_size,
         key=key,
         default=None
     )
