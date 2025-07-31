@@ -107,12 +107,62 @@ body {
   background: var(--card-bg);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
 .card-name {
   font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 0;
   line-height: 1.2;
+  flex: 1;
+}
+
+.toggle-button {
+  background: var(--button-gradient);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 70px;
+  justify-content: center;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.toggle-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.toggle-button:active {
+  transform: scale(0.95);
+}
+
+.toggle-button.inspect-mode {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+.toggle-text {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.toggle-icon {
+  font-size: 10px;
 }
 
 .card-description {
@@ -124,6 +174,32 @@ body {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+  margin-top: 4px;
+}
+
+/* Table locked state */
+.table-locked {
+  opacity: 0.7;
+  position: relative;
+}
+
+.table-locked::after {
+  content: '🔒 Table Locked - Toggle to Inspect';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px;
+  z-index: 10;
 }
 
 .action-buttons {
@@ -309,6 +385,21 @@ body {
   
   .card-description {
     font-size: 11px;
+  }
+  
+  .toggle-button {
+    padding: 4px 8px;
+    font-size: 10px;
+    min-width: 60px;
+    margin-left: 6px;
+  }
+  
+  .toggle-text {
+    font-size: 10px;
+  }
+  
+  .toggle-icon {
+    font-size: 9px;
   }
   
   .action-buttons {
