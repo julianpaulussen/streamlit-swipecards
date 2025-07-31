@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, List, Union
 import pandas as pd
+import os
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -11,6 +12,48 @@ frontend_dir = (Path(__file__).parent / "frontend").absolute()
 _component_func = components.declare_component(
 	"streamlit_swipecards", path=str(frontend_dir)
 )
+
+@st.cache_data
+def _load_dataset_cached(file_path: str, file_mtime: float) -> pd.DataFrame:
+    """
+    Load a dataset with caching based on file path and modification time.
+    
+    Args:
+        file_path: Path to the dataset file
+        file_mtime: File modification time (used as cache key)
+    
+    Returns:
+        pd.DataFrame: Loaded dataset
+    """
+    if file_path.endswith('.csv'):
+        return pd.read_csv(file_path)
+    elif file_path.endswith(('.xlsx', '.xls')):
+        return pd.read_excel(file_path)
+    else:
+        raise ValueError("Unsupported file format. Use CSV or Excel files.")
+
+def _load_dataset_with_cache(file_path: str) -> pd.DataFrame:
+    """
+    Load a dataset using caching if the file exists, with cache invalidation based on file modification time.
+    
+    Args:
+        file_path: Path to the dataset file
+    
+    Returns:
+        pd.DataFrame: Loaded dataset
+    
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        ValueError: If the file format is not supported
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Dataset file not found: {file_path}")
+    
+    # Get file modification time for cache invalidation
+    file_mtime = os.path.getmtime(file_path)
+    
+    # Use cached loading function
+    return _load_dataset_cached(file_path, file_mtime)
 
 # Create the python function that will be called
 def streamlit_swipecards(
@@ -92,12 +135,7 @@ def streamlit_swipecards(
                 # This is a table card with individual configuration
                 try:
                     card_dataset_path = card['dataset_path']
-                    if card_dataset_path.endswith('.csv'):
-                        df = pd.read_csv(card_dataset_path)
-                    elif card_dataset_path.endswith(('.xlsx', '.xls')):
-                        df = pd.read_excel(card_dataset_path)
-                    else:
-                        raise ValueError("Unsupported file format. Use CSV or Excel files.")
+                    df = _load_dataset_with_cache(card_dataset_path)
                     
                     # Get the specific row for this card (default to first row if not specified)
                     row_index = card.get('row_index', 0)
@@ -144,12 +182,7 @@ def streamlit_swipecards(
     table_data = None
     if dataset_path:
         try:
-            if dataset_path.endswith('.csv'):
-                df = pd.read_csv(dataset_path)
-            elif dataset_path.endswith(('.xlsx', '.xls')):
-                df = pd.read_excel(dataset_path)
-            else:
-                raise ValueError("Unsupported file format. Use CSV or Excel files.")
+            df = _load_dataset_with_cache(dataset_path)
             
             # Convert DataFrame to table data format (convert numpy types)
             table_data = {

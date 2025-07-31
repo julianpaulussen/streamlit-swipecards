@@ -8,6 +8,7 @@ A modern card-swiping component for Streamlit. Build swipe interfaces using imag
 - **Like**, **pass** and **undo** actions
 - Optional **table view** powered by AG‑Grid
 - **Cell, row and column highlighting** support
+- **Automatic table caching** for improved performance when loading the same dataset multiple times
 
 ## Installation
 ```bash
@@ -138,6 +139,19 @@ The component returns a dictionary:
 3. **Click back** ↶ to undo your last action
 4. Cards stack behind each other for a realistic experience
 5. Smooth animations provide visual feedback
+
+## Performance
+
+The component automatically caches loaded datasets to improve performance when multiple cards reference the same file. This means:
+
+- **No redundant file reads**: The same dataset file is only loaded once, even if multiple cards use it
+- **Automatic cache invalidation**: When a file is modified, the cache is automatically updated
+- **Memory efficient**: Uses Streamlit's built-in `@st.cache_data` for optimal memory management
+
+To see the performance benefits in action, run:
+```bash
+python demo_caching.py
+```
 
 
 ---
