@@ -166,6 +166,3 @@ temp/
 # Documentation builds
 docs/_build/
 docs/build/
-
-# Pre-commit
-.pre-commit-config.yaml

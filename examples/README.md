@@ -39,10 +39,20 @@ Run a minimal example showing basic usage:
 streamlit run simple_example.py
 ```
 
-This example shows:
-- Basic image cards with nature photos
-- Simple swipe interactions
-- Result display with metrics
+### Advanced Example
+
+Run the advanced table customization example:
+
+```bash
+streamlit run advanced_example.py
+```
+
+This example demonstrates:
+- Complex highlighting patterns (cells, rows, columns)
+- Custom color schemes for different data types
+- Advanced table centering and navigation
+- Results dashboard with detailed metrics
+- Professional card layouts with role-based styling
 
 ## Example Features
 
