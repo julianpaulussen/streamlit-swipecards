@@ -62,13 +62,36 @@ function detectAndApplyTheme() {
     isDark = mediaQuery.matches;
   }
   
-  // Apply theme to the document
+  // Apply theme to the document with multiple methods for compatibility
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   
   // Also set it on body for compatibility
   document.body.className = isDark ? 'dark-theme' : 'light-theme';
   
+  // Force CSS variables update for better compatibility
+  const root = document.documentElement;
+  if (isDark) {
+    root.style.setProperty('--bg-color', '#0e1117');
+    root.style.setProperty('--card-bg', '#262730');
+    root.style.setProperty('--text-primary', '#fafafa');
+    root.style.setProperty('--text-secondary', '#a6a6a6');
+    root.style.setProperty('--border-color', '#464748');
+    root.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.3)');
+  } else {
+    root.style.setProperty('--bg-color', '#f8f9fa');
+    root.style.setProperty('--card-bg', '#ffffff');
+    root.style.setProperty('--text-primary', '#262730');
+    root.style.setProperty('--text-secondary', '#666666');
+    root.style.setProperty('--border-color', '#e0e0e0');
+    root.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.1)');
+  }
+  
   console.log('Applied theme:', isDark ? 'dark' : 'light');
+  console.log('CSS variables set:', {
+    textPrimary: root.style.getPropertyValue('--text-primary'),
+    cardBg: root.style.getPropertyValue('--card-bg')
+  });
+  
   return isDark;
 }
 

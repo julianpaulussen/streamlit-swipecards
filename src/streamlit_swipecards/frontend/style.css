@@ -683,36 +683,113 @@ body {
   --ag-row-hover-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Fallback table specific styling for better dark mode support */
+/* Better dark mode support with media queries and explicit color rules */
+
+/* Light mode - default table styling */
+.data-table,
 .fallback-table {
-  background: var(--card-bg) !important;
-  color: var(--text-primary) !important;
+  background: var(--card-bg, #ffffff) !important;
+  color: var(--text-primary, #262730) !important;
 }
 
+.data-table th,
 .fallback-table th {
   color: white !important;
   background: var(--button-gradient) !important;
 }
 
+.data-table td,
 .fallback-table td {
-  background: var(--card-bg) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
+  background: var(--card-bg, #ffffff) !important;
+  color: var(--text-primary, #262730) !important;
+  border-color: var(--border-color, #e0e0e0) !important;
 }
 
+.data-table tbody tr:hover,
 .fallback-table tbody tr:hover {
-  background-color: var(--bg-color) !important;
+  background-color: var(--bg-color, #f8f9fa) !important;
 }
 
-/* Ensure highlighted cells in fallback tables maintain good contrast */
+/* Dark mode via data-theme attribute */
+[data-theme="dark"] .data-table,
+[data-theme="dark"] .fallback-table {
+  background: var(--card-bg, #262730) !important;
+  color: var(--text-primary, #fafafa) !important;
+}
+
+[data-theme="dark"] .data-table td,
+[data-theme="dark"] .fallback-table td {
+  background: var(--card-bg, #262730) !important;
+  color: var(--text-primary, #fafafa) !important;
+  border-color: var(--border-color, #464748) !important;
+}
+
+[data-theme="dark"] .data-table tbody tr:hover,
+[data-theme="dark"] .fallback-table tbody tr:hover {
+  background-color: var(--bg-color, #1a1d23) !important;
+}
+
+/* Dark mode via CSS media query for system preference */
+@media (prefers-color-scheme: dark) {
+  .data-table,
+  .fallback-table {
+    background: #262730 !important;
+    color: #fafafa !important;
+  }
+
+  .data-table td,
+  .fallback-table td {
+    background: #262730 !important;
+    color: #fafafa !important;
+    border-color: #464748 !important;
+  }
+
+  .data-table tbody tr:hover,
+  .fallback-table tbody tr:hover {
+    background-color: #1a1d23 !important;
+  }
+}
+
+/* Dark mode via body class (for compatibility) */
+.dark-theme .data-table,
+.dark-theme .fallback-table,
+body.dark-theme .data-table,
+body.dark-theme .fallback-table {
+  background: #262730 !important;
+  color: #fafafa !important;
+}
+
+.dark-theme .data-table td,
+.dark-theme .fallback-table td,
+body.dark-theme .data-table td,
+body.dark-theme .fallback-table td {
+  background: #262730 !important;
+  color: #fafafa !important;
+  border-color: #464748 !important;
+}
+
+.dark-theme .data-table tbody tr:hover,
+.dark-theme .fallback-table tbody tr:hover,
+body.dark-theme .data-table tbody tr:hover,
+body.dark-theme .fallback-table tbody tr:hover {
+  background-color: #1a1d23 !important;
+}
+
+/* Ensure highlighted cells maintain good contrast in all modes */
+.data-table td[style*="background-color"],
 .fallback-table td[style*="background-color"] {
   color: #000 !important; /* Dark text for highlighted cells with colored backgrounds */
   font-weight: bold !important;
 }
 
-/* Dark mode specific overrides for highlighted cells */
-[data-theme="dark"] .fallback-table td[style*="background-color"] {
-  color: #000 !important; /* Keep dark text on colored backgrounds for contrast */
+/* Special handling for very dark highlighted backgrounds */
+.data-table td[style*="background-color: #000"],
+.data-table td[style*="background-color: black"],
+.data-table td[style*="background-color: #333"],
+.fallback-table td[style*="background-color: #000"],
+.fallback-table td[style*="background-color: black"],
+.fallback-table td[style*="background-color: #333"] {
+  color: #fff !important; /* Light text for very dark backgrounds */
 }
 
 /* No data message styling */
