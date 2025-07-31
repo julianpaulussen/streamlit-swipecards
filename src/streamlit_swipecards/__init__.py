@@ -35,6 +35,7 @@ def streamlit_swipecards(
         - name: str (required)
         - description: str (required) 
         - image: str (required - URL or base64 image)
+        - pills: list (optional - list of strings to display as pills)
         
         For table cards mode, each dict should have:
         - dataset_path: str (required - path to CSV/Excel file)
@@ -45,6 +46,7 @@ def streamlit_swipecards(
         - center_table_column: str/int (optional - column to center on)
         - name: str (optional - card title, defaults to "Row X")
         - description: str (optional - card description)
+        - pills: list (optional - list of strings to display as pills)
     dataset_path : str, optional
         Path to a CSV/Excel dataset to display as table cards (legacy mode)
     highlight_cells : list, optional
@@ -112,7 +114,8 @@ def streamlit_swipecards(
                         'center_table_row': card.get('center_table_row', int(row_index)),
                         'center_table_column': card.get('center_table_column', None),
                         'name': card.get('name', f"Row {int(row_index) + 1}"),
-                        'description': card.get('description', f"Data from row {int(row_index) + 1}")
+                        'description': card.get('description', f"Data from row {int(row_index) + 1}"),
+                        'pills': card.get('pills', [])  # Preserve pills data
                     }
                     
                     # Store table data for this specific card (convert numpy types)

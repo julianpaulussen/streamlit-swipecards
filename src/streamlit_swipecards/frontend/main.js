@@ -191,14 +191,34 @@ class SwipeCards {
   }
   
   renderImageCard(card) {
+    const pillsHTML = this.renderPills(card.pills);
     return `
       <img src="${card.image}" alt="${card.name}" class="card-image" 
            onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
       <div class="card-content">
         <h3 class="card-name">${card.name}</h3>
         <p class="card-description">${card.description}</p>
+        ${pillsHTML}
       </div>
     `;
+  }
+  
+  renderPills(pills) {
+    if (!pills || !Array.isArray(pills) || pills.length === 0) {
+      return '';
+    }
+    
+    const pillElements = pills.map(pill => 
+      `<span class="card-pill">${this.escapeHtml(pill)}</span>`
+    ).join('');
+    
+    return `<div class="card-pills">${pillElements}</div>`;
+  }
+  
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
   
   renderTableCard(card, cardIndex) {
@@ -223,6 +243,9 @@ class SwipeCards {
                   </button>`;
     tableHTML += '</div>';
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
+    // Add pills if they exist
+    const pillsHTML = this.renderPills(card.pills);
+    tableHTML += pillsHTML;
     tableHTML += '</div>';
     
     // Initialize AG-Grid after rendering - pre-center all cards, not just visible ones
@@ -385,17 +408,20 @@ class SwipeCards {
     } catch (error) {
       console.error('Error creating AG-Grid:', error);
       // Fallback to simple table if AG-Grid fails
-      this.renderFallbackTable(gridContainer, currentRowIndex);
+      this.renderFallbackTable(gridContainer, cardIndex, currentRowIndex);
     }
   }
   
-  renderFallbackTable(container, currentRowIndex) {
+  renderFallbackTable(container, cardIndex, currentRowIndex) {
+    const card = this.cards[cardIndex];
+    const tableData = card.table_data || this.tableData;
+    
     let tableHTML = '<table class="data-table fallback-table">';
     
     // Header row
-    if (this.tableData && this.tableData.columns) {
+    if (tableData && tableData.columns) {
       tableHTML += '<thead><tr>';
-      this.tableData.columns.forEach(col => {
+      tableData.columns.forEach(col => {
         tableHTML += `<th>${col}</th>`;
       });
       tableHTML += '</tr></thead>';
@@ -403,30 +429,40 @@ class SwipeCards {
     
     // Data rows
     tableHTML += '<tbody>';
-    if (this.tableData && this.tableData.rows) {
-      this.tableData.rows.forEach((row, rIndex) => {
+    if (tableData && tableData.rows) {
+      tableData.rows.forEach((row, rIndex) => {
         tableHTML += '<tr>';
-        this.tableData.columns.forEach((col, colIndex) => {
+        tableData.columns.forEach((col, colIndex) => {
           const cellValue = row[colIndex] || '';
 
+          // Use card-specific highlighting
+          const highlightCells = card.highlight_cells || this.highlightCells;
+          const highlightRows = card.highlight_rows || this.highlightRows;
+          const highlightColumns = card.highlight_columns || this.highlightColumns;
+
           // Check for cell highlighting first (highest priority)
-          const isCellHighlighted = this.isCellHighlighted(rIndex, col, colIndex);
+          const isCellHighlighted = this.isCellHighlightedForCard(rIndex, col, colIndex, highlightCells);
           // Check for row highlighting
-          const isRowHighlighted = this.isRowHighlighted(rIndex);
+          const isRowHighlighted = this.isRowHighlightedForCard(rIndex, highlightRows);
           // Check for column highlighting
-          const isColumnHighlighted = this.isColumnHighlighted(col);
+          const isColumnHighlighted = this.isColumnHighlightedForCard(col, highlightColumns);
 
           let style = '';
           if (isCellHighlighted) {
-            style = this.getHighlightStyle(rIndex, col, colIndex);
+            const styleObj = this.getHighlightStyleObjectForCard(rIndex, col, colIndex, highlightCells);
+            if (styleObj) {
+              style = `background-color: ${styleObj.backgroundColor}; border: ${styleObj.border}; font-weight: ${styleObj.fontWeight};`;
+            }
           } else if (isRowHighlighted) {
-            const highlight = this.highlightRows.find(h => h.row === rIndex);
-            const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E3F2FD');
-            style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
+            const styleObj = this.getRowHighlightStyleObjectForCard(rIndex, highlightRows);
+            if (styleObj) {
+              style = `background-color: ${styleObj.backgroundColor}; border: ${styleObj.border}; font-weight: ${styleObj.fontWeight};`;
+            }
           } else if (isColumnHighlighted) {
-            const highlight = this.highlightColumns.find(h => h.column === col);
-            const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E8F5E8');
-            style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
+            const styleObj = this.getColumnHighlightStyleObjectForCard(col, highlightColumns);
+            if (styleObj) {
+              style = `background-color: ${styleObj.backgroundColor}; border: ${styleObj.border}; font-weight: ${styleObj.fontWeight};`;
+            }
           }
 
           tableHTML += `<td style="${style}">${cellValue}</td>`;
@@ -438,6 +474,16 @@ class SwipeCards {
     tableHTML += '</table>';
     
     container.innerHTML = tableHTML;
+    
+    // Hide loading overlay and show the container
+    const overlay = container.parentElement.querySelector('.loading-overlay');
+    if (overlay) {
+      overlay.classList.add('fade-out');
+      setTimeout(() => overlay.remove(), 300);
+    }
+    
+    container.style.visibility = 'visible';
+    container.style.opacity = '1';
   }
   
   isCellHighlighted(rowIndex, columnName, columnIndex) {

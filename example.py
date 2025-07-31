@@ -32,17 +32,20 @@ def main():
             {
                 "name": "Alice",
                 "description": "Loves hiking and photography",
-                "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=faces"
+                "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=faces",
+                "pills": ["Hiking", "Photography", "Adventure", "Nature"]
             },
             {
                 "name": "Bob",
                 "description": "Chef and food enthusiast",
-                "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces"
+                "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces",
+                "pills": ["Cooking", "Food", "Travel", "Wine"]
             },
             {
                 "name": "Carol",
                 "description": "Artist and musician",
-                "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=faces"
+                "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=faces",
+                "pills": ["Art", "Music", "Creative", "Guitar", "Painting"]
             }
         ]
         
@@ -92,6 +95,7 @@ def main():
                 "row_index": 0,  # Alice Johnson
                 "name": "Alice Johnson",
                 "description": "Engineering professional from New York",
+                "pills": ["Engineer", "NYC", "Tech", "Senior"],
                 # Demonstrates default highlighting colors for cell, row and column
                 "highlight_cells": [{'row': 0, 'column': 'Salary'}],
                 "highlight_rows": [{"row": 0}],
@@ -104,6 +108,7 @@ def main():
                 "row_index": 1,  # Bob Smith
                 "name": "Bob Smith",
                 "description": "Sales professional from California",
+                "pills": ["Sales", "California", "Business"],
                 "highlight_cells": [{'row': 1, 'column': 'Rating', 'color': '#98FB98'}],
                 "highlight_rows": [{"row": 1}],
                 "highlight_columns": [{"column": "Rating"}],
@@ -115,6 +120,7 @@ def main():
                 "row_index": 2,  # Carol Davis
                 "name": "Carol Davis",
                 "description": "Marketing specialist from Texas",
+                "pills": ["Marketing", "Texas", "Creative", "Digital"],
                 "highlight_cells": [{'row': 2, 'column': 'Experience', 'color': '#87CEEB'}],
                 "highlight_rows": [{"row": 2}],
                 "highlight_columns": [{"column": "Experience"}],

@@ -177,6 +177,45 @@ body {
   margin-top: 4px;
 }
 
+/* Pills styling */
+.card-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  max-height: 60px;
+  overflow: hidden;
+}
+
+.card-pill {
+  display: inline-block;
+  background: var(--pill-bg, #f0f2f6);
+  color: var(--pill-text, #262730);
+  border: 1px solid var(--pill-border, #d4d4d4);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: default;
+}
+
+.card-pill:hover {
+  background: var(--pill-hover-bg, #e8eaed);
+  transform: scale(1.05);
+}
+
+/* Dark theme pill colors */
+[data-theme="dark"] {
+  --pill-bg: #3d3d3d;
+  --pill-text: #fafafa;
+  --pill-border: #525252;
+  --pill-hover-bg: #525252;
+}
+
 /* Table locked state */
 .table-locked {
   opacity: 0.7;
@@ -400,6 +439,18 @@ body {
   
   .toggle-icon {
     font-size: 9px;
+  }
+  
+  .card-pills {
+    gap: 3px;
+    margin-top: 6px;
+    max-height: 50px;
+  }
+  
+  .card-pill {
+    padding: 1px 6px;
+    font-size: 9px;
+    border-radius: 10px;
   }
   
   .action-buttons {
