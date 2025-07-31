@@ -19,9 +19,6 @@ Launch the sample app to see both modes in action:
 ```bash
 streamlit run example.py
 ```
-Use the **Show Desktop Width** button (below the instructions) in the demo to
-expand the cards to the available page width. By default the component uses the
-mobile layout.
 
 ## Usage
 ### Image cards
@@ -107,18 +104,9 @@ streamlit_swipecards(
     display_mode="cards",      # "cards" or "table"
     center_table_row=None,
     center_table_column=None,
-    window_size="mobile",      # "mobile" or "desktop"
     key=None,
 ) 
 ```
-
-The `window_size` option controls how wide the cards appear:
-
-- `"mobile"` (default) – optimized for small screens and always keeps the
-  narrow card layout even on a wide browser window.
-- `"desktop"` – stretches the cards across the available component width and
-  automatically reverts to the mobile layout when the window becomes smaller
-  than 480&nbsp;px.
 
 ## Return value
 The component returns a dictionary:
