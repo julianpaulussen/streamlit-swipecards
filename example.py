@@ -23,10 +23,6 @@ def main():
         ["Image Cards", "Table Cards"],
         horizontal=True
     )
-    
-    # Track current width mode
-    if "window_size" not in st.session_state:
-        st.session_state["window_size"] = "mobile"
 
     if mode == "Image Cards":
         st.subheader("🖼️ Image Cards Mode")
@@ -55,21 +51,10 @@ def main():
         st.markdown("- 👆 **Swipe left** or click ❌ to pass")
         st.markdown("- 🔄 Click ↶ to go back")
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Show Mobile Width"):
-                st.session_state["window_size"] = "mobile"
-        with col2:
-            if st.button("Show Desktop Width"):
-                st.session_state["window_size"] = "desktop"
-
-        current_size = st.session_state["window_size"]
-
         # Create the swipe cards
         result = streamlit_swipecards(
             cards=sample_cards,
             display_mode="cards",
-            window_size=current_size,
             key="image_example",
         )
     
@@ -99,16 +84,6 @@ def main():
         st.markdown("- 👆 **Swipe left** or click ❌ to pass the row")
         st.markdown("- 🔄 Click ↶ to go back")
         st.markdown("- 📊 Click to get results when done")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Show Mobile Width"):
-                st.session_state["window_size"] = "mobile"
-        with col2:
-            if st.button("Show Desktop Width"):
-                st.session_state["window_size"] = "desktop"
-
-        current_size = st.session_state["window_size"]
 
         # Create table cards - each card represents a different row with its own configuration
         table_cards = [
@@ -229,7 +204,6 @@ def main():
         result = streamlit_swipecards(
             cards=table_cards,
             display_mode="table",
-            window_size=current_size,
             key="table_example"
         )
     
