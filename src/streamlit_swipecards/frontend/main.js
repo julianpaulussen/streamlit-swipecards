@@ -117,7 +117,6 @@ class SwipeCards {
           <p>No more cards to swipe</p>
           <div class="results-section">
             <button class="results-btn" onclick="swipeCards.goBack()" ${this.swipedCards.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>↶ Go Back</button>
-            <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
             <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
           </div>
         </div>
@@ -169,7 +168,6 @@ class SwipeCards {
         <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">💚</button>
       </div>
       <div class="results-section">
-        <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
         <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
       </div>
     `;
@@ -788,6 +786,8 @@ class SwipeCards {
 
         if (this.currentIndex >= this.cards.length) {
           this.render(); // Render the 'All done' message
+          // Automatically return results when all cards are swiped
+          this.getResults();
         }
         this.isAnimating = false;
       }, 300);
@@ -816,6 +816,8 @@ class SwipeCards {
 
         if (this.currentIndex >= this.cards.length) {
           this.render();
+          // Automatically return results when all cards are swiped
+          this.getResults();
         }
         this.isAnimating = false;
       }, 300);
@@ -942,7 +944,7 @@ class SwipeCards {
     const results = {
       swipedCards: minimalSwipes,
       lastAction: this.lastAction,
-      totalSwiped: minimalSwipes.length,totalSwiped: minimalSwipes.length,
+      totalSwiped: minimalSwipes.length,
       remainingCards: this.cards.length - this.currentIndex
     };
     

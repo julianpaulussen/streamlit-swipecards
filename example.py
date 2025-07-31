@@ -98,7 +98,7 @@ def main():
         st.markdown("- 👆 **Swipe right** or click 💚 to like the row")
         st.markdown("- 👆 **Swipe left** or click ❌ to pass the row")
         st.markdown("- 🔄 Click ↶ to go back")
-        st.markdown("- 📊 Click to get results when done")
+        st.markdown("- ✅ Results will appear automatically when done")
 
         col1, col2 = st.columns(2)
         with col1:
