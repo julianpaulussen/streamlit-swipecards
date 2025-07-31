@@ -53,3 +53,7 @@ coverage.xml
 
 # Streamlit
 .streamlit/
+
+# Test files
+test_caching.py
+test_real_world_caching.py
