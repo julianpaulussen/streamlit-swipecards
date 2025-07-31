@@ -36,17 +36,20 @@ def main():
             {
                 "name": "Alice",
                 "description": "Loves hiking and photography",
-                "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=faces"
+                "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=faces",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"]
             },
             {
                 "name": "Bob",
                 "description": "Chef and food enthusiast",
-                "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces"
+                "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"]
             },
             {
                 "name": "Carol",
                 "description": "Artist and musician",
-                "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=faces"
+                "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=faces",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"]
             }
         ]
         
@@ -117,6 +120,7 @@ def main():
                 "row_index": 0,  # Alice Johnson
                 "name": "Alice Johnson",
                 "description": "Engineering professional from New York",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 # Demonstrates default highlighting colors for cell, row and column
                 "highlight_cells": [{'row': 0, 'column': 'Salary'}],
                 "highlight_rows": [{"row": 0}],
@@ -129,6 +133,7 @@ def main():
                 "row_index": 1,  # Bob Smith
                 "name": "Bob Smith",
                 "description": "Sales professional from California",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{'row': 1, 'column': 'Rating', 'color': '#98FB98'}],
                 "highlight_rows": [{"row": 1}],
                 "highlight_columns": [{"column": "Rating"}],
@@ -140,6 +145,7 @@ def main():
                 "row_index": 2,  # Carol Davis
                 "name": "Carol Davis",
                 "description": "Marketing specialist from Texas",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{'row': 2, 'column': 'Experience', 'color': '#87CEEB'}],
                 "highlight_rows": [{"row": 2}],
                 "highlight_columns": [{"column": "Experience"}],
@@ -151,6 +157,7 @@ def main():
                 "row_index": 3,  # David Wilson
                 "name": "David Wilson",
                 "description": "Engineering manager from New York",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{'row': 3, 'column': 'Projects', 'color': '#DDA0DD'}],
                 "highlight_rows": [{"row": 3}],
                 "highlight_columns": [{"column": "Projects"}],
@@ -162,6 +169,7 @@ def main():
                 "row_index": 4,  # Eve Brown
                 "name": "Eve Brown",
                 "description": "HR specialist from Florida",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{'row': 4, 'column': 'Salary', 'color': '#F0E68C'}],
                 "highlight_rows": [{"row": 4}],
                 "highlight_columns": [{"column": "Salary"}],
@@ -173,6 +181,7 @@ def main():
                 "row_index": 5,
                 "name": "Frank Miller",
                 "description": "Senior engineer from Seattle",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{"row": 5, "column": "Salary", "color": "#FFD700"}],
                 "highlight_rows": [{"row": 5}],
                 "highlight_columns": [{"column": "Salary"}],
@@ -184,6 +193,7 @@ def main():
                 "row_index": 6,
                 "name": "Grace Lee",
                 "description": "UI/UX designer based in California",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{"row": 6, "column": "Skills", "color": "#87CEEB"}],
                 "highlight_rows": [{"row": 6}],
                 "highlight_columns": [{"column": "Skills"}],
@@ -195,6 +205,7 @@ def main():
                 "row_index": 8,
                 "name": "Iris Chen",
                 "description": "Data scientist specializing in ML & SQL",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{"row": 8, "column": "Rating", "color": "#98FB98"}],
                 "highlight_rows": [{"row": 8}],
                 "highlight_columns": [{"column": "Rating"}],
@@ -206,6 +217,7 @@ def main():
                 "row_index": 9,
                 "name": "Jack Wilson",
                 "description": "Marketing associate from Texas",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{"row": 9, "column": "Experience", "color": "#FFA500"}],
                 "highlight_rows": [{"row": 9}],
                 "highlight_columns": [{"column": "Experience"}],
@@ -217,6 +229,7 @@ def main():
                 "row_index": 10,
                 "name": "Henry Taylor",
                 "description": "Financial analyst from New York",
+                "pills": ["Pill 1", "Pill 2", "Pill 3", "Pill 4"],
                 "highlight_cells": [{"row": 10, "column": "Location", "color": "#E6E6FA"}],
                 "highlight_rows": [{"row": 10}],
                 "highlight_columns": [{"column": "Location"}],
