@@ -17,7 +17,10 @@ pip install streamlit-swipecards
 ## Quick demo
 Launch the sample app to see both modes in action:
 ```bash
-streamlit run example.py
+git clone https://github.com/lejuliennn/streamlit-swipecards.git
+cd streamlit-swipecards
+pip install -e .
+streamlit run examples/example.py
 ```
 
 ## Usage
@@ -126,6 +129,39 @@ The component returns a dictionary:
 3. **Click back** ↶ to undo your last action
 4. Cards stack behind each other for a realistic experience
 5. Smooth animations provide visual feedback
+
+## Examples
+
+Check out the `examples/` directory for:
+- **Basic usage examples** with both image and table modes
+- **Sample data** for testing
+- **Customization examples** with highlighting and styling
+
+Run examples:
+```bash
+cd examples
+streamlit run example.py
+```
+
+## Development
+
+For development setup and contributing guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Install development dependencies:
+```bash
+pip install -r requirements-dev.txt
+```
+
+## Project Structure
+
+```
+streamlit-swipecards/
+├── src/streamlit_swipecards/    # Main package
+├── examples/                    # Example applications and data
+├── tests/                       # Unit tests
+├── docs/                        # Documentation
+└── requirements-dev.txt         # Development dependencies
+```
 
 
 ---

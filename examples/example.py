@@ -62,7 +62,7 @@ def main():
         st.subheader("📊 Table Cards Mode")
         
         # Load sample data from CSV file
-        csv_path = os.path.join(os.path.dirname(__file__), "sample_data.csv")
+        csv_path = os.path.join(os.path.dirname(__file__), "data", "sample_data.csv")
         
         # Check if CSV file exists, if not create it
         if not os.path.exists(csv_path):

@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streamlit-swipecards"
+version = "0.2.0"
+description = "Streamlit Swipecards allow you to add interactive swipeable cards to your app. Supports both image cards and table row swiping with cell highlighting."
+readme = "README.md"
+authors = [
+    {name = "Julian", email = "julien.playsde@gmail.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "streamlit>=1.2",
+    "jinja2",
+    "pandas",
+    "openpyxl",
+]
+
+[project.urls]
+Homepage = "https://github.com/lejuliennn/streamlit-swipecards"
+Documentation = "https://github.com/lejuliennn/streamlit-swipecards#readme"
+Repository = "https://github.com/lejuliennn/streamlit-swipecards"
+Issues = "https://github.com/lejuliennn/streamlit-swipecards/issues"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "isort",
+    "flake8",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["frontend/**/*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | frontend
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["streamlit_swipecards"]
+skip_glob = ["frontend/**/*"]
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+exclude = [
+    "frontend/",
+    "build/",
+    "dist/",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--cov=src/streamlit_swipecards",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
