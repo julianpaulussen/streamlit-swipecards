@@ -93,6 +93,7 @@ class SwipeCards {
     this.lastAction = null; // Store the last action without sending immediately
     this.agGridInstances = new Map(); // Store AG-Grid instances for cleanup
     this.isAnimating = false; // Prevent rapid repeated actions
+    this.cardStates = new Map(); // Store toggle states for each card (default: true = locked/swipeable)
     
     this.init();
   }
@@ -214,9 +215,15 @@ class SwipeCards {
     tableHTML += `<div class="ag-grid-container" id="ag-grid-${cardIndex}" style="visibility: hidden;"></div>`;
     tableHTML += '</div>';
     
-    // Add card content section like image cards
+    // Add card content section with toggle button
     tableHTML += '<div class="card-content">';
+    tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
+    tableHTML += `<button class="toggle-button" data-card-index="${cardIndex}" onclick="swipeCards.toggleTableMode(${cardIndex})">
+                    <span class="toggle-text">Lock</span>
+                    <span class="toggle-icon">🔒</span>
+                  </button>`;
+    tableHTML += '</div>';
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
     tableHTML += '</div>';
     
@@ -357,6 +364,9 @@ class SwipeCards {
             gridContainer.style.opacity = '0';
             gridContainer.style.zIndex = '-1';
           }
+          
+          // Set initial locked state (default is locked)
+          this.updateTableInteractionState(cardIndex, true);
           
           // Always store grid reference
           this.agGridInstances.set(`${cardIndex}_centered`, true);
@@ -687,6 +697,11 @@ class SwipeCards {
   }
   
   handleStart(e) {
+    // Don't allow swiping if card is in inspect mode
+    if (!this.isCardSwipeable()) {
+      return;
+    }
+    
     this.isDragging = true;
     const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
     const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
@@ -767,7 +782,7 @@ class SwipeCards {
   }
   
   swipeRight() {
-    if (this.isAnimating) return;
+    if (this.isAnimating || !this.isCardSwipeable()) return;
     this.isAnimating = true;
     const topCard = this.container.querySelector('.swipe-card:first-child');
     const card = this.cards[this.currentIndex];
@@ -795,7 +810,7 @@ class SwipeCards {
   }
 
   swipeLeft() {
-    if (this.isAnimating) return;
+    if (this.isAnimating || !this.isCardSwipeable()) return;
     this.isAnimating = true;
     const topCard = this.container.querySelector('.swipe-card:first-child');
     const card = this.cards[this.currentIndex];
@@ -949,6 +964,59 @@ class SwipeCards {
     // Send results to Streamlit
     sendValue(results);
     return results;
+  }
+
+  toggleTableMode(cardIndex) {
+    // Toggle between "Lock" (default) and "Inspect" modes
+    const currentState = this.cardStates.get(cardIndex) !== false; // default true (locked)
+    const newState = !currentState;
+    this.cardStates.set(cardIndex, newState);
+    
+    const toggleButton = this.container.querySelector(`[data-card-index="${cardIndex}"]`);
+    const toggleText = toggleButton.querySelector('.toggle-text');
+    const toggleIcon = toggleButton.querySelector('.toggle-icon');
+    
+    if (newState) {
+      // Lock mode: table locked, cards swipeable
+      toggleText.textContent = 'Lock';
+      toggleIcon.textContent = '🔒';
+      toggleButton.classList.remove('inspect-mode');
+    } else {
+      // Inspect mode: table interactive, cards not swipeable
+      toggleText.textContent = 'Inspect';
+      toggleIcon.textContent = '🔍';
+      toggleButton.classList.add('inspect-mode');
+    }
+    
+    // Update table interaction state
+    this.updateTableInteractionState(cardIndex, newState);
+    
+    console.log(`Card ${cardIndex} toggled to ${newState ? 'Lock' : 'Inspect'} mode`);
+  }
+  
+  updateTableInteractionState(cardIndex, isLocked) {
+    const gridContainer = this.container.querySelector(`#ag-grid-${cardIndex}`);
+    if (gridContainer) {
+      if (isLocked) {
+        // Lock mode: disable table interaction
+        gridContainer.style.pointerEvents = 'none';
+        gridContainer.classList.add('table-locked');
+      } else {
+        // Inspect mode: enable table interaction
+        gridContainer.style.pointerEvents = 'auto';
+        gridContainer.classList.remove('table-locked');
+      }
+    }
+  }
+  
+  isCardSwipeable() {
+    // Check if the current front card is in lock mode (swipeable)
+    const frontCard = this.container.querySelector('.swipe-card:first-child');
+    if (!frontCard) return true;
+    
+    const cardIndex = parseInt(frontCard.getAttribute('data-index'));
+    const isLocked = this.cardStates.get(cardIndex) !== false; // default true (locked/swipeable)
+    return isLocked;
   }
 }
 
