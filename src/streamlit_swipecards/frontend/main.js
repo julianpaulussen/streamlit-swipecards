@@ -999,8 +999,7 @@ function onRender(event) {
     highlight_columns = [],
     display_mode = 'cards',
     centerTableRow = null,
-    centerTableColumn = null,
-    window_size = 'mobile'
+    centerTableColumn = null
   } = event.detail.args;
   
   // Apply theme detection immediately
@@ -1013,10 +1012,6 @@ function onRender(event) {
   root.innerHTML = '<div class="swipe-container"></div>';
 
   const container = root.querySelector('.swipe-container');
-
-  if (window_size === 'desktop') {
-    container.classList.add('desktop');
-  }
 
   // Add table-mode class if needed
   if (display_mode === 'table') {
