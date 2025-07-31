@@ -192,12 +192,18 @@ class SwipeCards {
   }
   
   renderImageCard(card) {
+    let pillsHTML = '';
+    if (card.pills && Array.isArray(card.pills) && card.pills.length > 0) {
+      pillsHTML = this.renderPills(card.pills);
+    }
+    
     return `
       <img src="${card.image}" alt="${card.name}" class="card-image" 
            onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
       <div class="card-content">
         <h3 class="card-name">${card.name}</h3>
         <p class="card-description">${card.description}</p>
+        ${pillsHTML}
       </div>
     `;
   }
@@ -214,10 +220,17 @@ class SwipeCards {
     tableHTML += `<div class="ag-grid-container" id="ag-grid-${cardIndex}" style="visibility: hidden;"></div>`;
     tableHTML += '</div>';
     
+    // Add pills if they exist
+    let pillsHTML = '';
+    if (card.pills && Array.isArray(card.pills) && card.pills.length > 0) {
+      pillsHTML = this.renderPills(card.pills);
+    }
+    
     // Add card content section like image cards
     tableHTML += '<div class="card-content">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
+    tableHTML += pillsHTML;
     tableHTML += '</div>';
     
     // Initialize AG-Grid after rendering - pre-center all cards, not just visible ones
@@ -656,6 +669,24 @@ class SwipeCards {
       };
     }
     return null;
+  }
+  
+  renderPills(pills) {
+    if (!pills || !Array.isArray(pills) || pills.length === 0) {
+      return '';
+    }
+    
+    const pillsHTML = pills.map(pill => 
+      `<span class="card-pill">${this.escapeHtml(pill)}</span>`
+    ).join('');
+    
+    return `<div class="card-pills">${pillsHTML}</div>`;
+  }
+  
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
   
   darkenColor(color, percent) {
