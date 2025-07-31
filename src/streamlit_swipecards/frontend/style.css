@@ -410,6 +410,7 @@ body {
   background: var(--card-bg);
   transition: all 0.3s ease;
   font-size: 10px;
+  color: var(--text-primary);
 }
 
 .data-table tbody tr:hover {
@@ -680,4 +681,46 @@ body {
   --ag-background-color: var(--card-bg);
   --ag-odd-row-background-color: var(--card-bg);
   --ag-row-hover-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Fallback table specific styling for better dark mode support */
+.fallback-table {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.fallback-table th {
+  color: white !important;
+  background: var(--button-gradient) !important;
+}
+
+.fallback-table td {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.fallback-table tbody tr:hover {
+  background-color: var(--bg-color) !important;
+}
+
+/* Ensure highlighted cells in fallback tables maintain good contrast */
+.fallback-table td[style*="background-color"] {
+  color: #000 !important; /* Dark text for highlighted cells with colored backgrounds */
+  font-weight: bold !important;
+}
+
+/* Dark mode specific overrides for highlighted cells */
+[data-theme="dark"] .fallback-table td[style*="background-color"] {
+  color: #000 !important; /* Keep dark text on colored backgrounds for contrast */
+}
+
+/* No data message styling */
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-style: italic;
 }

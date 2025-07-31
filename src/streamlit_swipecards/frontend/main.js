@@ -377,17 +377,39 @@ class SwipeCards {
     } catch (error) {
       console.error('Error creating AG-Grid:', error);
       // Fallback to simple table if AG-Grid fails
-      this.renderFallbackTable(gridContainer, currentRowIndex);
+      this.renderFallbackTable(gridContainer, cardIndex, currentRowIndex);
     }
   }
   
-  renderFallbackTable(container, currentRowIndex) {
+  renderFallbackTable(container, cardIndex, currentRowIndex) {
+    // Remove loading overlay first
+    const parentElement = container.parentElement;
+    const overlay = parentElement ? parentElement.querySelector('.loading-overlay') : null;
+    if (overlay) {
+      overlay.classList.add('fade-out');
+      setTimeout(() => overlay.remove(), 300);
+    }
+
+    // Get the table data for this specific card
+    const card = this.cards[cardIndex];
+    const tableData = card.table_data || this.tableData;
+    
+    if (!tableData) {
+      container.innerHTML = '<div class="no-data">No data available</div>';
+      return;
+    }
+
+    // Use card-specific highlight configurations
+    const highlightCells = card.highlight_cells || this.highlightCells;
+    const highlightRows = card.highlight_rows || this.highlightRows; 
+    const highlightColumns = card.highlight_columns || this.highlightColumns;
+
     let tableHTML = '<table class="data-table fallback-table">';
     
     // Header row
-    if (this.tableData && this.tableData.columns) {
+    if (tableData && tableData.columns) {
       tableHTML += '<thead><tr>';
-      this.tableData.columns.forEach(col => {
+      tableData.columns.forEach(col => {
         tableHTML += `<th>${col}</th>`;
       });
       tableHTML += '</tr></thead>';
@@ -395,28 +417,28 @@ class SwipeCards {
     
     // Data rows
     tableHTML += '<tbody>';
-    if (this.tableData && this.tableData.rows) {
-      this.tableData.rows.forEach((row, rIndex) => {
+    if (tableData && tableData.rows) {
+      tableData.rows.forEach((row, rIndex) => {
         tableHTML += '<tr>';
-        this.tableData.columns.forEach((col, colIndex) => {
+        tableData.columns.forEach((col, colIndex) => {
           const cellValue = row[colIndex] || '';
 
           // Check for cell highlighting first (highest priority)
-          const isCellHighlighted = this.isCellHighlighted(rIndex, col, colIndex);
+          const isCellHighlighted = this.isCellHighlightedForCard(rIndex, col, colIndex, highlightCells);
           // Check for row highlighting
-          const isRowHighlighted = this.isRowHighlighted(rIndex);
+          const isRowHighlighted = this.isRowHighlightedForCard(rIndex, highlightRows);
           // Check for column highlighting
-          const isColumnHighlighted = this.isColumnHighlighted(col);
+          const isColumnHighlighted = this.isColumnHighlightedForCard(col, highlightColumns);
 
           let style = '';
           if (isCellHighlighted) {
-            style = this.getHighlightStyle(rIndex, col, colIndex);
+            style = this.getHighlightStyleForCard(rIndex, col, colIndex, highlightCells);
           } else if (isRowHighlighted) {
-            const highlight = this.highlightRows.find(h => h.row === rIndex);
+            const highlight = highlightRows.find(h => h.row === rIndex);
             const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E3F2FD');
             style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
           } else if (isColumnHighlighted) {
-            const highlight = this.highlightColumns.find(h => h.column === col);
+            const highlight = highlightColumns.find(h => h.column === col);
             const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E8F5E8');
             style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
           }
@@ -430,6 +452,10 @@ class SwipeCards {
     tableHTML += '</table>';
     
     container.innerHTML = tableHTML;
+    
+    // Make container visible
+    container.style.visibility = 'visible';
+    container.style.opacity = '1';
   }
   
   isCellHighlighted(rowIndex, columnName, columnIndex) {
@@ -570,6 +596,39 @@ class SwipeCards {
       const matchesRow = highlight.row === rowIndex;
       const matchesColumn = highlight.column === columnName || highlight.column === columnIndex;
       return matchesRow && matchesColumn;
+    });
+  }
+
+  getHighlightStyleForCard(rowIndex, columnName, columnIndex, highlightCells) {
+    const highlight = highlightCells.find(h => {
+      const matchesRow = h.row === rowIndex;
+      const matchesColumn = h.column === columnName || h.column === columnIndex;
+      return matchesRow && matchesColumn;
+    });
+    
+    if (highlight) {
+      let color = highlight.color;
+      
+      // Handle random color
+      if (color === 'random') {
+        color = this.getRandomColor();
+      }
+      
+      // Use provided color or default
+      color = color || '#FFD700'; // Gold as default
+      
+      return `background-color: ${color}; border: 2px solid ${this.darkenColor(color, 20)}; font-weight: bold;`;
+    }
+    return '';
+  }
+
+  isRowHighlightedForCard(rowIndex, highlightRows) {
+    return highlightRows.some(highlight => highlight.row === rowIndex);
+  }
+
+  isColumnHighlightedForCard(columnName, highlightColumns) {
+    return highlightColumns.some(highlight => {
+      return highlight.column === columnName || highlight.column === columnName;
     });
   }
   
