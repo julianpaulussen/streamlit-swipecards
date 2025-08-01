@@ -753,6 +753,12 @@ class SwipeCards {
   
   handleStart(e) {
     if (this.mode !== 'swipe') return;
+
+    // Ignore touches on toggle buttons so taps register as clicks on mobile
+    if (e.target.closest('.mode-toggle-btn')) {
+      return;
+    }
+
     this.isDragging = true;
     const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
     const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
