@@ -760,7 +760,9 @@ class SwipeCards {
     }
 
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness < 128 ? '#FFFFFF' : '#000000';
+    // Use a slightly higher threshold so mid-dark backgrounds like dark grey
+    // get a lighter text color for better readability
+    return brightness < 170 ? '#FFFFFF' : '#000000';
   }
 
   bindEvents() {
