@@ -427,11 +427,13 @@ class SwipeCards {
           } else if (isRowHighlighted) {
             const highlight = this.highlightRows.find(h => h.row === rIndex);
             const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E3F2FD');
-            style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
+            const textColor = this.getContrastingTextColor(color);
+            style = `background-color: ${color}; color: ${textColor}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
           } else if (isColumnHighlighted) {
             const highlight = this.highlightColumns.find(h => h.column === col);
             const color = highlight?.color === 'random' ? this.getRandomColor() : (highlight?.color || '#E8F5E8');
-            style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
+            const textColor = this.getContrastingTextColor(color);
+            style = `background-color: ${color}; color: ${textColor}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
           }
 
           tableHTML += `<td style="${style}">${cellValue}</td>`;
@@ -470,8 +472,10 @@ class SwipeCards {
       
       // Use provided color or default
       color = color || '#FFD700'; // Gold as default
-      
-      return `background-color: ${color}; border: 2px solid ${this.darkenColor(color, 20)};`;
+
+      const textColor = this.getContrastingTextColor(color);
+
+      return `background-color: ${color}; color: ${textColor}; border: 2px solid ${this.darkenColor(color, 20)};`;
     }
     return '';
   }
@@ -493,11 +497,14 @@ class SwipeCards {
       
       // Use provided color or default
       color = color || '#FFD700'; // Gold as default
-      
+
+      const textColor = this.getContrastingTextColor(color);
+
       return {
         backgroundColor: color,
         border: `2px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: textColor
       };
     }
     return null;
@@ -526,11 +533,14 @@ class SwipeCards {
       
       // Use provided color or default light blue
       color = color || '#E3F2FD'; // Light blue as default for rows
-      
+
+      const textColor = this.getContrastingTextColor(color);
+
       return {
         backgroundColor: color,
         border: `1px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: '500'
+        fontWeight: '500',
+        color: textColor
       };
     }
     return null;
@@ -551,11 +561,14 @@ class SwipeCards {
       
       // Use provided color or default light green
       color = color || '#E8F5E8'; // Light green as default for columns
-      
+
+      const textColor = this.getContrastingTextColor(color);
+
       return {
         backgroundColor: color,
         border: `1px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: '500'
+        fontWeight: '500',
+        color: textColor
       };
     }
     return null;
@@ -603,11 +616,14 @@ class SwipeCards {
       
       // Use provided color or default
       color = color || '#FFD700'; // Gold as default
-      
+
+      const textColor = this.getContrastingTextColor(color);
+
       return {
         backgroundColor: color,
         border: `2px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: textColor
       };
     }
     return null;
@@ -630,11 +646,14 @@ class SwipeCards {
       
       // Use provided color or default light blue
       color = color || '#E3F2FD'; // Light blue as default for rows
-      
+
+      const textColor = this.getContrastingTextColor(color);
+
       return {
         backgroundColor: color,
         border: `1px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: '500'
+        fontWeight: '500',
+        color: textColor
       };
     }
     return null;
@@ -661,11 +680,14 @@ class SwipeCards {
       
       // Use provided color or default light green
       color = color || '#E8F5E8'; // Light green as default for columns
-      
+
+      const textColor = this.getContrastingTextColor(color);
+
       return {
         backgroundColor: color,
         border: `1px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: '500'
+        fontWeight: '500',
+        color: textColor
       };
     }
     return null;
@@ -700,7 +722,47 @@ class SwipeCards {
       (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
       (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
   }
-  
+
+  getContrastingTextColor(color) {
+    if (!color) return '#000000';
+    let r, g, b;
+
+    color = color.trim();
+
+    if (color.startsWith('#')) {
+      let hex = color.substring(1);
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const num = parseInt(hex, 16);
+      r = (num >> 16) & 255;
+      g = (num >> 8) & 255;
+      b = num & 255;
+    } else if (color.startsWith('rgb')) {
+      const parts = color.match(/\d+/g);
+      if (parts) {
+        [r, g, b] = parts.map(Number);
+      }
+    } else {
+      const temp = document.createElement('div');
+      temp.style.color = color;
+      document.body.appendChild(temp);
+      const computed = window.getComputedStyle(temp).color;
+      document.body.removeChild(temp);
+      const parts = computed.match(/\d+/g);
+      if (parts) {
+        [r, g, b] = parts.map(Number);
+      }
+    }
+
+    if (r === undefined || g === undefined || b === undefined) {
+      return '#000000';
+    }
+
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128 ? '#FFFFFF' : '#000000';
+  }
+
   bindEvents() {
     // Always bind to the first card in the stack (topmost/front card)
     const topCard = this.container.querySelector('.swipe-card:first-child');
