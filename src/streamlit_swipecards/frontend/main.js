@@ -93,7 +93,8 @@ class SwipeCards {
     this.lastAction = null; // Store the last action without sending immediately
     this.agGridInstances = new Map(); // Store AG-Grid instances for cleanup
     this.isAnimating = false; // Prevent rapid repeated actions
-    
+    this.mode = 'swipe'; // Default mode
+
     this.init();
   }
   
@@ -109,7 +110,7 @@ class SwipeCards {
     
     // Clean up existing AG-Grid instances
     this.cleanupAgGrids();
-    
+
     if (this.currentIndex >= this.cards.length) {
       this.container.innerHTML = `
         <div class="no-more-cards">
@@ -126,7 +127,7 @@ class SwipeCards {
     }
     
     let cardsHTML = '';
-    
+
     // Show up to 5 cards in the stack for smoother animations
     for (let i = 0; i < Math.min(5, this.cards.length - this.currentIndex); i++) {
       const cardIndex = this.currentIndex + i;
@@ -159,6 +160,9 @@ class SwipeCards {
       `;
     }
     
+    this.container.classList.toggle('inspect-mode', this.mode === 'inspect');
+    this.container.classList.toggle('swipe-mode', this.mode === 'swipe');
+
     this.container.innerHTML = `
       <div class="cards-stack">
         ${cardsHTML}
@@ -173,6 +177,32 @@ class SwipeCards {
         <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
       </div>
     `;
+
+    // Bind toggle button
+    const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
+        this.setMode(newMode);
+      });
+    });
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+    if (mode !== 'swipe') {
+      this.isDragging = false;
+    }
+    this.container.classList.toggle('inspect-mode', mode === 'inspect');
+    this.container.classList.toggle('swipe-mode', mode === 'swipe');
+    const actionBtns = this.container.querySelectorAll('.action-btn');
+    actionBtns.forEach(btn => {
+      btn.disabled = mode !== 'swipe';
+    });
+    const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
+    toggleBtns.forEach(btn => {
+      btn.textContent = mode === 'swipe' ? 'Inspect' : 'Swipe';
+    });
   }
   
   cleanupAgGrids() {
@@ -227,8 +257,12 @@ class SwipeCards {
     }
     
     // Add card content section like image cards
+    const modeLabel = this.mode === 'swipe' ? 'Inspect' : 'Swipe';
     tableHTML += '<div class="card-content">';
+    tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
+    tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
+    tableHTML += '</div>';
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
     tableHTML += pillsHTML;
     tableHTML += '</div>';
@@ -718,26 +752,33 @@ class SwipeCards {
   }
   
   handleStart(e) {
+    if (this.mode !== 'swipe') return;
+
+    // Ignore touches on toggle buttons so taps register as clicks on mobile
+    if (e.target.closest('.mode-toggle-btn')) {
+      return;
+    }
+
     this.isDragging = true;
     const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
     const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
-    
+
     this.startX = clientX;
     this.startY = clientY;
     this.currentX = clientX;
     this.currentY = clientY;
-    
+
     const topCard = this.container.querySelector('.swipe-card:first-child');
     if (topCard) {
       topCard.classList.add('dragging');
     }
-    
+
     e.preventDefault();
   }
-  
+
   handleMove(e) {
-    if (!this.isDragging) return;
-    
+    if (!this.isDragging || this.mode !== 'swipe') return;
+
     const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
     const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
     
@@ -770,10 +811,10 @@ class SwipeCards {
     
     e.preventDefault();
   }
-  
+
   handleEnd(e) {
-    if (!this.isDragging) return;
-    
+    if (!this.isDragging || this.mode !== 'swipe') return;
+
     this.isDragging = false;
     const deltaX = this.currentX - this.startX;
     const topCard = this.container.querySelector('.swipe-card:first-child');
