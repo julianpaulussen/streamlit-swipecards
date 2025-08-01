@@ -164,10 +164,6 @@ class SwipeCards {
     this.container.classList.toggle('swipe-mode', this.mode === 'swipe');
 
     this.container.innerHTML = `
-      <div class="mode-toggle">
-        <button class="mode-btn ${this.mode === 'swipe' ? 'active' : ''}" data-mode="swipe">Swipe</button>
-        <button class="mode-btn ${this.mode === 'inspect' ? 'active' : ''}" data-mode="inspect">Inspect</button>
-      </div>
       <div class="cards-stack">
         ${cardsHTML}
       </div>
@@ -182,11 +178,11 @@ class SwipeCards {
       </div>
     `;
 
-    // Bind toggle buttons
-    const modeButtons = this.container.querySelectorAll('.mode-btn');
-    modeButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const newMode = e.currentTarget.getAttribute('data-mode');
+    // Bind toggle button
+    const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
         this.setMode(newMode);
       });
     });
@@ -199,13 +195,13 @@ class SwipeCards {
     }
     this.container.classList.toggle('inspect-mode', mode === 'inspect');
     this.container.classList.toggle('swipe-mode', mode === 'swipe');
-    const modeButtons = this.container.querySelectorAll('.mode-btn');
-    modeButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
-    });
     const actionBtns = this.container.querySelectorAll('.action-btn');
     actionBtns.forEach(btn => {
       btn.disabled = mode !== 'swipe';
+    });
+    const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
+    toggleBtns.forEach(btn => {
+      btn.textContent = mode === 'swipe' ? 'Inspect' : 'Swipe';
     });
   }
   
@@ -261,8 +257,12 @@ class SwipeCards {
     }
     
     // Add card content section like image cards
+    const modeLabel = this.mode === 'swipe' ? 'Inspect' : 'Swipe';
     tableHTML += '<div class="card-content">';
+    tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
+    tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
+    tableHTML += '</div>';
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
     tableHTML += pillsHTML;
     tableHTML += '</div>';

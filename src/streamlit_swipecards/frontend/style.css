@@ -209,14 +209,13 @@ body {
 }
 
 /* Mode toggle styles */
-.mode-toggle {
+.card-header {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.mode-btn {
+.mode-toggle-btn {
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
@@ -227,7 +226,7 @@ body {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.mode-btn.active {
+.swipe-container.inspect-mode .mode-toggle-btn {
   background: var(--button-gradient);
   color: #fff;
   border: none;
