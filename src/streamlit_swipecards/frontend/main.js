@@ -7,6 +7,45 @@ function sendValue(value) {
   Streamlit.setComponentValue(value)
 }
 
+// Hidden progress tracker
+const progressEl = (() => {
+  let el = document.getElementById('swipe-progress');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'swipe-progress';
+    el.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!document.body.contains(el)) {
+        document.body.appendChild(el);
+      }
+    });
+  }
+  return el;
+})();
+
+window.swipeProgress = { loaded: 0, total: 0 };
+
+function updateSwipeProgress() {
+  if (progressEl) {
+    progressEl.textContent = `${window.swipeProgress.loaded}/${window.swipeProgress.total}`;
+  }
+}
+
+function handleImageLoad(img) {
+  if (img.dataset.full && !img.dataset.fullLoaded) {
+    const hiRes = new Image();
+    hiRes.src = img.dataset.full;
+    hiRes.onload = () => {
+      img.dataset.fullLoaded = 'true';
+      img.src = img.dataset.full;
+    };
+  } else {
+    img.classList.remove('loading');
+    window.swipeProgress.loaded++;
+    updateSwipeProgress();
+  }
+}
+
 // Theme detection and application
 function detectAndApplyTheme() {
   // Try to detect theme from Streamlit's CSS variables or parent styles
@@ -95,6 +134,11 @@ class SwipeCards {
     this.isAnimating = false; // Prevent rapid repeated actions
     this.mode = 'swipe'; // Default mode
     this.moveRaf = null; // Track scheduled move frame
+
+    // initialize progress tracking
+    window.swipeProgress.loaded = 0;
+    window.swipeProgress.total = this.cards.filter(c => c.image || c.placeholder || c.lowres).length;
+    updateSwipeProgress();
 
     this.init();
   }
@@ -233,12 +277,10 @@ class SwipeCards {
 
     const src = placeholder || card.image;
     const srcsetAttr = lowRes ? `srcset="${lowRes} 480w, ${card.image} 800w"` : '';
-    const placeholderAttrs = placeholder
-      ? `data-full="${card.image}" onload="if(this.dataset.full && this.src !== this.dataset.full){const img=new Image();img.src=this.dataset.full;img.onload=()=>{this.src=this.dataset.full;}}"`
-      : '';
+    const placeholderAttrs = placeholder ? `data-full="${card.image}"` : '';
 
     return `
-      <img src="${src}" ${srcsetAttr} ${placeholderAttrs} alt="${card.name}" class="card-image" loading="lazy"
+      <img src="${src}" ${srcsetAttr} ${placeholderAttrs} alt="${card.name}" class="card-image loading" loading="lazy" onload="handleImageLoad(this)"
            onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
       <div class="card-content">
         <h3 class="card-name">${card.name}</h3>
