@@ -227,9 +227,18 @@ class SwipeCards {
     if (card.pills && Array.isArray(card.pills) && card.pills.length > 0) {
       pillsHTML = this.renderPills(card.pills);
     }
-    
+
+    const lowRes = card.lowres || card.lowRes || card.image_low || card.thumbnail;
+    const placeholder = card.placeholder || card.placeholder_image;
+
+    const src = placeholder || card.image;
+    const srcsetAttr = lowRes ? `srcset="${lowRes} 480w, ${card.image} 800w"` : '';
+    const placeholderAttrs = placeholder
+      ? `data-full="${card.image}" onload="if(this.dataset.full && this.src !== this.dataset.full){const img=new Image();img.src=this.dataset.full;img.onload=()=>{this.src=this.dataset.full;}}"`
+      : '';
+
     return `
-      <img src="${card.image}" alt="${card.name}" class="card-image" 
+      <img src="${src}" ${srcsetAttr} ${placeholderAttrs} alt="${card.name}" class="card-image" loading="lazy"
            onerror="this.style.display='none'; this.nextElementSibling.style.paddingTop='40px';" />
       <div class="card-content">
         <h3 class="card-name">${card.name}</h3>
