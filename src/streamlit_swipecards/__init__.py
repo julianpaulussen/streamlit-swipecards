@@ -68,7 +68,7 @@ def streamlit_swipecards(
     key: Optional[str] = None,
 ):
     """
-    Create a Tinder-like swipe card component or table display.
+    Create a swipe card component or table display.
     
     Parameters:
     -----------
@@ -221,7 +221,7 @@ def streamlit_swipecards(
 
 
 def main():
-    st.write("## Tinder-like Swipe Cards Example")
+    st.write("## Swipe Cards Example")
     
     # Sample data
     sample_cards = [

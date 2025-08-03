@@ -4,7 +4,7 @@
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.2+-red.svg)](https://streamlit.io)
 
-A modern, interactive card-swiping component for Streamlit applications. Build Tinder-like interfaces with smooth animations for both image cards and data table rows.
+A modern, interactive card-swiping component for Streamlit applications. Build interfaces with smooth animations for both image cards and data table rows.
 
 
 ## ✨ Features
