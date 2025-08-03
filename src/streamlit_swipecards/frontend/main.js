@@ -966,9 +966,14 @@ class SwipeCards {
   }
 
   goBack() {
+    // Prevent action if an animation is already in progress
     if (this.isAnimating) return;
-    this.isAnimating = true;
+
+    // If no cards have been swiped yet, there's nothing to go back to
     if (this.swipedCards.length === 0) return;
+
+    // Only set animating flag when we actually have work to do
+    this.isAnimating = true;
     
     const lastSwiped = this.swipedCards.pop();
     this.currentIndex = lastSwiped.index;
