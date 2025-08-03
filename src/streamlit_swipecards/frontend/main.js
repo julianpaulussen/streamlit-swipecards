@@ -94,6 +94,28 @@ function detectAndApplyTheme() {
         isDark = true;
       }
     }
+
+    // Copy Streamlit theme colors into component variables
+    const parentStyle = window.parent.getComputedStyle(parentDoc.documentElement);
+    const docStyle = document.documentElement.style;
+    const primary = parentStyle.getPropertyValue('--primary-color');
+    const bg = parentStyle.getPropertyValue('--background-color');
+    const secondaryBg = parentStyle.getPropertyValue('--secondary-background-color');
+    const text = parentStyle.getPropertyValue('--text-color');
+
+    if (primary) docStyle.setProperty('--primary-color', primary.trim());
+    if (bg) {
+      docStyle.setProperty('--background-color', bg.trim());
+      docStyle.setProperty('--bg-color', bg.trim());
+    }
+    if (secondaryBg) {
+      docStyle.setProperty('--secondary-background-color', secondaryBg.trim());
+      docStyle.setProperty('--card-bg', secondaryBg.trim());
+    }
+    if (text) {
+      docStyle.setProperty('--text-color', text.trim());
+      docStyle.setProperty('--text-primary', text.trim());
+    }
   } catch (e) {
     console.log('Theme detection fallback:', e);
     // Fallback: use system preference
@@ -131,25 +153,42 @@ class SwipeCards {
     this.currentY = 0;
     this.lastAction = null; // Store the last action without sending immediately
     this.agGridInstances = new Map(); // Store AG-Grid instances for cleanup
+    this.gridHandlers = new Map(); // Store table interaction handlers
     this.isAnimating = false; // Prevent rapid repeated actions
     this.mode = 'swipe'; // Default mode
     this.moveRaf = null; // Track scheduled move frame
 
-    // initialize progress tracking
-    window.swipeProgress.loaded = 0;
-    window.swipeProgress.total = this.cards.filter(
-      c => c.image || c.placeholder || c.lowres || c.table_data || c.data
-    ).length;
-    updateSwipeProgress();
+    // Bind swipe handlers once so we can add/remove them easily
+    this.handleStart = this.handleStart.bind(this);
+    this.handleMove = this.handleMove.bind(this);
+    this.handleEnd = this.handleEnd.bind(this);
 
     this.init();
   }
-  
+
   init() {
     // Apply theme detection
     detectAndApplyTheme();
     this.render();
     this.bindEvents();
+  }
+
+  // Display a temporary notification inside the component
+  showNotification(message) {
+    const existing = this.container.querySelector('.swipe-notification');
+    if (existing) {
+      existing.remove();
+    }
+    const note = document.createElement('div');
+    note.className = 'swipe-notification';
+    note.textContent = message;
+    this.container.appendChild(note);
+    // Trigger CSS transition
+    requestAnimationFrame(() => note.classList.add('visible'));
+    setTimeout(() => {
+      note.classList.remove('visible');
+      setTimeout(() => note.remove(), 300);
+    }, 2000);
   }
   
   render() {
@@ -244,18 +283,42 @@ class SwipeCards {
     this.container.classList.toggle('swipe-mode', mode === 'swipe');
     const actionBtns = this.container.querySelectorAll('.action-btn');
     actionBtns.forEach(btn => {
-      btn.disabled = mode !== 'swipe';
+      // Keep buttons clickable for notifications, but dim them in inspect mode
+      btn.disabled = false;
     });
     const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
     toggleBtns.forEach(btn => {
       btn.textContent = mode === 'swipe' ? 'Inspect' : 'Swipe';
+    });
+
+    this.updateGridListeners();
+    this.bindEvents();
+  }
+
+  updateGridListeners() {
+    const pdOpts = { capture: true };
+    const puOpts = { passive: false, capture: true };
+    const blockOpts = { passive: false, capture: true };
+
+    this.gridHandlers.forEach((handlers, gridContainer) => {
+      gridContainer.removeEventListener('pointerdown', handlers.handlePointerDown, pdOpts);
+      gridContainer.removeEventListener('pointerup', handlers.handlePointerUp, puOpts);
+      gridContainer.removeEventListener('wheel', handlers.blockScroll, blockOpts);
+      gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
+
+      if (this.mode === 'swipe') {
+        gridContainer.addEventListener('pointerdown', handlers.handlePointerDown, pdOpts);
+        gridContainer.addEventListener('pointerup', handlers.handlePointerUp, puOpts);
+        gridContainer.addEventListener('wheel', handlers.blockScroll, blockOpts);
+        gridContainer.addEventListener('touchmove', handlers.blockScroll, blockOpts);
+      }
     });
   }
   
   cleanupAgGrids() {
     // Destroy existing AG-Grid instances to prevent memory leaks
     if (this.agGridInstances) {
-      this.agGridInstances.forEach((grid, cardIndex) => {
+      this.agGridInstances.forEach((grid) => {
         try {
           if (grid && grid.destroy) {
             grid.destroy();
@@ -265,6 +328,20 @@ class SwipeCards {
         }
       });
       this.agGridInstances.clear();
+    }
+
+    if (this.gridHandlers) {
+      const pdOpts = { capture: true };
+      const puOpts = { passive: false, capture: true };
+      const blockOpts = { passive: false, capture: true };
+
+      this.gridHandlers.forEach((handlers, gridContainer) => {
+        gridContainer.removeEventListener('pointerdown', handlers.handlePointerDown, pdOpts);
+        gridContainer.removeEventListener('pointerup', handlers.handlePointerUp, puOpts);
+        gridContainer.removeEventListener('wheel', handlers.blockScroll, blockOpts);
+        gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
+      });
+      this.gridHandlers.clear();
     }
   }
   
@@ -332,12 +409,57 @@ class SwipeCards {
   initializeAgGrid(cardIndex, currentRowIndex) {
     const gridContainer = document.getElementById(`ag-grid-${cardIndex}`);
     if (!gridContainer) return;
-    
+
     // Get the table data for this specific card using the correct card index
     const card = this.cards[cardIndex];
     const tableData = card.table_data || this.tableData;
-    
+
     if (!tableData) return;
+
+    // Warn users in swipe mode that they need to inspect to interact with the table
+    let tapStartTime = 0;
+    let tapStartX = 0;
+    let tapStartY = 0;
+
+    const handlePointerDown = (e) => {
+      if (this.mode === 'swipe') {
+        tapStartTime = Date.now();
+        tapStartX = e.clientX;
+        tapStartY = e.clientY;
+      }
+    };
+
+    const handlePointerUp = (e) => {
+      if (this.mode === 'swipe') {
+        const dt = Date.now() - tapStartTime;
+        const dx = Math.abs(e.clientX - tapStartX);
+        const dy = Math.abs(e.clientY - tapStartY);
+        if (dt < 200 && dx < 10 && dy < 10) {
+          e.preventDefault();
+          this.showNotification('Click "Inspect" to inspect the table');
+        }
+      }
+    };
+
+    const blockScroll = (e) => {
+      if (this.mode === 'swipe') {
+        e.preventDefault();
+      }
+    };
+
+    // Store handlers for later enabling/disabling
+    this.gridHandlers.set(gridContainer, {
+      handlePointerDown,
+      handlePointerUp,
+      blockScroll,
+    });
+
+    if (this.mode === 'swipe') {
+      gridContainer.addEventListener('pointerdown', handlePointerDown, { capture: true });
+      gridContainer.addEventListener('pointerup', handlePointerUp, { passive: false, capture: true });
+      gridContainer.addEventListener('wheel', blockScroll, { passive: false, capture: true });
+      gridContainer.addEventListener('touchmove', blockScroll, { passive: false, capture: true });
+    }
     
     // Use card-specific highlight configurations
     const highlightCells = card.highlight_cells || this.highlightCells;
@@ -801,16 +923,24 @@ class SwipeCards {
     // Always bind to the first card in the stack (topmost/front card)
     const topCard = this.container.querySelector('.swipe-card:first-child');
     if (!topCard) return;
-    
-    // Mouse events
-    topCard.addEventListener('mousedown', this.handleStart.bind(this));
-    document.addEventListener('mousemove', this.handleMove.bind(this));
-    document.addEventListener('mouseup', this.handleEnd.bind(this));
-    
-    // Touch events
-    topCard.addEventListener('touchstart', this.handleStart.bind(this));
-    document.addEventListener('touchmove', this.handleMove.bind(this));
-    document.addEventListener('touchend', this.handleEnd.bind(this));
+
+    // Remove existing listeners so they don't accumulate
+    topCard.removeEventListener('mousedown', this.handleStart);
+    topCard.removeEventListener('touchstart', this.handleStart);
+    document.removeEventListener('mousemove', this.handleMove);
+    document.removeEventListener('touchmove', this.handleMove);
+    document.removeEventListener('mouseup', this.handleEnd);
+    document.removeEventListener('touchend', this.handleEnd);
+
+    // Only bind swipe handlers when in swipe mode
+    if (this.mode === 'swipe') {
+      topCard.addEventListener('mousedown', this.handleStart);
+      topCard.addEventListener('touchstart', this.handleStart, { passive: false });
+      document.addEventListener('mousemove', this.handleMove);
+      document.addEventListener('touchmove', this.handleMove, { passive: false });
+      document.addEventListener('mouseup', this.handleEnd);
+      document.addEventListener('touchend', this.handleEnd);
+    }
   }
   
   handleStart(e) {
@@ -910,6 +1040,10 @@ class SwipeCards {
   }
   
   swipeRight() {
+    if (this.mode !== 'swipe') {
+      this.showNotification('Press "Swipe" to be able to swipe');
+      return;
+    }
     if (this.isAnimating) return;
     this.isAnimating = true;
     const topCard = this.container.querySelector('.swipe-card:first-child');
@@ -938,6 +1072,10 @@ class SwipeCards {
   }
 
   swipeLeft() {
+    if (this.mode !== 'swipe') {
+      this.showNotification('Press "Swipe" to be able to swipe');
+      return;
+    }
     if (this.isAnimating) return;
     this.isAnimating = true;
     const topCard = this.container.querySelector('.swipe-card:first-child');
@@ -966,7 +1104,10 @@ class SwipeCards {
   }
 
   goBack() {
-    // Prevent action if an animation is already in progress
+    if (this.mode !== 'swipe') {
+      this.showNotification('Press "Swipe" to be able to swipe');
+      return;
+    }
     if (this.isAnimating) return;
 
     // If no cards have been swiped yet, there's nothing to go back to

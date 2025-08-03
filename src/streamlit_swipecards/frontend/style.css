@@ -6,22 +6,29 @@
   padding: 0;
 }
 
-/* Theme variables - will be updated by JavaScript */
+/* Theme variables - base values, overridden dynamically */
 :root {
-  --bg-color: #f8f9fa;
-  --card-bg: #ffffff;
-  --text-primary: #262730;
+  /* Streamlit theme bindings */
+  --primary-color: #ff4b4b;
+  --background-color: #f8f9fa;
+  --secondary-background-color: #ffffff;
+  --text-color: #262730;
+
+  /* Component mappings */
+  --bg-color: var(--background-color);
+  --card-bg: var(--secondary-background-color);
+  --text-primary: var(--text-color);
   --text-secondary: #666666;
   --border-color: #e0e0e0;
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Dark theme variables */
+/* Dark theme overrides */
 [data-theme="dark"] {
-  --bg-color: #0e1117;
-  --card-bg: #262730;
-  --text-primary: #fafafa;
+  --background-color: #0e1117;
+  --secondary-background-color: #262730;
+  --text-color: #fafafa;
   --text-secondary: #a6a6a6;
   --border-color: #464748;
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -261,11 +268,6 @@ body {
 
 .swipe-container.inspect-mode .action-btn {
   opacity: 0.5;
-  pointer-events: none;
-}
-
-.swipe-container.swipe-mode .ag-grid-container {
-  pointer-events: none;
 }
 
 .swipe-container.inspect-mode .ag-grid-container {
@@ -737,4 +739,26 @@ body {
   --ag-background-color: var(--card-bg);
   --ag-odd-row-background-color: var(--card-bg);
   --ag-row-hover-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Notification pop-up */
+.swipe-notification {
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--secondary-background-color);
+  color: var(--text-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.swipe-notification.visible {
+  opacity: 1;
 }
