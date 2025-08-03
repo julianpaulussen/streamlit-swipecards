@@ -94,6 +94,7 @@ class SwipeCards {
     this.agGridInstances = new Map(); // Store AG-Grid instances for cleanup
     this.isAnimating = false; // Prevent rapid repeated actions
     this.mode = 'swipe'; // Default mode
+    this.moveRaf = null; // Track scheduled move frame
 
     this.init();
   }
@@ -781,34 +782,39 @@ class SwipeCards {
 
     const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
     const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
-    
+
     this.currentX = clientX;
     this.currentY = clientY;
-    
-    const deltaX = this.currentX - this.startX;
-    const deltaY = this.currentY - this.startY;
-    const rotation = deltaX * 0.1;
-    
-    const topCard = this.container.querySelector('.swipe-card:first-child');
-    if (topCard) {
-      topCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
-      
-      // Show action indicators
-      const likeIndicator = topCard.querySelector('.action-indicator.like');
-      const passIndicator = topCard.querySelector('.action-indicator.pass');
-      
-      if (deltaX > 50) {
-        likeIndicator.classList.add('show');
-        passIndicator.classList.remove('show');
-      } else if (deltaX < -50) {
-        passIndicator.classList.add('show');
-        likeIndicator.classList.remove('show');
-      } else {
-        likeIndicator.classList.remove('show');
-        passIndicator.classList.remove('show');
-      }
+
+    if (!this.moveRaf) {
+      this.moveRaf = requestAnimationFrame(() => {
+        this.moveRaf = null;
+        const deltaX = this.currentX - this.startX;
+        const deltaY = this.currentY - this.startY;
+        const rotation = deltaX * 0.1;
+
+        const topCard = this.container.querySelector('.swipe-card:first-child');
+        if (topCard) {
+          topCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+
+          // Show action indicators
+          const likeIndicator = topCard.querySelector('.action-indicator.like');
+          const passIndicator = topCard.querySelector('.action-indicator.pass');
+
+          if (deltaX > 50) {
+            likeIndicator.classList.add('show');
+            passIndicator.classList.remove('show');
+          } else if (deltaX < -50) {
+            passIndicator.classList.add('show');
+            likeIndicator.classList.remove('show');
+          } else {
+            likeIndicator.classList.remove('show');
+            passIndicator.classList.remove('show');
+          }
+        }
+      });
     }
-    
+
     e.preventDefault();
   }
 
@@ -816,6 +822,10 @@ class SwipeCards {
     if (!this.isDragging || this.mode !== 'swipe') return;
 
     this.isDragging = false;
+    if (this.moveRaf) {
+      cancelAnimationFrame(this.moveRaf);
+      this.moveRaf = null;
+    }
     const deltaX = this.currentX - this.startX;
     const topCard = this.container.querySelector('.swipe-card:first-child');
     
