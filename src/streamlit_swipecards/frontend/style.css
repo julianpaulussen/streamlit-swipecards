@@ -561,7 +561,12 @@ body {
   border-radius: 8px;
   overflow: hidden;
   background: var(--card-bg);
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: filter 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.ag-grid-container.loading {
+  filter: blur(8px);
+  opacity: 0.7;
 }
 
 /* Loading overlay for table cards */

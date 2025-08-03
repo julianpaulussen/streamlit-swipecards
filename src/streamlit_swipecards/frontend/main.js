@@ -137,7 +137,9 @@ class SwipeCards {
 
     // initialize progress tracking
     window.swipeProgress.loaded = 0;
-    window.swipeProgress.total = this.cards.filter(c => c.image || c.placeholder || c.lowres).length;
+    window.swipeProgress.total = this.cards.filter(
+      c => c.image || c.placeholder || c.lowres || c.table_data || c.data
+    ).length;
     updateSwipeProgress();
 
     this.init();
@@ -299,7 +301,7 @@ class SwipeCards {
     tableHTML += '<div class="loading-snake"></div>';
     tableHTML += '<button class="loading-btn">Loading data...</button>';
     tableHTML += '</div>';
-    tableHTML += `<div class="ag-grid-container" id="ag-grid-${cardIndex}" style="visibility: hidden;"></div>`;
+    tableHTML += `<div class="ag-grid-container loading" id="ag-grid-${cardIndex}" style="visibility: hidden;"></div>`;
     tableHTML += '</div>';
     
     // Add pills if they exist
@@ -427,7 +429,6 @@ class SwipeCards {
 
         // Force the grid to be fully visible for centering
         gridContainer.style.visibility = 'visible';
-        gridContainer.style.opacity = '1';
         gridContainer.style.zIndex = '9999';
 
         const overlay = gridContainer.parentElement.querySelector('.loading-overlay');
@@ -435,6 +436,10 @@ class SwipeCards {
           overlay.classList.add('fade-out');
           setTimeout(() => overlay.remove(), 300);
         }
+
+        gridContainer.classList.remove('loading');
+        window.swipeProgress.loaded++;
+        updateSwipeProgress();
 
         if (rowIndexToCenter >= 0) {
           params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
@@ -477,6 +482,11 @@ class SwipeCards {
       console.error('Error creating AG-Grid:', error);
       // Fallback to simple table if AG-Grid fails
       this.renderFallbackTable(gridContainer, currentRowIndex);
+      gridContainer.classList.remove('loading');
+      const overlay = gridContainer.parentElement.querySelector('.loading-overlay');
+      if (overlay) overlay.remove();
+      window.swipeProgress.loaded++;
+      updateSwipeProgress();
     }
   }
   
