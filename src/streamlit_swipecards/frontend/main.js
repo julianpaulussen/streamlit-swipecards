@@ -513,16 +513,29 @@ class SwipeCards {
       });
       return rowObj;
     });
-    
+
+    // Data source for infinite row model
+    const dataSource = {
+      rowCount: rowData.length,
+      getRows: (params) => {
+        const start = params.startRow ?? params.request?.startRow ?? 0;
+        const end = params.endRow ?? params.request?.endRow ?? 0;
+        const rowsThisPage = rowData.slice(start, end);
+        params.successCallback(rowsThisPage, rowData.length);
+      }
+    };
+
     // Grid options
     const gridOptions = {
       columnDefs: columnDefs,
-      rowData: rowData,
       defaultColDef: {
         flex: 1,
         minWidth: 100,
         resizable: true
       },
+      rowModelType: 'infinite',
+      cacheBlockSize: 100,
+      maxBlocksInCache: 10,
       suppressHorizontalScroll: false,
       suppressVerticalScroll: false,
       domLayout: 'normal',
@@ -531,12 +544,13 @@ class SwipeCards {
       animateRows: false,
       suppressMovableColumns: true,
       suppressMenuHide: true,
-      suppressColumnVirtualisation: true,
-      suppressRowVirtualisation: true,
+      suppressColumnVirtualisation: false,
+      suppressRowVirtualisation: false,
       suppressContextMenu: true,
       enableCellTextSelection: true,
       rowSelection: 'none',
       onGridReady: (params) => {
+        params.api.setDatasource(dataSource);
         // Auto-size columns to fit
         params.api.sizeColumnsToFit();
       },
