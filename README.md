@@ -1,146 +1,189 @@
-# Streamlit Swipe Cards
+# 🃏 Streamlit Swipe Cards
 
-A modern card-swiping component for Streamlit. Build swipe interfaces using images or rows from a data table.
+[![PyPI version](https://badge.fury.io/py/streamlit-swipecards.svg)](https://badge.fury.io/py/streamlit-swipecards)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/streamlit-1.2+-red.svg)](https://streamlit.io)
 
-## Features
-- **Stacked card interface** with smooth animations
-- Works on both **touch** and **mouse** devices
-- **Like**, **pass** and **undo** actions
-- Optional **table view** powered by AG‑Grid
-- **Cell, row and column highlighting** support
-- **Automatic table caching** for improved performance when loading the same dataset multiple times
+A modern, interactive card-swiping component for Streamlit applications. Build Tinder-like interfaces with smooth animations for both image cards and data table rows.
 
-## Installation
+
+## ✨ Features
+
+- **Stacked Card Interface**: Card stacking with smooth animations
+- **Dual Display Modes**: Support for both image cards and interactive data tables
+- **Touch & Mouse Support**: Works seamlessly on desktop and mobile devices
+- **Interactive Actions**: Like 💚, pass ❌, and undo ↶ functionality
+- **Advanced Table Features**: Cell, row, and column highlighting with AG-Grid integration
+- **Performance Optimized**: Automatic dataset caching for improved loading times
+- **Return Values**: Get detailed feedback on user interactions and swipe patterns
+
+
+## 📦 Installation
+
 ```bash
 pip install streamlit-swipecards
 ```
 
-## Quick demo
-Launch the sample app to see both modes in action:
-```bash
-streamlit run example.py
-```
+## 🚀 Quick Start
 
-## Usage
-### Image cards
 ```python
 import streamlit as st
 from streamlit_swipecards import streamlit_swipecards
 
+st.title("My Swipe App")
+
+# Image cards example
 cards = [
-    {"name": "Alice", "description": "Loves hiking", "image": "https://.../alice.jpg"\},
-    {"name": "Bob", "description": "Chef and foodie", "image": "https://.../bob.jpg"\},
+    {
+        "name": "Alice",
+        "description": "Loves hiking and photography",
+        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400"
+    },
+    {
+        "name": "Bob", 
+        "description": "Chef and food enthusiast",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
+    }
 ]
 
-result = streamlit_swipecards(cards=cards, display_mode="cards", key="people")
+result = streamlit_swipecards(
+    cards=cards,
+    display_mode="cards",
+    key="my_swipe_cards"
+)
+
 if result:
     st.json(result)
 ```
 
-### Table cards
-Provide a list of card dictionaries. Each card points to the dataset and the row it should display. Highlighting and centering options are set per card.
+## 📋 API Reference
+
+### `streamlit_swipecards()`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `cards` | `list[dict]` | List of card dictionaries (image or table cards) |
+| `display_mode` | `str` | Display mode: `"cards"` or `"table"` |
+| `dataset_path` | `str \| None` | Legacy single-dataset mode (deprecated) |
+| `highlight_cells` | `list[dict] \| None` | Cell highlighting configuration |
+| `highlight_rows` | `list[dict] \| None` | Row highlighting configuration |
+| `highlight_columns` | `list[dict] \| None` | Column highlighting configuration |
+| `center_table_row` | `int \| None` | Row to center in table view |
+| `center_table_column` | `str \| None` | Column to center in table view |
+| `key` | `str \| None` | Unique component key |
+
+**Returns:** `dict | None` - Interaction data including swiped cards, last action, and statistics
+
+## 🎨 Card Types
+
+### 🖼️ Image Cards
+- **Custom Styling**: Flexible card layouts with names, descriptions, and images
+- **Smooth Animations**: Swipe gestures and visual feedback
 
 ```python
-csv_path = "sample_data.csv"
+{
+    "name": "Alice Johnson",              # required
+    "description": "Software Engineer",   # required  
+    "image": "https://example.com/alice.jpg",  # required - URL or base64
+    "pills": ["Python", "React", "AI"]   # optional - skill tags
+}
+```
 
-cards = [
-    {
-        "dataset_path": csv_path,
-        "row_index": 0,
-        "name": "Alice Johnson",
-        "description": "Engineering professional from New York",
-        "highlight_cells": [{"row": 0, "column": "Salary", "color": "#FFB6C1"}],
-        "center_table_row": 0,
-        "center_table_column": "Salary",
+### 📊 Table Cards
+- **Data Row Swiping**: Transform spreadsheet rows into swipeable cards
+- **Smart Highlighting**: Emphasize specific cells, rows, or columns
+- **Automatic Centering**: Focus on important data points
+
+```python
+{
+    "dataset_path": "employees.csv",      # required - path to CSV/Excel
+    "row_index": 0,                       # required - row to display
+    "name": "Alice Johnson",              # optional - card title
+    "description": "Engineering Team",    # optional - card subtitle
+    "pills": ["Senior", "Remote"],        # optional - status tags
+    "highlight_cells": [                  # optional - cell highlighting
+        {"row": 0, "column": "Salary", "color": "#FFB6C1"}
+    ],
+    "highlight_rows": [                   # optional - row highlighting
+        {"row": 0, "color": "#E3F2FD"}
+    ],
+    "highlight_columns": [                # optional - column highlighting
+        {"column": "Performance", "color": "#E8F5E8"}
+    ],
+    "center_table_row": 0,                # optional - focus row
+    "center_table_column": "Salary"       # optional - focus column
+}
+```
+
+## 🚦 Return Values
+
+The component returns detailed interaction data:
+
+```python
+{
+    "swipedCards": [
+        {"index": 0, "action": "right"},   # Liked first card
+        {"index": 1, "action": "left"}     # Passed second card
+    ],
+    "lastAction": {
+        "cardIndex": 1, 
+        "action": "left"
     },
-    {
-        "dataset_path": csv_path,
-        "row_index": 1,
-        "name": "Bob Smith",
-        "description": "Sales professional from California",
-        "highlight_cells": [{"row": 1, "column": "Rating", "color": "#98FB98"}],
-        "center_table_row": 1,
-        "center_table_column": "Rating",
-    },
-]
-
-result = streamlit_swipecards(cards=cards, display_mode="table", key="table")
-if result:
-    st.json(result)
-```
-
-## Card dictionaries
-### Image card
-```python
-{
-    "name": "Alice",       # required
-    "description": "Text", # required
-    "image": "URL or base64"
+    "totalSwiped": 2,      # Total cards swiped
+    "remainingCards": 8    # Cards left in stack
 }
 ```
 
-### Table card
-```python
-{
-    "dataset_path": "data.csv",               # required
-    "row_index": 0,                            # row to display
-    "name": "Row title",                      # optional
-    "description": "Row description",         # optional
-    "highlight_cells": [{"row": 0, "column": "Salary", "color": "#FFB6C1"}],
-    "highlight_rows": [{"row": 0, "color": "#E3F2FD"}],
-    "highlight_columns": [{"column": "Rating", "color": "#E8F5E8"}],
-    "center_table_row": 0,
-    "center_table_column": "Salary"
-}
-```
+## 🚀 Example App
 
-## API reference
-```python
-streamlit_swipecards(
-    cards=None,
-    dataset_path=None,         # legacy single-dataset mode
-    highlight_cells=None,
-    highlight_rows=None,
-    highlight_columns=None,
-    display_mode="cards",      # "cards" or "table"
-    center_table_row=None,
-    center_table_column=None,
-    key=None,
-) 
-```
+A comprehensive example showcasing all features is provided in `example.py`:
 
-## Return value
-The component returns a dictionary:
-```python
-{
-    "swipedCards": [{"index": 0, "action": "right"}, ...],
-    "lastAction": {"cardIndex": 0, "action": "right"},
-    "totalSwiped": 3,
-    "remainingCards": 7
-}
-```
-
-## How to Use
-
-1. **Swipe right** 💚 or click the like button to like a card
-2. **Swipe left** ❌ or click the pass button to pass on a card
-3. **Click back** ↶ to undo your last action
-4. Cards stack behind each other for a realistic experience
-5. Smooth animations provide visual feedback
-
-## Performance
-
-The component automatically caches loaded datasets to improve performance when multiple cards reference the same file. This means:
-
-- **No redundant file reads**: The same dataset file is only loaded once, even if multiple cards use it
-- **Automatic cache invalidation**: When a file is modified, the cache is automatically updated
-- **Memory efficient**: Uses Streamlit's built-in `@st.cache_data` for optimal memory management
-
-To see the performance benefits in action, run:
 ```bash
-python demo_caching.py
+streamlit run example.py
 ```
 
+## 🛠️ Development
 
----
-Released under the MIT License.
+### Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/lejuliennn/streamlit-swipecards.git
+cd streamlit-swipecards
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the example
+streamlit run example.py
+```
+
+### Building
+
+```bash
+# Build the package
+python setup.py sdist bdist_wheel
+
+# Install locally for testing
+pip install -e .
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+- 🐛 Issues: [GitHub Issues](https://github.com/lejuliennn/streamlit-swipecards/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/lejuliennn/streamlit-swipecards/discussions)
+- 📧 Email: julien.playsde@gmail.com
