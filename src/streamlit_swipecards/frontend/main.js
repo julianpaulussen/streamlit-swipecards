@@ -206,29 +206,56 @@ class SwipeCards {
     this.render();
     this.bindEvents();
 
-    // Delegate clicks for mode toggle and focus actions to be robust against re-renders
+    // Delegate interactions for mode toggle and focus actions
     if (!this._delegatedToggle) {
-      this.container.addEventListener('click', (e) => {
-        const toggleBtn = e.target && e.target.closest && e.target.closest('.mode-toggle-btn');
-        if (toggleBtn && this.container.contains(toggleBtn)) {
-          e.preventDefault();
-          e.stopPropagation();
-          const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
-          this.setMode(newMode);
-          return;
-        }
-
-        const focusBtn = e.target && e.target.closest && e.target.closest('.focus-btn');
-        if (focusBtn && this.container.contains(focusBtn)) {
-          e.preventDefault();
-          e.stopPropagation();
-          const cardEl = focusBtn.closest('.swipe-card');
-          if (cardEl) {
-            const idx = parseInt(cardEl.getAttribute('data-index'), 10);
-            this.focusTable(idx);
+      this.container.addEventListener(
+        'click',
+        (e) => {
+          const toggleBtn =
+            e.target && e.target.closest && e.target.closest('.mode-toggle-btn');
+          if (toggleBtn && this.container.contains(toggleBtn)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
+            this.setMode(newMode);
+            return;
           }
-        }
-      }, true); // capture to win against other listeners
+
+          const focusBtn =
+            e.target && e.target.closest && e.target.closest('.focus-btn');
+          if (focusBtn && this.container.contains(focusBtn)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const cardEl = focusBtn.closest('.swipe-card');
+            if (cardEl) {
+              const idx = parseInt(cardEl.getAttribute('data-index'), 10);
+              this.focusTable(idx);
+            }
+          }
+        },
+        true,
+      ); // capture to win against other listeners
+
+      // Visual feedback for focus button presses
+      this.container.addEventListener(
+        'pointerdown',
+        (e) => {
+          const btn = e.target && e.target.closest && e.target.closest('.focus-btn');
+          if (btn && this.container.contains(btn)) {
+            btn.classList.add('pressed');
+          }
+        },
+        true,
+      );
+
+      const clearPress = () => {
+        this.container
+          .querySelectorAll('.focus-btn.pressed')
+          .forEach((b) => b.classList.remove('pressed'));
+      };
+      document.addEventListener('pointerup', clearPress, true);
+      document.addEventListener('pointercancel', clearPress, true);
+
       this._delegatedToggle = true;
     }
   }
@@ -858,20 +885,41 @@ class SwipeCards {
     const gridContainer = document.getElementById(`ag-grid-${cardIndex}`);
     if (!grid || !gridContainer) return;
 
+    const api = grid.api || (grid.gridOptions && grid.gridOptions.api);
+    const columnApi = grid.columnApi || (grid.gridOptions && grid.gridOptions.columnApi);
+
     const card = this.cards[cardIndex];
-    const rowIndex = (card.center_table_row ?? this.centerTableRow ?? card.row_index ?? 0);
+    const rowIndex = card.center_table_row ?? this.centerTableRow ?? card.row_index;
     const colId = card.center_table_column || this.centerTableColumn;
 
+    const hasRow = typeof rowIndex === 'number' && rowIndex >= 0;
+    const hasCol = !!colId;
+
+    if (api) {
+      if (hasRow && hasCol) {
+        api.ensureCellVisible({ rowIndex, column: colId });
+        api.setFocusedCell(rowIndex, colId);
+      } else {
+        if (hasRow) {
+          api.ensureIndexVisible(rowIndex, 'middle');
+          const firstCol = columnApi && columnApi.getAllDisplayedColumns()[0];
+          if (firstCol) api.setFocusedCell(rowIndex, firstCol.getColId());
+        }
+        if (hasCol) {
+          api.ensureColumnVisible(colId);
+        }
+      }
+    }
+
     const vViewport = gridContainer.querySelector('.ag-body-viewport');
-    if (vViewport && rowIndex >= 0) {
+    if (vViewport && hasRow) {
       const rowHeight = (grid.gridOptions && grid.gridOptions.rowHeight) || 30;
       const targetTop = rowIndex * rowHeight - (vViewport.clientHeight - rowHeight) / 2;
       vViewport.scrollTo({ top: targetTop, behavior: 'smooth' });
     }
 
-    const columnApi = grid.columnApi || (grid.gridOptions && grid.gridOptions.columnApi);
     const hViewport = gridContainer.querySelector('.ag-center-cols-viewport');
-    if (hViewport && colId && columnApi) {
+    if (hViewport && hasCol && columnApi) {
       const column = columnApi.getColumn(colId);
       if (column) {
         const columnLeft = column.getLeft();

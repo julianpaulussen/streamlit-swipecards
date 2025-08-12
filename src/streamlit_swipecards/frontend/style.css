@@ -288,6 +288,13 @@ body {
   border: none;
 }
 
+.focus-btn:active,
+.focus-btn.pressed {
+  background: var(--button-gradient);
+  color: #fff;
+  border: none;
+}
+
 .action-btn {
   width: 60px;
   height: 60px;
