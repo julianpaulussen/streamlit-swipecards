@@ -567,6 +567,17 @@ body {
   transition: filter 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
 }
 
+/* In swipe mode, prevent any table scrolling within the grid */
+.swipe-container.swipe-mode .ag-grid-container .ag-body-horizontal-scroll,
+.swipe-container.swipe-mode .ag-grid-container .ag-body-vertical-scroll {
+  display: none !important;
+}
+
+.swipe-container.swipe-mode .ag-grid-container .ag-body-viewport,
+.swipe-container.swipe-mode .ag-grid-container .ag-center-cols-viewport {
+  overflow: hidden !important;
+}
+
 .ag-grid-container.loading {
   filter: blur(8px);
   opacity: 0.7;

@@ -307,12 +307,17 @@ class SwipeCards {
       gridContainer.removeEventListener('pointerup', handlers.handlePointerUp, puOpts);
       gridContainer.removeEventListener('wheel', handlers.blockScroll, blockOpts);
       gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
+      gridContainer.removeEventListener('keydown', handlers.handleKeyDown, true);
+      gridContainer.removeEventListener('wheel', handlers.handleWheel, false);
 
       if (this.mode === 'swipe') {
         gridContainer.addEventListener('pointerdown', handlers.handlePointerDown, pdOpts);
         gridContainer.addEventListener('pointerup', handlers.handlePointerUp, puOpts);
         gridContainer.addEventListener('wheel', handlers.blockScroll, blockOpts);
         gridContainer.addEventListener('touchmove', handlers.blockScroll, blockOpts);
+        gridContainer.addEventListener('keydown', handlers.handleKeyDown, true);
+      } else {
+        gridContainer.addEventListener('wheel', handlers.handleWheel, { passive: false });
       }
     });
   }
@@ -342,6 +347,8 @@ class SwipeCards {
         gridContainer.removeEventListener('pointerup', handlers.handlePointerUp, puOpts);
         gridContainer.removeEventListener('wheel', handlers.blockScroll, blockOpts);
         gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
+        gridContainer.removeEventListener('keydown', handlers.handleKeyDown, true);
+        gridContainer.removeEventListener('wheel', handlers.handleWheel, false);
       });
       this.gridHandlers.clear();
     }
@@ -449,11 +456,38 @@ class SwipeCards {
       }
     };
 
+    const handleKeyDown = (e) => {
+      if (this.mode === 'swipe') {
+        const blockKeys = [
+          'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+          'PageUp', 'PageDown', 'Home', 'End', ' '
+        ];
+        if (blockKeys.includes(e.key)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
+
+    const handleWheel = (e) => {
+      if (this.mode !== 'inspect') return;
+      const viewport = gridContainer.querySelector('.ag-body-viewport');
+      if (!viewport) return;
+      const dy = e.deltaY || 0;
+      const dx = e.deltaX || (e.shiftKey ? dy : 0);
+      if (dy !== 0) viewport.scrollTop += dy;
+      if (dx !== 0) viewport.scrollLeft += dx;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     // Store handlers for later enabling/disabling
     this.gridHandlers.set(gridContainer, {
       handlePointerDown,
       handlePointerUp,
       blockScroll,
+      handleKeyDown,
+      handleWheel,
     });
 
     if (this.mode === 'swipe') {
@@ -461,6 +495,10 @@ class SwipeCards {
       gridContainer.addEventListener('pointerup', handlePointerUp, { passive: false, capture: true });
       gridContainer.addEventListener('wheel', blockScroll, { passive: false, capture: true });
       gridContainer.addEventListener('touchmove', blockScroll, { passive: false, capture: true });
+      gridContainer.addEventListener('keydown', handleKeyDown, true);
+    } else {
+      // Ensure wheel scrolling works reliably in inspect mode
+      gridContainer.addEventListener('wheel', handleWheel, { passive: false });
     }
     
     // Use card-specific highlight configurations
