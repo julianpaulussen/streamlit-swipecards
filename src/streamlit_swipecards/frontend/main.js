@@ -116,6 +116,8 @@ function detectAndApplyTheme() {
       docStyle.setProperty('--text-color', text.trim());
       docStyle.setProperty('--text-primary', text.trim());
     }
+
+    // Do not override text/background variables here; follow Streamlit's theme.
   } catch (e) {
     console.log('Theme detection fallback:', e);
     // Fallback: use system preference

@@ -472,6 +472,7 @@ body {
   background: var(--card-bg);
   transition: all 0.3s ease;
   font-size: 10px;
+  color: var(--text-primary);
 }
 
 .data-table tbody tr:hover {
@@ -643,6 +644,7 @@ body {
   --ag-font-family: inherit;
   font-family: inherit;
   border-radius: 8px;
+  color: var(--text-primary);
 }
 
 /* Custom header styling to match our gradient */
@@ -679,6 +681,8 @@ body {
   border-right: 1px solid var(--border-color) !important;
   font-size: 10px !important;
   padding: 4px 6px !important;
+  color: var(--text-primary) !important;
+  background-color: var(--card-bg) !important;
 }
 
 /* Remove default focus outline */
