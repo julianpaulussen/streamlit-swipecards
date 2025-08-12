@@ -227,6 +227,8 @@ else:  # Table Cards
         cards=table_cards,
         display_mode="table",
         show_border=show_border,
+        center_table_row=0,
+        center_table_column="Salary",
         last_card_message="This is the last page. You can add your own text here",
         key="table_example"
     )
@@ -321,7 +323,7 @@ st.markdown("""
 | Parameter | Type | Description | Required |
 |-----------|------|-------------|----------|
 | `dataset_path` | str | Path to the CSV file containing data | Yes |
-| `row_index` | int | Index of the row to highlight/focus on | Yes |
+| `row_index` | int | Index of the row to highlight/center on | Yes |
 | `name` | str | Name/title for the card | Yes |
 | `description` | str | Description text for the card | Yes |
 | `pills` | list[str] | List of pill/tag labels to show | No |

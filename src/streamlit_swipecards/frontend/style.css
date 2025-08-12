@@ -247,7 +247,7 @@ body {
 }
 
 .mode-toggle-btn,
-.focus-btn {
+.center-btn {
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
@@ -267,8 +267,8 @@ body {
   border: none;
 }
 
-.focus-btn:active,
-.focus-btn.pressed {
+.center-btn:active,
+.center-btn.pressed {
   background: var(--button-gradient);
   color: #fff;
   border: none;

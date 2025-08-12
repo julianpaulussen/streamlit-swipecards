@@ -207,7 +207,7 @@ class SwipeCards {
     this.render();
     this.bindEvents();
 
-    // Delegate interactions for mode toggle and focus actions
+    // Delegate interactions for mode toggle and center actions
     if (!this._delegatedToggle) {
       this.container.addEventListener(
         'click',
@@ -222,26 +222,26 @@ class SwipeCards {
             return;
           }
 
-          const focusBtn =
-            e.target && e.target.closest && e.target.closest('.focus-btn');
-          if (focusBtn && this.container.contains(focusBtn)) {
+          const centerBtn =
+            e.target && e.target.closest && e.target.closest('.center-btn');
+          if (centerBtn && this.container.contains(centerBtn)) {
             e.preventDefault();
             e.stopPropagation();
-            const cardEl = focusBtn.closest('.swipe-card');
+            const cardEl = centerBtn.closest('.swipe-card');
             if (cardEl) {
               const idx = parseInt(cardEl.getAttribute('data-index'), 10);
-              this.focusTable(idx);
+              this.centerTable(idx);
             }
           }
         },
         true,
       ); // capture to win against other listeners
 
-      // Visual feedback for focus button presses
+      // Visual feedback for center button presses
       this.container.addEventListener(
         'pointerdown',
         (e) => {
-          const btn = e.target && e.target.closest && e.target.closest('.focus-btn');
+          const btn = e.target && e.target.closest && e.target.closest('.center-btn');
           if (btn && this.container.contains(btn)) {
             btn.classList.add('pressed');
           }
@@ -251,7 +251,7 @@ class SwipeCards {
 
       const clearPress = () => {
         this.container
-          .querySelectorAll('.focus-btn.pressed')
+          .querySelectorAll('.center-btn.pressed')
           .forEach((b) => b.classList.remove('pressed'));
       };
       document.addEventListener('pointerup', clearPress, true);
@@ -388,8 +388,8 @@ class SwipeCards {
       btn.textContent = mode === 'swipe' ? 'Inspect' : 'Swipe';
     });
 
-    const focusBtns = this.container.querySelectorAll('.focus-btn');
-    focusBtns.forEach(btn => {
+    const centerBtns = this.container.querySelectorAll('.center-btn');
+    centerBtns.forEach(btn => {
       btn.disabled = false;
     });
 
@@ -522,7 +522,7 @@ class SwipeCards {
     tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
     tableHTML += '<div class="card-header-buttons">';
-    tableHTML += '<button class="focus-btn">Focus</button>';
+    tableHTML += '<button class="center-btn">Center</button>';
     tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
     tableHTML += '</div>';
     tableHTML += '</div>';
@@ -815,7 +815,7 @@ class SwipeCards {
         
         // Scroll to current row or centered view
         const rowIndexToCenter = card.center_table_row !== null ? card.center_table_row : (this.centerTableRow !== null ? this.centerTableRow : currentRowIndex);
-        const colIdToCenter = card.center_table_column || this.centerTableColumn;
+        const colIdToCenter = card.center_table_column ?? this.centerTableColumn;
 
         console.log(`Centering card ${cardIndex}: row=${rowIndexToCenter}, col=${colIdToCenter}`);
 
@@ -836,7 +836,7 @@ class SwipeCards {
         if (rowIndexToCenter >= 0) {
           params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
         }
-        if (colIdToCenter) {
+        if (colIdToCenter !== undefined && colIdToCenter !== null && colIdToCenter !== '') {
           params.api.ensureColumnVisible(colIdToCenter, 'middle');
         }
 
@@ -885,34 +885,32 @@ class SwipeCards {
     }
   }
 
-  focusTable(cardIndex) {
+  centerTable(cardIndex) {
     const grid = this.agGridInstances && this.agGridInstances.get(cardIndex);
     const gridContainer = document.getElementById(`ag-grid-${cardIndex}`);
     if (!grid || !gridContainer) return;
 
-    const api = grid.api || (grid.gridOptions && grid.gridOptions.api);
-    const columnApi = grid.columnApi || (grid.gridOptions && grid.gridOptions.columnApi);
+    const api = grid.api || grid;
+    const columnApi =
+      grid.columnApi ||
+      (api.getColumnApi ? api.getColumnApi() : (grid.gridOptions && grid.gridOptions.columnApi));
 
     const card = this.cards[cardIndex];
-    const rowIndex = card.center_table_row ?? this.centerTableRow ?? card.row_index;
-    const colId = card.center_table_column || this.centerTableColumn;
+    const rowIndex = card.center_table_row ?? this.centerTableRow;
+    const colId = card.center_table_column ?? this.centerTableColumn;
 
     const hasRow = typeof rowIndex === 'number' && rowIndex >= 0;
-    const hasCol = !!colId;
+    const hasCol = colId !== undefined && colId !== null && colId !== '';
 
     if (api) {
+      if (hasRow) {
+        api.ensureIndexVisible(rowIndex, 'middle');
+      }
+      if (hasCol) {
+        api.ensureColumnVisible(colId, 'middle');
+      }
       if (hasRow && hasCol) {
-        api.ensureCellVisible({ rowIndex, column: colId });
         api.setFocusedCell(rowIndex, colId);
-      } else {
-        if (hasRow) {
-          api.ensureIndexVisible(rowIndex, 'middle');
-          const firstCol = columnApi && columnApi.getAllDisplayedColumns()[0];
-          if (firstCol) api.setFocusedCell(rowIndex, firstCol.getColId());
-        }
-        if (hasCol) {
-          api.ensureColumnVisible(colId);
-        }
       }
     }
 

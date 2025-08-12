@@ -96,7 +96,7 @@ if result:
 ### 📊 Table Cards
 - **Data Row Swiping**: Transform spreadsheet rows into swipeable cards
 - **Smart Highlighting**: Emphasize specific cells, rows, or columns
-- **Automatic Centering**: Focus on important data points
+- **Automatic Centering**: Center on important data points
 
 ```python
 {
@@ -114,8 +114,8 @@ if result:
     "highlight_columns": [                # optional - column highlighting
         {"column": "Performance", "color": "#E8F5E8"}
     ],
-    "center_table_row": 0,                # optional - focus row
-    "center_table_column": "Salary"       # optional - focus column
+    "center_table_row": 0,                # optional - center row
+    "center_table_column": "Salary"       # optional - center column
 }
 ```
 
