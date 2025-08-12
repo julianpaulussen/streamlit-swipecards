@@ -553,6 +553,11 @@ body {
   height: 480px;
 }
 
+/* Wider cards for desktop view */
+.swipe-container.desktop-view .cards-stack {
+  max-width: 600px;
+}
+
 /* Mobile responsiveness for table cards */
 @media (max-width: 480px) {
   .swipe-container.table-mode {

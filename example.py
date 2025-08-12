@@ -24,6 +24,13 @@ st.write("## 📱 Interactive Examples")
 st.write("Choose customization options:")
 show_border = st.checkbox("Show card borders", True)
 
+view_option = st.radio(
+    "Select view:",
+    ["Mobile", "Desktop"],
+    horizontal=True
+)
+view = "desktop" if view_option == "Desktop" else "mobile"
+
 mode = st.radio(
     "Select display mode:",
     ["Image Cards", "Table Cards"],
@@ -65,6 +72,7 @@ if mode == "Image Cards":
         cards=sample_cards,
         display_mode="cards",
         show_border=show_border,
+        view=view,
         last_card_message="This is the last page. You can add your own text here",
         key="image_example",
     )
@@ -227,6 +235,7 @@ else:  # Table Cards
         cards=table_cards,
         display_mode="table",
         show_border=show_border,
+        view=view,
         center_table_row=0,
         center_table_column="Salary",
         last_card_message="This is the last page. You can add your own text here",

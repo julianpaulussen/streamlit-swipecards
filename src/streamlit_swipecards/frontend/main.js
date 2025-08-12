@@ -1611,6 +1611,7 @@ function onRender(event) {
     display_mode = 'cards',
     centerTableRow = null,
     centerTableColumn = null,
+    view = 'mobile',
     show_border = true,
     last_card_message = null
   } = event.detail.args;
@@ -1633,6 +1634,11 @@ function onRender(event) {
   // Add table-mode class if needed
   if (display_mode === 'table') {
     container.classList.add('table-mode');
+  }
+
+  // Apply desktop view styling if requested
+  if (view === 'desktop') {
+    container.classList.add('desktop-view');
   }
   
   if (cards.length === 0) {

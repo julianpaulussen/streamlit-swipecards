@@ -12,6 +12,7 @@ A modern, interactive card-swiping component for Streamlit applications. Build i
 - **Stacked Card Interface**: Card stacking with smooth animations
 - **Dual Display Modes**: Support for both image cards and interactive data tables
 - **Touch & Mouse Support**: Works seamlessly on desktop and mobile devices
+- **Responsive Views**: Choose mobile or desktop layouts for card width
 - **Interactive Actions**: Like 💚, pass ❌, and undo ↶ functionality
 - **Advanced Table Features**: Cell, row, and column highlighting with AG-Grid integration
 - **Performance Optimized**: Automatic dataset caching for improved loading times
@@ -50,6 +51,7 @@ result = streamlit_swipecards(
     cards=cards,
     display_mode="cards",
     show_border=False,
+    view="desktop",
     last_card_message="This is the last page. You can add your own text here",
     key="my_swipe_cards"
 )
@@ -72,6 +74,7 @@ if result:
 | `highlight_columns` | `list[dict] \| None` | Column highlighting configuration |
 | `center_table_row` | `int \| None` | Row to center in table view |
 | `center_table_column` | `str \| None` | Column to center in table view |
+| `view` | `str` | Layout: `"mobile"` (default) or `"desktop"` for wider cards |
 | `show_border` | `bool` | Show border around cards (default `True`) |
 | `last_card_message` | `str \| None` | Message shown after all cards are swiped |
 | `key` | `str \| None` | Unique component key |
