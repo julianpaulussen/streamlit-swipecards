@@ -173,6 +173,20 @@ class SwipeCards {
     detectAndApplyTheme();
     this.render();
     this.bindEvents();
+
+    // Delegate clicks for mode toggle to be robust against re-renders
+    if (!this._delegatedToggle) {
+      this.container.addEventListener('click', (e) => {
+        const btn = e.target && e.target.closest && e.target.closest('.mode-toggle-btn');
+        if (btn && this.container.contains(btn)) {
+          e.preventDefault();
+          e.stopPropagation();
+          const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
+          this.setMode(newMode);
+        }
+      }, true); // capture to win against other listeners
+      this._delegatedToggle = true;
+    }
   }
 
   // Display a temporary notification inside the component
@@ -266,14 +280,16 @@ class SwipeCards {
       </div>
     `;
 
-    // Bind toggle button
-    const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
-    toggleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
-        this.setMode(newMode);
+    // Bind toggle button (only if delegation not set up)
+    if (!this._delegatedToggle) {
+      const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
+      toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
+          this.setMode(newMode);
+        });
       });
-    });
+    }
   }
 
   setMode(mode) {
@@ -309,6 +325,14 @@ class SwipeCards {
       gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
       gridContainer.removeEventListener('keydown', handlers.handleKeyDown, true);
       gridContainer.removeEventListener('wheel', handlers.handleWheel, false);
+      gridContainer.removeEventListener('mousedown', handlers.blockResizeHandle, true);
+      gridContainer.removeEventListener('dblclick', handlers.blockResizeHandle, true);
+      gridContainer.removeEventListener('pointerdown', handlers.handlePanStart, { passive: false });
+      gridContainer.removeEventListener('pointermove', handlers.handlePanMove, { passive: false });
+      window.removeEventListener('pointerup', handlers.handlePanEnd, { passive: true });
+      gridContainer.removeEventListener('touchstart', handlers.handlePanStart, { passive: false });
+      gridContainer.removeEventListener('touchmove', handlers.handlePanMove, { passive: false });
+      window.removeEventListener('touchend', handlers.handlePanEnd, { passive: true });
 
       if (this.mode === 'swipe') {
         gridContainer.addEventListener('pointerdown', handlers.handlePointerDown, pdOpts);
@@ -316,7 +340,16 @@ class SwipeCards {
         gridContainer.addEventListener('wheel', handlers.blockScroll, blockOpts);
         gridContainer.addEventListener('touchmove', handlers.blockScroll, blockOpts);
         gridContainer.addEventListener('keydown', handlers.handleKeyDown, true);
+        gridContainer.addEventListener('mousedown', handlers.blockResizeHandle, true);
+        gridContainer.addEventListener('dblclick', handlers.blockResizeHandle, true);
       } else {
+        // Enable panning and wheel scrolling in inspect mode
+        gridContainer.addEventListener('pointerdown', handlers.handlePanStart, { passive: false });
+        gridContainer.addEventListener('pointermove', handlers.handlePanMove, { passive: false });
+        window.addEventListener('pointerup', handlers.handlePanEnd, { passive: true });
+        gridContainer.addEventListener('touchstart', handlers.handlePanStart, { passive: false });
+        gridContainer.addEventListener('touchmove', handlers.handlePanMove, { passive: false });
+        window.addEventListener('touchend', handlers.handlePanEnd, { passive: true });
         gridContainer.addEventListener('wheel', handlers.handleWheel, { passive: false });
       }
     });
@@ -349,6 +382,8 @@ class SwipeCards {
         gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
         gridContainer.removeEventListener('keydown', handlers.handleKeyDown, true);
         gridContainer.removeEventListener('wheel', handlers.handleWheel, false);
+        gridContainer.removeEventListener('mousedown', handlers.blockResizeHandle, true);
+        gridContainer.removeEventListener('dblclick', handlers.blockResizeHandle, true);
       });
       this.gridHandlers.clear();
     }
@@ -471,14 +506,86 @@ class SwipeCards {
 
     const handleWheel = (e) => {
       if (this.mode !== 'inspect') return;
-      const viewport = gridContainer.querySelector('.ag-body-viewport');
-      if (!viewport) return;
+      // Use AG Grid's dedicated viewports: vertical = ag-body-viewport, horizontal = ag-center-cols-viewport
+      const vEl = gridContainer.querySelector('.ag-body-viewport');
+      const hEl = gridContainer.querySelector('.ag-center-cols-viewport') || vEl;
       const dy = e.deltaY || 0;
-      const dx = e.deltaX || (e.shiftKey ? dy : 0);
-      if (dy !== 0) viewport.scrollTop += dy;
-      if (dx !== 0) viewport.scrollLeft += dx;
+      const dxRaw = e.deltaX || 0;
+      // Allow shift+wheel to scroll horizontally when deltaX is 0
+      const dx = dxRaw !== 0 ? dxRaw : (e.shiftKey ? dy : 0);
+      let handled = false;
+      if (vEl && dy !== 0) {
+        vEl.scrollTop += dy;
+        handled = true;
+      }
+      if (hEl && dx !== 0) {
+        hEl.scrollLeft += dx;
+        handled = true;
+      }
+      if (handled) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Block column resizing interactions when not in inspect mode
+    const blockResizeHandle = (e) => {
+      if (this.mode === 'swipe') {
+        const isResizeHandle = e.target && (e.target.closest && (e.target.closest('.ag-header-cell-resize') || e.target.closest('.ag-resizer')));
+        if (isResizeHandle) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
+
+    // Panning support in inspect mode (desktop drag and mobile touch)
+    const panState = { active: false, startX: 0, startY: 0, startLeft: 0, startTop: 0 };
+    const panViewports = () => ({
+      vEl: gridContainer.querySelector('.ag-body-viewport'),
+      hEl: gridContainer.querySelector('.ag-center-cols-viewport') || gridContainer.querySelector('.ag-body-viewport')
+    });
+    const panShouldStart = (target) => {
+      // Don't pan when starting on header or on a resize handle
+      if (!target || !target.closest) return true;
+      // Block panning entirely if the gesture starts in the header area
+      if (target.closest('.ag-header')) return false;
+      // Also block when starting on explicit resize handles
+      if (target.closest('.ag-header-cell-resize') || target.closest('.ag-resizer')) return false;
+      return true;
+    };
+    const handlePanStart = (e) => {
+      if (this.mode !== 'inspect') return;
+      if (!panShouldStart(e.target)) return;
+      const { vEl, hEl } = panViewports();
+      if (!vEl && !hEl) return;
+      panState.active = true;
+      const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX) ?? 0;
+      const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY) ?? 0;
+      panState.startX = clientX;
+      panState.startY = clientY;
+      panState.startLeft = (hEl ? hEl.scrollLeft : 0);
+      panState.startTop = (vEl ? vEl.scrollTop : 0);
+      gridContainer.classList.add('panning');
       e.preventDefault();
-      e.stopPropagation();
+    };
+    const handlePanMove = (e) => {
+      if (!panState.active || this.mode !== 'inspect') return;
+      const { vEl, hEl } = panViewports();
+      if (!vEl && !hEl) return;
+      const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX) ?? 0;
+      const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY) ?? 0;
+      const dx = clientX - panState.startX;
+      const dy = clientY - panState.startY;
+      if (hEl) hEl.scrollLeft = panState.startLeft - dx;
+      if (vEl) vEl.scrollTop = panState.startTop - dy;
+      e.preventDefault();
+    };
+    const handlePanEnd = (e) => {
+      if (!panState.active) return;
+      panState.active = false;
+      gridContainer.classList.remove('panning');
+      // Don't prevent default here to allow clicks to pass if it was a tap
     };
 
     // Store handlers for later enabling/disabling
@@ -488,6 +595,10 @@ class SwipeCards {
       blockScroll,
       handleKeyDown,
       handleWheel,
+      blockResizeHandle,
+      handlePanStart,
+      handlePanMove,
+      handlePanEnd,
     });
 
     if (this.mode === 'swipe') {
@@ -496,8 +607,19 @@ class SwipeCards {
       gridContainer.addEventListener('wheel', blockScroll, { passive: false, capture: true });
       gridContainer.addEventListener('touchmove', blockScroll, { passive: false, capture: true });
       gridContainer.addEventListener('keydown', handleKeyDown, true);
+      // Prevent header resize drag and double-click autosize in swipe mode
+      gridContainer.addEventListener('mousedown', blockResizeHandle, true);
+      gridContainer.addEventListener('dblclick', blockResizeHandle, true);
     } else {
-      // Ensure wheel scrolling works reliably in inspect mode
+      // In inspect mode, enable drag panning for desktop and touch + wheel scrolling
+      gridContainer.addEventListener('pointerdown', handlePanStart, { passive: false });
+      gridContainer.addEventListener('pointermove', handlePanMove, { passive: false });
+      window.addEventListener('pointerup', handlePanEnd, { passive: true });
+      // For older mobile browsers that fire touch events
+      gridContainer.addEventListener('touchstart', handlePanStart, { passive: false });
+      gridContainer.addEventListener('touchmove', handlePanMove, { passive: false });
+      window.addEventListener('touchend', handlePanEnd, { passive: true });
+      // Desktop wheel and trackpad support (both axes)
       gridContainer.addEventListener('wheel', handleWheel, { passive: false });
     }
     
@@ -600,15 +722,7 @@ class SwipeCards {
         if (allColIds.length > 0) {
           params.columnApi.autoSizeColumns(allColIds, false);
         }
-
-        // 2) Cap widths at the original fixed width (120px) to avoid overly wide columns
-        // This removes unused width for small columns while preserving the existing max width behavior.
-        const currentState = params.columnApi.getColumnState();
-        const cappedState = currentState.map(s => ({
-          colId: s.colId,
-          width: Math.min(s.width || 120, 120)
-        }));
-        params.columnApi.applyColumnState({ state: cappedState, applyOrder: false });
+        // Do not cap widths; allow full resize in Inspect mode
         
         // Scroll to current row or centered view
         const rowIndexToCenter = card.center_table_row !== null ? card.center_table_row : (this.centerTableRow !== null ? this.centerTableRow : currentRowIndex);
@@ -1015,6 +1129,8 @@ class SwipeCards {
 
     // Ignore touches on toggle buttons so taps register as clicks on mobile
     if (e.target.closest('.mode-toggle-btn')) {
+      // Prevent swipe initiation and let the click fire
+      e.stopPropagation();
       return;
     }
 
