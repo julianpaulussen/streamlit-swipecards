@@ -20,6 +20,7 @@
   --text-primary: var(--text-color);
   --text-secondary: #666666;
   --border-color: #e0e0e0;
+  --card-border-color: #333333;
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --shadow-color: rgba(0, 0, 0, 0.1);
 }
@@ -31,6 +32,7 @@
   --text-color: #fafafa;
   --text-secondary: #a6a6a6;
   --border-color: #464748;
+  --card-border-color: #fafafa;
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --shadow-color: rgba(0, 0, 0, 0.3);
 }
@@ -78,7 +80,7 @@ body {
   display: flex;
   flex-direction: column;
   user-select: none;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border-color);
 }
 
 .swipe-card:active {
@@ -152,6 +154,7 @@ body {
   background: var(--card-bg);
   position: relative;
   z-index: 2;
+  border-top: 1px solid var(--card-border-color);
 }
 
 .card-name {
@@ -370,7 +373,7 @@ body {
   text-align: center;
   background: var(--card-bg);
   border-radius: 16px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border-color);
   box-shadow: 0 8px 25px var(--shadow-color);
   padding: 20px;
 }
