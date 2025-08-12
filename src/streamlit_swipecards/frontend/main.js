@@ -1384,12 +1384,12 @@ class SwipeCards {
         topCard.remove(); // Remove the swiped card from the DOM
         this.addNewCardToStack(); // Add a new card to the bottom
         this.updateCardStackClasses();
-        this.updateSwipeCounter(); // Update the counter
+        this.updateSwipeCounter();
         this.bindEvents();
-
         if (this.currentIndex >= this.cards.length) {
-          this.render(); // Render the 'All done' message
+          this.render();
         }
+        this.sendResults();
         this.isAnimating = false;
         updateFrameHeightDebounced();
       }, 300);
@@ -1417,12 +1417,12 @@ class SwipeCards {
         topCard.remove();
         this.addNewCardToStack();
         this.updateCardStackClasses();
-        this.updateSwipeCounter(); // Update the counter
+        this.updateSwipeCounter();
         this.bindEvents();
-
         if (this.currentIndex >= this.cards.length) {
           this.render();
         }
+        this.sendResults();
         this.isAnimating = false;
         updateFrameHeightDebounced();
       }, 300);
@@ -1453,6 +1453,8 @@ class SwipeCards {
 
     this.render();
     this.bindEvents();
+    this.updateSwipeCounter();
+    this.sendResults();
 
     const topCard = this.container.querySelector('.swipe-card:first-child');
     if (topCard) {
@@ -1565,20 +1567,14 @@ class SwipeCards {
     }
   }
   
-  getResults() {
-    // Return all swiped cards and the last action
-    // Return all swiped cards and the last action in a minimal form
-    const minimalSwipes = this.swipedCards.map(({ index, action }) => ({ index, action }));
+  sendResults() {
     const results = {
-      swipedCards: minimalSwipes,
+      swipedCards: this.swipedCards.map(({ index, action }) => ({ index, action })),
       lastAction: this.lastAction,
-      totalSwiped: minimalSwipes.length,totalSwiped: minimalSwipes.length,
-      remainingCards: this.cards.length - this.currentIndex
+      totalSwiped: this.swipedCards.length,
+      remainingCards: this.cards.length - this.currentIndex,
     };
-    
-    // Send results to Streamlit
     sendValue(results);
-    return results;
   }
 }
 
