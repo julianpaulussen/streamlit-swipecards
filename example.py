@@ -20,7 +20,17 @@ Users can swipe through cards containing images or data with intuitive gestures.
 
 st.write("## 📱 Interactive Examples")
 
-# Mode selection
+# Border toggle and mode selection
+st.write("Choose customization options:")
+show_border = st.checkbox("Show card borders", True)
+
+view_option = st.radio(
+    "Select view:",
+    ["Mobile", "Desktop"],
+    horizontal=True
+)
+view = "desktop" if view_option == "Desktop" else "mobile"
+
 mode = st.radio(
     "Select display mode:",
     ["Image Cards", "Table Cards"],
@@ -61,8 +71,13 @@ if mode == "Image Cards":
     result = streamlit_swipecards(
         cards=sample_cards,
         display_mode="cards",
+        show_border=show_border,
+        view=view,
+        last_card_message="This is the last page. You can add your own text here",
         key="image_example",
     )
+    if result:
+        st.session_state["swipe_results"] = result
 else:  # Table Cards
     st.subheader("📊 Table Cards Mode")
     
@@ -88,7 +103,7 @@ else:  # Table Cards
     st.markdown("- 👆 **Swipe right** or click 💚 to like the row")
     st.markdown("- 👆 **Swipe left** or click ❌ to pass the row")
     st.markdown("- 🔄 Click ↶ to go back")
-    st.markdown("- 📊 Click to get results when done")
+    
 
     # Create table cards - each card represents a different row with its own configuration
     table_cards = [
@@ -219,12 +234,19 @@ else:  # Table Cards
     result = streamlit_swipecards(
         cards=table_cards,
         display_mode="table",
+        show_border=show_border,
+        view=view,
+        center_table_row=0,
+        center_table_column="Salary",
+        last_card_message="This is the last page. You can add your own text here",
         key="table_example"
     )
-# Show the result only when explicitly requested (when Get Results is clicked)
-if result and result.get('totalSwiped', 0) > 0:
+    if result:
+        st.session_state["swipe_results"] = result
+
+if st.session_state.get("swipe_results"):
     st.write("### Results:")
-    st.json(result)
+    st.json(st.session_state["swipe_results"])
 
 st.write("## 🛠️ Code Examples")
 
@@ -294,6 +316,8 @@ st.markdown("""
 |-----------|------|-------------|----------|
 | `cards` | list[dict] | List of card objects to display | Yes |
 | `display_mode` | str | Display mode: "cards" for images or "table" for data tables | Yes |
+| `show_border` | bool | Whether to display a border around cards | No |
+| `last_card_message` | str | Custom text shown when all cards are swiped | No |
 | `key` | str | Unique component key for state management | Yes |
 
 ### Card Object (Image Cards)
@@ -308,7 +332,7 @@ st.markdown("""
 | Parameter | Type | Description | Required |
 |-----------|------|-------------|----------|
 | `dataset_path` | str | Path to the CSV file containing data | Yes |
-| `row_index` | int | Index of the row to highlight/focus on | Yes |
+| `row_index` | int | Index of the row to highlight/center on | Yes |
 | `name` | str | Name/title for the card | Yes |
 | `description` | str | Description text for the card | Yes |
 | `pills` | list[str] | List of pill/tag labels to show | No |

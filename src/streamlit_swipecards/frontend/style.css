@@ -20,8 +20,9 @@
   --text-primary: var(--text-color);
   --text-secondary: #666666;
   --border-color: #e0e0e0;
+  --card-border-color: #333333;
+  --card-border: 1px solid var(--card-border-color);
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark theme overrides */
@@ -31,34 +32,37 @@
   --text-color: #fafafa;
   --text-secondary: #a6a6a6;
   --border-color: #464748;
+  --card-border-color: #fafafa;
+  --card-border: 1px solid var(--card-border-color);
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: var(--bg-color);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
   transition: background-color 0.3s ease;
 }
 
 .swipe-container {
   width: 100%;
-  max-width: 400px;
-  height: 600px;
+  max-width: 100%;
+  height: auto;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  margin: 0 auto;
+  padding: 0 8px;
 }
 
 .cards-stack {
   position: relative;
-  width: 320px;
+  width: 100%;
+  max-width: 360px; /* unified desktop card width */
   height: 450px;
   margin-bottom: 15px;
 }
@@ -69,14 +73,13 @@ body {
   height: 100%;
   background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 8px 25px var(--shadow-color);
   cursor: grab;
   transition: transform 0.2s ease-out, opacity 0.2s ease-out, background-color 0.3s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   user-select: none;
-  border: 1px solid var(--border-color);
+  border: var(--card-border);
 }
 
 .swipe-card:active {
@@ -96,6 +99,36 @@ body {
 .swipe-card.swiped-left {
   transform: translateX(-400px) rotate(-30deg);
   opacity: 0;
+}
+
+.return-from-left {
+  animation: return-from-left 0.3s ease-out;
+}
+
+.return-from-right {
+  animation: return-from-right 0.3s ease-out;
+}
+
+@keyframes return-from-left {
+  from {
+    transform: translateX(-400px) rotate(-30deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes return-from-right {
+  from {
+    transform: translateX(400px) rotate(30deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
 }
 
 .card-image {
@@ -118,6 +151,9 @@ body {
   flex-direction: column;
   justify-content: center;
   background: var(--card-bg);
+  position: relative;
+  z-index: 2;
+  border-top: var(--card-border);
 }
 
 .card-name {
@@ -187,31 +223,8 @@ body {
 .results-section {
   margin-top: 8px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
-}
-
-.results-btn {
-  background: var(--button-gradient);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px var(--shadow-color);
-}
-
-.results-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 20px var(--shadow-color);
-}
-
-.results-btn:active {
-  transform: scale(0.95);
 }
 
 .swipe-counter {
@@ -228,6 +241,11 @@ body {
   align-items: center;
 }
 
+.card-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 .mode-toggle-btn {
   padding: 4px 12px;
   border-radius: 20px;
@@ -237,6 +255,9 @@ body {
   cursor: pointer;
   font-size: 13px;
   transition: background 0.2s ease, color 0.2s ease;
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
 }
 
 .swipe-container.inspect-mode .mode-toggle-btn {
@@ -256,9 +277,8 @@ body {
   justify-content: center;
   font-size: 24px;
   font-weight: bold;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
   color: white;
-  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 /* Disable interactions when in inspect mode */
@@ -276,11 +296,16 @@ body {
 
 .action-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px var(--shadow-color);
 }
 
 .action-btn:active {
   transform: scale(0.95);
+}
+
+.action-btn:disabled {
+  filter: grayscale(1);
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-pass {
@@ -328,13 +353,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 450px;
+  min-height: 320px;
   color: var(--text-primary);
   text-align: center;
   background: var(--card-bg);
   border-radius: 16px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 8px 25px var(--shadow-color);
+  border: var(--card-border);
   padding: 20px;
 }
 
@@ -380,12 +404,12 @@ body {
 /* Mobile responsiveness */
 @media (max-width: 480px) {
   .swipe-container {
-    max-width: 95%;
-    height: 550px;
+    max-width: 100%;
+    padding: 0 6px;
   }
 
   .cards-stack {
-    width: 280px;
+    width: 100%;
     height: 400px;
   }
   
@@ -406,12 +430,7 @@ body {
     height: 55px;
     font-size: 22px;
   }
-  
-  .results-btn {
-    font-size: 14px;
-    padding: 10px 20px;
-  }
-  
+
   .swipe-counter {
     font-size: 11px;
   }
@@ -446,7 +465,6 @@ body {
   background: var(--card-bg);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .data-table th {
@@ -472,6 +490,7 @@ body {
   background: var(--card-bg);
   transition: all 0.3s ease;
   font-size: 10px;
+  color: var(--text-primary);
 }
 
 .data-table tbody tr:hover {
@@ -517,22 +536,28 @@ body {
 
 /* Adjust card size for table mode */
 .swipe-container.table-mode {
-  max-width: 450px;
+  max-width: 100%;
 }
 
 .swipe-container.table-mode .cards-stack {
-  width: 380px;
+  width: 100%;
+  max-width: 360px; /* unified desktop card width */
   height: 480px;
+}
+
+/* Wider cards for desktop view */
+.swipe-container.desktop-view .cards-stack {
+  max-width: 600px;
 }
 
 /* Mobile responsiveness for table cards */
 @media (max-width: 480px) {
   .swipe-container.table-mode {
-    max-width: 95%;
+    max-width: 100%;
   }
 
   .swipe-container.table-mode .cards-stack {
-    width: 320px;
+    width: 100%;
     height: 420px;
   }
   
@@ -566,9 +591,42 @@ body {
   transition: filter 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
 }
 
+/* In swipe mode, prevent any table scrolling within the grid */
+.swipe-container.swipe-mode .ag-grid-container .ag-body-horizontal-scroll,
+.swipe-container.swipe-mode .ag-grid-container .ag-body-vertical-scroll {
+  display: none !important;
+}
+
+.swipe-container.swipe-mode .ag-grid-container .ag-body-viewport,
+.swipe-container.swipe-mode .ag-grid-container .ag-center-cols-viewport {
+  overflow: hidden !important;
+}
+
+.ag-grid-container .ag-center-cols-container {
+  padding-bottom: 16px;
+}
+
 .ag-grid-container.loading {
   filter: blur(8px);
   opacity: 0.7;
+}
+
+/* In swipe mode, hide column resize handles */
+@media (pointer: coarse) {
+  .swipe-container.swipe-mode .ag-grid-container .ag-header-cell-resize,
+  .swipe-container.swipe-mode .ag-grid-container .ag-resizer {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
+/* In inspect mode, allow manual panning by user */
+.swipe-container.inspect-mode .ag-grid-container {
+  cursor: grab;
+  touch-action: none; /* let JS pan both directions */
+}
+.swipe-container.inspect-mode .ag-grid-container.panning {
+  cursor: grabbing;
 }
 
 /* Loading overlay for table cards */
@@ -643,6 +701,7 @@ body {
   --ag-font-family: inherit;
   font-family: inherit;
   border-radius: 8px;
+  color: var(--text-primary);
 }
 
 /* Custom header styling to match our gradient */
@@ -679,6 +738,8 @@ body {
   border-right: 1px solid var(--border-color) !important;
   font-size: 10px !important;
   padding: 4px 6px !important;
+  color: var(--text-primary) !important;
+  background-color: var(--card-bg) !important;
 }
 
 /* Remove default focus outline */
@@ -752,7 +813,6 @@ body {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--primary-color);
-  box-shadow: 0 4px 12px var(--shadow-color);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1000;

@@ -31,6 +31,37 @@ function updateSwipeProgress() {
   }
 }
 
+// Debounced frame height updater
+let _resizeRaf = null;
+let _resizeTimeout = null;
+function updateFrameHeightImmediate() {
+  try {
+    const docEl = document.documentElement;
+    const body = document.body;
+    const height = Math.ceil(Math.max(
+      docEl?.scrollHeight || 0,
+      body?.scrollHeight || 0,
+      docEl?.offsetHeight || 0,
+      body?.offsetHeight || 0
+    ));
+    // Ensure a sensible minimum height so controls aren't clipped
+    const minH = 360;
+    const finalH = Math.max(height, minH);
+    Streamlit.setFrameHeight(finalH);
+  } catch (e) {
+    // Fallback to a safe default if measurement fails
+    Streamlit.setFrameHeight(620);
+  }
+}
+
+function updateFrameHeightDebounced() {
+  if (_resizeRaf) cancelAnimationFrame(_resizeRaf);
+  if (_resizeTimeout) clearTimeout(_resizeTimeout);
+  _resizeRaf = requestAnimationFrame(() => {
+    _resizeTimeout = setTimeout(updateFrameHeightImmediate, 50);
+  });
+}
+
 function handleImageLoad(img) {
   if (img.dataset.full && !img.dataset.fullLoaded) {
     const hiRes = new Image();
@@ -43,6 +74,7 @@ function handleImageLoad(img) {
     img.classList.remove('loading');
     window.swipeProgress.loaded++;
     updateSwipeProgress();
+    updateFrameHeightDebounced();
   }
 }
 
@@ -116,6 +148,8 @@ function detectAndApplyTheme() {
       docStyle.setProperty('--text-color', text.trim());
       docStyle.setProperty('--text-primary', text.trim());
     }
+
+    // Do not override text/background variables here; follow Streamlit's theme.
   } catch (e) {
     console.log('Theme detection fallback:', e);
     // Fallback: use system preference
@@ -134,7 +168,7 @@ function detectAndApplyTheme() {
 }
 
 class SwipeCards {
-  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null) {
+  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null, lastCardMessage = 'No more cards to swipe') {
     this.container = container;
     this.cards = cards;
     this.tableData = tableData;
@@ -144,6 +178,7 @@ class SwipeCards {
     this.displayMode = displayMode;
     this.centerTableRow = centerTableRow;
     this.centerTableColumn = centerTableColumn;
+    this.lastCardMessage = lastCardMessage;
     this.currentIndex = 0;
     this.swipedCards = [];
     this.isDragging = false;
@@ -157,6 +192,7 @@ class SwipeCards {
     this.isAnimating = false; // Prevent rapid repeated actions
     this.mode = 'swipe'; // Default mode
     this.moveRaf = null; // Track scheduled move frame
+    this.isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
     // Bind swipe handlers once so we can add/remove them easily
     this.handleStart = this.handleStart.bind(this);
@@ -171,6 +207,27 @@ class SwipeCards {
     detectAndApplyTheme();
     this.render();
     this.bindEvents();
+
+    // Delegate interactions for mode toggle and center actions
+    if (!this._delegatedToggle) {
+      this.container.addEventListener(
+        'click',
+        (e) => {
+          const toggleBtn =
+            e.target && e.target.closest && e.target.closest('.mode-toggle-btn');
+          if (toggleBtn && this.container.contains(toggleBtn)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
+            this.setMode(newMode);
+            return;
+          }
+        },
+        true,
+      ); // capture to win against other listeners
+
+      this._delegatedToggle = true;
+    }
   }
 
   // Display a temporary notification inside the component
@@ -199,14 +256,19 @@ class SwipeCards {
 
     if (this.currentIndex >= this.cards.length) {
       this.container.innerHTML = `
-        <div class="no-more-cards">
-          <h3>🎉 All done!</h3>
-          <p>No more cards to swipe</p>
-          <div class="results-section">
-            <button class="results-btn" onclick="swipeCards.goBack()" ${this.swipedCards.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>↶ Go Back</button>
-            <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
-            <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
+        <div class="cards-stack">
+          <div class="swipe-card no-more-cards">
+            <h3>🎉 All done!</h3>
+            <p>${this.lastCardMessage}</p>
           </div>
+        </div>
+        <div class="action-buttons">
+          <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()" disabled>❌</button>
+          <button class="action-btn btn-back" onclick="swipeCards.goBack()">↶</button>
+          <button class="action-btn btn-like" onclick="swipeCards.swipeRight()" disabled>💚</button>
+        </div>
+        <div class="results-section">
+          <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
         </div>
       `;
       return;
@@ -259,19 +321,23 @@ class SwipeCards {
         <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">💚</button>
       </div>
       <div class="results-section">
-        <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
         <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
       </div>
     `;
 
-    // Bind toggle button
-    const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
-    toggleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
-        this.setMode(newMode);
+    // Bind toggle button (only if delegation not set up)
+    if (!this._delegatedToggle) {
+      const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
+      toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
+          this.setMode(newMode);
+        });
       });
-    });
+    }
+
+    // Ensure the Streamlit iframe height tracks content
+    updateFrameHeightDebounced();
   }
 
   setMode(mode) {
@@ -293,6 +359,7 @@ class SwipeCards {
 
     this.updateGridListeners();
     this.bindEvents();
+    updateFrameHeightDebounced();
   }
 
   updateGridListeners() {
@@ -305,12 +372,38 @@ class SwipeCards {
       gridContainer.removeEventListener('pointerup', handlers.handlePointerUp, puOpts);
       gridContainer.removeEventListener('wheel', handlers.blockScroll, blockOpts);
       gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
+      gridContainer.removeEventListener('keydown', handlers.handleKeyDown, true);
+      gridContainer.removeEventListener('wheel', handlers.handleWheel, false);
+      if (handlers.blockResizeHandle) {
+        gridContainer.removeEventListener('mousedown', handlers.blockResizeHandle, true);
+        gridContainer.removeEventListener('dblclick', handlers.blockResizeHandle, true);
+      }
+      gridContainer.removeEventListener('pointerdown', handlers.handlePanStart, { passive: false });
+      gridContainer.removeEventListener('pointermove', handlers.handlePanMove, { passive: false });
+      window.removeEventListener('pointerup', handlers.handlePanEnd, { passive: true });
+      gridContainer.removeEventListener('touchstart', handlers.handlePanStart, { passive: false });
+      gridContainer.removeEventListener('touchmove', handlers.handlePanMove, { passive: false });
+      window.removeEventListener('touchend', handlers.handlePanEnd, { passive: true });
 
       if (this.mode === 'swipe') {
         gridContainer.addEventListener('pointerdown', handlers.handlePointerDown, pdOpts);
         gridContainer.addEventListener('pointerup', handlers.handlePointerUp, puOpts);
         gridContainer.addEventListener('wheel', handlers.blockScroll, blockOpts);
         gridContainer.addEventListener('touchmove', handlers.blockScroll, blockOpts);
+        gridContainer.addEventListener('keydown', handlers.handleKeyDown, true);
+        if (handlers.blockResizeHandle) {
+          gridContainer.addEventListener('mousedown', handlers.blockResizeHandle, true);
+          gridContainer.addEventListener('dblclick', handlers.blockResizeHandle, true);
+        }
+      } else {
+        // Enable panning and wheel scrolling in inspect mode
+        gridContainer.addEventListener('pointerdown', handlers.handlePanStart, { passive: false });
+        gridContainer.addEventListener('pointermove', handlers.handlePanMove, { passive: false });
+        window.addEventListener('pointerup', handlers.handlePanEnd, { passive: true });
+        gridContainer.addEventListener('touchstart', handlers.handlePanStart, { passive: false });
+        gridContainer.addEventListener('touchmove', handlers.handlePanMove, { passive: false });
+        window.addEventListener('touchend', handlers.handlePanEnd, { passive: true });
+        gridContainer.addEventListener('wheel', handlers.handleWheel, { passive: false });
       }
     });
   }
@@ -340,6 +433,12 @@ class SwipeCards {
         gridContainer.removeEventListener('pointerup', handlers.handlePointerUp, puOpts);
         gridContainer.removeEventListener('wheel', handlers.blockScroll, blockOpts);
         gridContainer.removeEventListener('touchmove', handlers.blockScroll, blockOpts);
+        gridContainer.removeEventListener('keydown', handlers.handleKeyDown, true);
+        gridContainer.removeEventListener('wheel', handlers.handleWheel, false);
+        if (handlers.blockResizeHandle) {
+          gridContainer.removeEventListener('mousedown', handlers.blockResizeHandle, true);
+          gridContainer.removeEventListener('dblclick', handlers.blockResizeHandle, true);
+        }
       });
       this.gridHandlers.clear();
     }
@@ -392,7 +491,9 @@ class SwipeCards {
     tableHTML += '<div class="card-content">';
     tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
+    tableHTML += '<div class="card-header-buttons">';
     tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
+    tableHTML += '</div>';
     tableHTML += '</div>';
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
     tableHTML += pillsHTML;
@@ -415,6 +516,8 @@ class SwipeCards {
     const tableData = card.table_data || this.tableData;
 
     if (!tableData) return;
+
+    const shouldBlockResize = this.isTouchDevice && this.displayMode !== 'table';
 
     // Warn users in swipe mode that they need to inspect to interact with the table
     let tapStartTime = 0;
@@ -447,11 +550,122 @@ class SwipeCards {
       }
     };
 
+    const handleKeyDown = (e) => {
+      if (this.mode === 'swipe') {
+        const blockKeys = [
+          'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+          'PageUp', 'PageDown', 'Home', 'End', ' '
+        ];
+        if (blockKeys.includes(e.key)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
+
+    const handleWheel = (e) => {
+      if (this.mode !== 'inspect') return;
+      // Use AG Grid's dedicated viewports: vertical = ag-body-viewport, horizontal = ag-center-cols-viewport
+      const vEl = gridContainer.querySelector('.ag-body-viewport');
+      const hEl = gridContainer.querySelector('.ag-center-cols-viewport') || vEl;
+      const dy = e.deltaY || 0;
+      const dxRaw = e.deltaX || 0;
+      // Allow shift+wheel to scroll horizontally when deltaX is 0
+      const dx = dxRaw !== 0 ? dxRaw : (e.shiftKey ? dy : 0);
+      let handled = false;
+      if (vEl && dy !== 0) {
+        vEl.scrollTop += dy;
+        handled = true;
+      }
+      if (hEl && dx !== 0) {
+        hEl.scrollLeft += dx;
+        handled = true;
+      }
+      if (handled) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Block column resizing interactions when not in inspect mode
+    let blockResizeHandle = null;
+    if (shouldBlockResize) {
+      blockResizeHandle = (e) => {
+        if (this.mode === 'swipe') {
+          const isResizeHandle =
+            e.target &&
+            e.target.closest &&
+            (e.target.closest('.ag-header-cell-resize') ||
+              e.target.closest('.ag-resizer'));
+          if (isResizeHandle) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
+      };
+    }
+
+    // Panning support in inspect mode (desktop drag and mobile touch)
+    const panState = { active: false, startX: 0, startY: 0, startLeft: 0, startTop: 0 };
+    const panViewports = () => ({
+      vEl: gridContainer.querySelector('.ag-body-viewport'),
+      hEl: gridContainer.querySelector('.ag-center-cols-viewport') || gridContainer.querySelector('.ag-body-viewport')
+    });
+    const panShouldStart = (target) => {
+      // Don't pan when starting on header or on a resize handle
+      if (!target || !target.closest) return true;
+      // Block panning entirely if the gesture starts in the header area
+      if (target.closest('.ag-header')) return false;
+      // Also block when starting on explicit resize handles
+      if (target.closest('.ag-header-cell-resize') || target.closest('.ag-resizer')) return false;
+      return true;
+    };
+    const handlePanStart = (e) => {
+      if (this.mode !== 'inspect') return;
+      // Allow mouse panning, but not if starting in header or on resize handle
+      if (!panShouldStart(e.target)) return;
+      const { vEl, hEl } = panViewports();
+      if (!vEl && !hEl) return;
+      panState.active = true;
+      const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX) ?? 0;
+      const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY) ?? 0;
+      panState.startX = clientX;
+      panState.startY = clientY;
+      panState.startLeft = (hEl ? hEl.scrollLeft : 0);
+      panState.startTop = (vEl ? vEl.scrollTop : 0);
+      gridContainer.classList.add('panning');
+      e.preventDefault();
+    };
+    const handlePanMove = (e) => {
+      if (!panState.active || this.mode !== 'inspect') return;
+      const { vEl, hEl } = panViewports();
+      if (!vEl && !hEl) return;
+      const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX) ?? 0;
+      const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY) ?? 0;
+      const dx = clientX - panState.startX;
+      const dy = clientY - panState.startY;
+      if (hEl) hEl.scrollLeft = panState.startLeft - dx;
+      if (vEl) vEl.scrollTop = panState.startTop - dy;
+      e.preventDefault();
+    };
+    const handlePanEnd = (e) => {
+      if (!panState.active) return;
+      panState.active = false;
+      gridContainer.classList.remove('panning');
+      // Don't prevent default here to allow clicks to pass if it was a tap
+    };
+
     // Store handlers for later enabling/disabling
     this.gridHandlers.set(gridContainer, {
       handlePointerDown,
       handlePointerUp,
       blockScroll,
+      handleKeyDown,
+      handleWheel,
+      blockResizeHandle,
+      handlePanStart,
+      handlePanMove,
+      handlePanEnd,
     });
 
     if (this.mode === 'swipe') {
@@ -459,6 +673,23 @@ class SwipeCards {
       gridContainer.addEventListener('pointerup', handlePointerUp, { passive: false, capture: true });
       gridContainer.addEventListener('wheel', blockScroll, { passive: false, capture: true });
       gridContainer.addEventListener('touchmove', blockScroll, { passive: false, capture: true });
+      gridContainer.addEventListener('keydown', handleKeyDown, true);
+      // Prevent header resize drag and double-click autosize in swipe mode
+      if (blockResizeHandle) {
+        gridContainer.addEventListener('mousedown', blockResizeHandle, true);
+        gridContainer.addEventListener('dblclick', blockResizeHandle, true);
+      }
+    } else {
+      // In inspect mode, enable drag panning for desktop and touch + wheel scrolling
+      gridContainer.addEventListener('pointerdown', handlePanStart, { passive: false });
+      gridContainer.addEventListener('pointermove', handlePanMove, { passive: false });
+      window.addEventListener('pointerup', handlePanEnd, { passive: true });
+      // For older mobile browsers that fire touch events
+      gridContainer.addEventListener('touchstart', handlePanStart, { passive: false });
+      gridContainer.addEventListener('touchmove', handlePanMove, { passive: false });
+      window.addEventListener('touchend', handlePanEnd, { passive: true });
+      // Desktop wheel and trackpad support (both axes)
+      gridContainer.addEventListener('wheel', handleWheel, { passive: false });
     }
     
     // Use card-specific highlight configurations
@@ -470,7 +701,8 @@ class SwipeCards {
     const columnDefs = tableData.columns.map(col => ({
       field: col,
       headerName: col,
-      width: 120,
+      flex: 1,
+      minWidth: 60,
       resizable: true,
       sortable: false,
       filter: false,
@@ -529,8 +761,6 @@ class SwipeCards {
     const gridOptions = {
       columnDefs: columnDefs,
       defaultColDef: {
-        flex: 1,
-        minWidth: 100,
         resizable: true
       },
       rowModelType: 'infinite',
@@ -551,15 +781,20 @@ class SwipeCards {
       rowSelection: 'none',
       onGridReady: (params) => {
         params.api.setDatasource(dataSource);
-        // Auto-size columns to fit
-        params.api.sizeColumnsToFit();
       },
       onFirstDataRendered: (params) => {
-        params.api.sizeColumnsToFit();
+        // 1) Auto-size columns to their content (including header)
+        const allColIds = [];
+        const cols = params.columnApi.getColumns() || [];
+        cols.forEach(c => allColIds.push(c.getColId()));
+        if (allColIds.length > 0) {
+          params.columnApi.autoSizeColumns(allColIds, false);
+        }
+        // Do not cap widths; allow full resize in Inspect mode
         
         // Scroll to current row or centered view
         const rowIndexToCenter = card.center_table_row !== null ? card.center_table_row : (this.centerTableRow !== null ? this.centerTableRow : currentRowIndex);
-        const colIdToCenter = card.center_table_column || this.centerTableColumn;
+        const colIdToCenter = card.center_table_column ?? this.centerTableColumn;
 
         console.log(`Centering card ${cardIndex}: row=${rowIndexToCenter}, col=${colIdToCenter}`);
 
@@ -580,7 +815,7 @@ class SwipeCards {
         if (rowIndexToCenter >= 0) {
           params.api.ensureIndexVisible(rowIndexToCenter, 'middle');
         }
-        if (colIdToCenter) {
+        if (colIdToCenter !== undefined && colIdToCenter !== null && colIdToCenter !== '') {
           params.api.ensureColumnVisible(colIdToCenter, 'middle');
         }
 
@@ -601,6 +836,9 @@ class SwipeCards {
           // Always store grid reference
           this.agGridInstances.set(`${cardIndex}_centered`, true);
         }, 200); // Longer delay to ensure centering is complete
+
+        // Update frame height after data renders and centering completes
+        updateFrameHeightDebounced();
       }
     };
     
@@ -625,7 +863,7 @@ class SwipeCards {
       updateSwipeProgress();
     }
   }
-  
+
   renderFallbackTable(container, currentRowIndex) {
     let tableHTML = '<table class="data-table fallback-table">';
     
@@ -962,6 +1200,8 @@ class SwipeCards {
 
     // Ignore touches on toggle buttons so taps register as clicks on mobile
     if (e.target.closest('.mode-toggle-btn')) {
+      // Prevent swipe initiation and let the click fire
+      e.stopPropagation();
       return;
     }
 
@@ -1074,13 +1314,14 @@ class SwipeCards {
         topCard.remove(); // Remove the swiped card from the DOM
         this.addNewCardToStack(); // Add a new card to the bottom
         this.updateCardStackClasses();
-        this.updateSwipeCounter(); // Update the counter
+        this.updateSwipeCounter();
         this.bindEvents();
-
         if (this.currentIndex >= this.cards.length) {
-          this.render(); // Render the 'All done' message
+          this.render();
         }
+        this.sendResults();
         this.isAnimating = false;
+        updateFrameHeightDebounced();
       }, 300);
     }
   }
@@ -1106,13 +1347,14 @@ class SwipeCards {
         topCard.remove();
         this.addNewCardToStack();
         this.updateCardStackClasses();
-        this.updateSwipeCounter(); // Update the counter
+        this.updateSwipeCounter();
         this.bindEvents();
-
         if (this.currentIndex >= this.cards.length) {
           this.render();
         }
+        this.sendResults();
         this.isAnimating = false;
+        updateFrameHeightDebounced();
       }, 300);
     }
   }
@@ -1129,19 +1371,35 @@ class SwipeCards {
 
     // Only set animating flag when we actually have work to do
     this.isAnimating = true;
-    
+
     const lastSwiped = this.swipedCards.pop();
     this.currentIndex = lastSwiped.index;
-    
+
     // Store the last action but don't send to Streamlit immediately
     this.lastAction = {
       action: 'back',
       cardIndex: this.currentIndex
     };
-    
+
     this.render();
     this.bindEvents();
-    this.isAnimating = false;
+    this.updateSwipeCounter();
+    this.sendResults();
+
+    const topCard = this.container.querySelector('.swipe-card:first-child');
+    if (topCard) {
+      const directionClass =
+        lastSwiped.action === 'left' ? 'return-from-left' : 'return-from-right';
+      topCard.classList.add(directionClass);
+      setTimeout(() => {
+        topCard.classList.remove('return-from-left', 'return-from-right');
+        this.isAnimating = false;
+        updateFrameHeightDebounced();
+      }, 300);
+    } else {
+      this.isAnimating = false;
+      updateFrameHeightDebounced();
+    }
   }
 
   addNewCardToStack() {
@@ -1173,6 +1431,7 @@ class SwipeCards {
           this.initializeAgGrid(nextCardIndex, card.row_index);
         }, 20);
       }
+      updateFrameHeightDebounced();
     }
   }
 
@@ -1238,20 +1497,14 @@ class SwipeCards {
     }
   }
   
-  getResults() {
-    // Return all swiped cards and the last action
-    // Return all swiped cards and the last action in a minimal form
-    const minimalSwipes = this.swipedCards.map(({ index, action }) => ({ index, action }));
+  sendResults() {
     const results = {
-      swipedCards: minimalSwipes,
+      swipedCards: this.swipedCards.map(({ index, action }) => ({ index, action })),
       lastAction: this.lastAction,
-      totalSwiped: minimalSwipes.length,totalSwiped: minimalSwipes.length,
-      remainingCards: this.cards.length - this.currentIndex
+      totalSwiped: this.swipedCards.length,
+      remainingCards: this.cards.length - this.currentIndex,
     };
-    
-    // Send results to Streamlit
     sendValue(results);
-    return results;
   }
 }
 
@@ -1271,14 +1524,21 @@ function onRender(event) {
     highlight_columns = [],
     display_mode = 'cards',
     centerTableRow = null,
-    centerTableColumn = null
+    centerTableColumn = null,
+    view = 'mobile',
+    show_border = true,
+    last_card_message = null
   } = event.detail.args;
-  
+
   // Apply theme detection immediately
   detectAndApplyTheme();
-  
+
   // Set up theme monitoring for dynamic updates
   setupThemeMonitoring();
+
+  // Apply card border preference
+  const borderValue = show_border ? '1px solid var(--card-border-color)' : 'none';
+  document.documentElement.style.setProperty('--card-border', borderValue);
   
   const root = document.getElementById('root');
   root.innerHTML = '<div class="swipe-container"></div>';
@@ -1288,6 +1548,11 @@ function onRender(event) {
   // Add table-mode class if needed
   if (display_mode === 'table') {
     container.classList.add('table-mode');
+  }
+
+  // Apply desktop view styling if requested
+  if (view === 'desktop') {
+    container.classList.add('desktop-view');
   }
   
   if (cards.length === 0) {
@@ -1304,11 +1569,43 @@ function onRender(event) {
   }
   
   // Always create a fresh instance to avoid state persistence issues
-  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode, centerTableRow, centerTableColumn);
+  const finalMessage = last_card_message ?? 'No more cards to swipe';
+  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode, centerTableRow, centerTableColumn, finalMessage);
   
-  // Set the frame height based on content (adjust for table mode)
-  const frameHeight = display_mode === 'table' ? 720 : 620;
-  Streamlit.setFrameHeight(frameHeight);
+  // Update frame height now and observe for subsequent changes
+  updateFrameHeightImmediate();
+
+  // Observe size changes to keep iframe height in sync
+  try {
+    if (!window._swipecards_resizeObserver) {
+      const ro = new ResizeObserver(() => updateFrameHeightDebounced());
+      ro.observe(document.documentElement);
+      ro.observe(document.body);
+      ro.observe(container);
+      window._swipecards_resizeObserver = ro;
+    }
+  } catch (e) {
+    // ResizeObserver may not be available in very old browsers
+  }
+
+  // Listen to viewport changes
+  window.addEventListener('resize', () => {
+    updateFrameHeightDebounced();
+    try {
+      // Nudge AG-Grid instances to recompute viewport if present,
+      // but keep column widths as measured (no forced stretch)
+      if (window.swipeCards && window.swipeCards.agGridInstances) {
+        window.swipeCards.agGridInstances.forEach((grid) => {
+          try {
+            if (grid && grid.api && grid.api.onGridSizeChanged) {
+              grid.api.onGridSizeChanged();
+            }
+          } catch (e) {}
+        });
+      }
+    } catch (e) {}
+  }, { passive: true });
+  window.addEventListener('orientationchange', updateFrameHeightDebounced, { passive: true });
 }
 
 // Setup theme monitoring for dynamic theme changes
@@ -1351,5 +1648,5 @@ function setupThemeMonitoring() {
 Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender)
 // Tell Streamlit that the component is ready to receive events
 Streamlit.setComponentReady()
-// Initial frame height (reduced for tighter spacing)
-Streamlit.setFrameHeight(620)
+// Initial frame height
+updateFrameHeightImmediate()

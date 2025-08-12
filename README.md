@@ -12,6 +12,7 @@ A modern, interactive card-swiping component for Streamlit applications. Build i
 - **Stacked Card Interface**: Card stacking with smooth animations
 - **Dual Display Modes**: Support for both image cards and interactive data tables
 - **Touch & Mouse Support**: Works seamlessly on desktop and mobile devices
+- **Responsive Views**: Choose mobile or desktop layouts for card width
 - **Interactive Actions**: Like 💚, pass ❌, and undo ↶ functionality
 - **Advanced Table Features**: Cell, row, and column highlighting with AG-Grid integration
 - **Performance Optimized**: Automatic dataset caching for improved loading times
@@ -49,6 +50,9 @@ cards = [
 result = streamlit_swipecards(
     cards=cards,
     display_mode="cards",
+    show_border=False,
+    view="desktop",
+    last_card_message="This is the last page. You can add your own text here",
     key="my_swipe_cards"
 )
 
@@ -70,6 +74,9 @@ if result:
 | `highlight_columns` | `list[dict] \| None` | Column highlighting configuration |
 | `center_table_row` | `int \| None` | Row to center in table view |
 | `center_table_column` | `str \| None` | Column to center in table view |
+| `view` | `str` | Layout: `"mobile"` (default) or `"desktop"` for wider cards |
+| `show_border` | `bool` | Show border around cards (default `True`) |
+| `last_card_message` | `str \| None` | Message shown after all cards are swiped |
 | `key` | `str \| None` | Unique component key |
 
 **Returns:** `dict | None` - Interaction data including swiped cards, last action, and statistics
@@ -92,7 +99,7 @@ if result:
 ### 📊 Table Cards
 - **Data Row Swiping**: Transform spreadsheet rows into swipeable cards
 - **Smart Highlighting**: Emphasize specific cells, rows, or columns
-- **Automatic Centering**: Focus on important data points
+- **Automatic Centering**: Center on important data points
 
 ```python
 {
@@ -110,8 +117,8 @@ if result:
     "highlight_columns": [                # optional - column highlighting
         {"column": "Performance", "color": "#E8F5E8"}
     ],
-    "center_table_row": 0,                # optional - focus row
-    "center_table_column": "Salary"       # optional - focus column
+    "center_table_row": 0,                # optional - center row
+    "center_table_column": "Salary"       # optional - center column
 }
 ```
 
