@@ -66,6 +66,7 @@ def streamlit_swipecards(
     center_table_row: Optional[int] = None,
     center_table_column: Optional[Union[str, int]] = None,
     show_border: bool = True,
+    last_card_message: Optional[str] = None,
     key: Optional[str] = None,
 ):
     """
@@ -114,6 +115,8 @@ def streamlit_swipecards(
         Column name or index to center the table view on (legacy mode).
     show_border : bool, optional
         Whether to display a border around cards. Defaults to True.
+    last_card_message : str, optional
+        Custom message to display when all cards have been swiped.
     key : str, optional
         Unique key for the component
         
@@ -217,6 +220,7 @@ def streamlit_swipecards(
         centerTableRow=center_table_row,
         centerTableColumn=center_table_column,
         show_border=show_border,
+        last_card_message=last_card_message,
         key=key,
         default=None
     )
@@ -254,7 +258,11 @@ def main():
     st.write("Swipe right to like, left to pass, or use the buttons below!")
     
     # Create the swipe cards component
-    result = streamlit_swipecards(cards=sample_cards, key="swipe_cards")
+    result = streamlit_swipecards(
+        cards=sample_cards,
+        key="swipe_cards",
+        last_card_message="This is the last page. You can add your own text here",
+    )
     
     # Display the result
     if result:

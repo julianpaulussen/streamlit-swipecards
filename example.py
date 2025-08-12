@@ -65,6 +65,7 @@ if mode == "Image Cards":
         cards=sample_cards,
         display_mode="cards",
         show_border=show_border,
+        last_card_message="This is the last page. You can add your own text here",
         key="image_example",
     )
 else:  # Table Cards
@@ -224,6 +225,7 @@ else:  # Table Cards
         cards=table_cards,
         display_mode="table",
         show_border=show_border,
+        last_card_message="This is the last page. You can add your own text here",
         key="table_example"
     )
 # Show the result only when explicitly requested (when Get Results is clicked)
@@ -300,6 +302,7 @@ st.markdown("""
 | `cards` | list[dict] | List of card objects to display | Yes |
 | `display_mode` | str | Display mode: "cards" for images or "table" for data tables | Yes |
 | `show_border` | bool | Whether to display a border around cards | No |
+| `last_card_message` | str | Custom text shown when all cards are swiped | No |
 | `key` | str | Unique component key for state management | Yes |
 
 ### Card Object (Image Cards)

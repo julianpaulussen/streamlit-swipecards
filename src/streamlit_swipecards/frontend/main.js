@@ -168,7 +168,7 @@ function detectAndApplyTheme() {
 }
 
 class SwipeCards {
-  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null) {
+  constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null, lastCardMessage = 'No more cards to swipe') {
     this.container = container;
     this.cards = cards;
     this.tableData = tableData;
@@ -178,6 +178,7 @@ class SwipeCards {
     this.displayMode = displayMode;
     this.centerTableRow = centerTableRow;
     this.centerTableColumn = centerTableColumn;
+    this.lastCardMessage = lastCardMessage;
     this.currentIndex = 0;
     this.swipedCards = [];
     this.isDragging = false;
@@ -289,7 +290,7 @@ class SwipeCards {
         <div class="cards-stack">
           <div class="swipe-card no-more-cards">
             <h3>🎉 All done!</h3>
-            <p>No more cards to swipe</p>
+            <p>${this.lastCardMessage}</p>
           </div>
         </div>
         <div class="action-buttons">
@@ -1595,7 +1596,8 @@ function onRender(event) {
     display_mode = 'cards',
     centerTableRow = null,
     centerTableColumn = null,
-    show_border = true
+    show_border = true,
+    last_card_message = null
   } = event.detail.args;
 
   // Apply theme detection immediately
@@ -1632,7 +1634,8 @@ function onRender(event) {
   }
   
   // Always create a fresh instance to avoid state persistence issues
-  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode, centerTableRow, centerTableColumn);
+  const finalMessage = last_card_message ?? 'No more cards to swipe';
+  swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode, centerTableRow, centerTableColumn, finalMessage);
   
   // Update frame height now and observe for subsequent changes
   updateFrameHeightImmediate();
