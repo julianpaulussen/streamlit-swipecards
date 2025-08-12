@@ -358,7 +358,7 @@ class SwipeCards {
 
     const focusBtns = this.container.querySelectorAll('.focus-btn');
     focusBtns.forEach(btn => {
-      btn.disabled = mode !== 'inspect';
+      btn.disabled = false;
     });
 
     this.updateGridListeners();
@@ -486,12 +486,11 @@ class SwipeCards {
     
     // Add card content section like image cards
     const modeLabel = this.mode === 'swipe' ? 'Inspect' : 'Swipe';
-    const focusDisabled = this.mode === 'inspect' ? '' : 'disabled';
     tableHTML += '<div class="card-content">';
     tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
     tableHTML += '<div class="card-header-buttons">';
-    tableHTML += `<button class="focus-btn" ${focusDisabled}>Focus</button>`;
+    tableHTML += '<button class="focus-btn">Focus</button>';
     tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
     tableHTML += '</div>';
     tableHTML += '</div>';

@@ -285,8 +285,7 @@ body {
   pointer-events: auto;
 }
 
-.swipe-container.inspect-mode .mode-toggle-btn,
-.swipe-container.inspect-mode .focus-btn {
+.swipe-container.inspect-mode .mode-toggle-btn {
   background: var(--button-gradient);
   color: #fff;
   border: none;
