@@ -22,7 +22,6 @@
   --border-color: #e0e0e0;
   --card-border-color: #333333;
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Dark theme overrides */
@@ -34,7 +33,6 @@
   --border-color: #464748;
   --card-border-color: #fafafa;
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -73,7 +71,6 @@ body {
   height: 100%;
   background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 8px 25px var(--shadow-color);
   cursor: grab;
   transition: transform 0.2s ease-out, opacity 0.2s ease-out, background-color 0.3s ease;
   overflow: hidden;
@@ -238,13 +235,11 @@ body {
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: transform 0.2s ease;
 }
 
 .results-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 20px var(--shadow-color);
 }
 
 .results-btn:active {
@@ -302,9 +297,8 @@ body {
   justify-content: center;
   font-size: 24px;
   font-weight: bold;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
   color: white;
-  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 /* Disable interactions when in inspect mode */
@@ -322,7 +316,6 @@ body {
 
 .action-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px var(--shadow-color);
 }
 
 .action-btn:active {
@@ -380,7 +373,6 @@ body {
   background: var(--card-bg);
   border-radius: 16px;
   border: 1px solid var(--card-border-color);
-  box-shadow: 0 8px 25px var(--shadow-color);
   padding: 20px;
 }
 
@@ -492,7 +484,6 @@ body {
   background: var(--card-bg);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .data-table th {
@@ -834,7 +825,6 @@ body {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--primary-color);
-  box-shadow: 0 4px 12px var(--shadow-color);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1000;
