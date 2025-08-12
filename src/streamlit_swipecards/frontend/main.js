@@ -721,7 +721,8 @@ class SwipeCards {
     const columnDefs = tableData.columns.map(col => ({
       field: col,
       headerName: col,
-      width: 120,
+      flex: 1,
+      minWidth: 60,
       resizable: true,
       sortable: false,
       filter: false,
@@ -780,8 +781,6 @@ class SwipeCards {
     const gridOptions = {
       columnDefs: columnDefs,
       defaultColDef: {
-        // Remove flex so columns can shrink to content
-        minWidth: 60,
         resizable: true
       },
       rowModelType: 'infinite',
