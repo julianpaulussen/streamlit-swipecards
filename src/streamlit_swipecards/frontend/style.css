@@ -265,7 +265,13 @@ body {
   align-items: center;
 }
 
-.mode-toggle-btn {
+.card-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-toggle-btn,
+.focus-btn {
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
@@ -279,7 +285,8 @@ body {
   pointer-events: auto;
 }
 
-.swipe-container.inspect-mode .mode-toggle-btn {
+.swipe-container.inspect-mode .mode-toggle-btn,
+.swipe-container.inspect-mode .focus-btn {
   background: var(--button-gradient);
   color: #fff;
   border: none;

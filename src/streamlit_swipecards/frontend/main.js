@@ -206,15 +206,27 @@ class SwipeCards {
     this.render();
     this.bindEvents();
 
-    // Delegate clicks for mode toggle to be robust against re-renders
+    // Delegate clicks for mode toggle and focus actions to be robust against re-renders
     if (!this._delegatedToggle) {
       this.container.addEventListener('click', (e) => {
-        const btn = e.target && e.target.closest && e.target.closest('.mode-toggle-btn');
-        if (btn && this.container.contains(btn)) {
+        const toggleBtn = e.target && e.target.closest && e.target.closest('.mode-toggle-btn');
+        if (toggleBtn && this.container.contains(toggleBtn)) {
           e.preventDefault();
           e.stopPropagation();
           const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
           this.setMode(newMode);
+          return;
+        }
+
+        const focusBtn = e.target && e.target.closest && e.target.closest('.focus-btn');
+        if (focusBtn && this.container.contains(focusBtn)) {
+          e.preventDefault();
+          e.stopPropagation();
+          const cardEl = focusBtn.closest('.swipe-card');
+          if (cardEl) {
+            const idx = parseInt(cardEl.getAttribute('data-index'), 10);
+            this.focusTable(idx);
+          }
         }
       }, true); // capture to win against other listeners
       this._delegatedToggle = true;
@@ -344,6 +356,11 @@ class SwipeCards {
       btn.textContent = mode === 'swipe' ? 'Inspect' : 'Swipe';
     });
 
+    const focusBtns = this.container.querySelectorAll('.focus-btn');
+    focusBtns.forEach(btn => {
+      btn.disabled = mode !== 'inspect';
+    });
+
     this.updateGridListeners();
     this.bindEvents();
     updateFrameHeightDebounced();
@@ -469,10 +486,14 @@ class SwipeCards {
     
     // Add card content section like image cards
     const modeLabel = this.mode === 'swipe' ? 'Inspect' : 'Swipe';
+    const focusDisabled = this.mode === 'inspect' ? '' : 'disabled';
     tableHTML += '<div class="card-content">';
     tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
+    tableHTML += '<div class="card-header-buttons">';
+    tableHTML += `<button class="focus-btn" ${focusDisabled}>Focus</button>`;
     tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
+    tableHTML += '</div>';
     tableHTML += '</div>';
     tableHTML += `<p class="card-description">${card.description || `Swipe to evaluate this data row`}</p>`;
     tableHTML += pillsHTML;
@@ -832,7 +853,36 @@ class SwipeCards {
       updateSwipeProgress();
     }
   }
-  
+
+  focusTable(cardIndex) {
+    const grid = this.agGridInstances && this.agGridInstances.get(cardIndex);
+    const gridContainer = document.getElementById(`ag-grid-${cardIndex}`);
+    if (!grid || !gridContainer) return;
+
+    const card = this.cards[cardIndex];
+    const rowIndex = (card.center_table_row ?? this.centerTableRow ?? card.row_index ?? 0);
+    const colId = card.center_table_column || this.centerTableColumn;
+
+    const vViewport = gridContainer.querySelector('.ag-body-viewport');
+    if (vViewport && rowIndex >= 0) {
+      const rowHeight = (grid.gridOptions && grid.gridOptions.rowHeight) || 30;
+      const targetTop = rowIndex * rowHeight - (vViewport.clientHeight - rowHeight) / 2;
+      vViewport.scrollTo({ top: targetTop, behavior: 'smooth' });
+    }
+
+    const columnApi = grid.columnApi || (grid.gridOptions && grid.gridOptions.columnApi);
+    const hViewport = gridContainer.querySelector('.ag-center-cols-viewport');
+    if (hViewport && colId && columnApi) {
+      const column = columnApi.getColumn(colId);
+      if (column) {
+        const columnLeft = column.getLeft();
+        const columnWidth = column.getActualWidth();
+        const targetLeft = columnLeft + columnWidth / 2 - hViewport.clientWidth / 2;
+        hViewport.scrollTo({ left: targetLeft, behavior: 'smooth' });
+      }
+    }
+  }
+
   renderFallbackTable(container, currentRowIndex) {
     let tableHTML = '<table class="data-table fallback-table">';
     
