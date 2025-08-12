@@ -31,6 +31,37 @@ function updateSwipeProgress() {
   }
 }
 
+// Debounced frame height updater
+let _resizeRaf = null;
+let _resizeTimeout = null;
+function updateFrameHeightImmediate() {
+  try {
+    const docEl = document.documentElement;
+    const body = document.body;
+    const height = Math.ceil(Math.max(
+      docEl?.scrollHeight || 0,
+      body?.scrollHeight || 0,
+      docEl?.offsetHeight || 0,
+      body?.offsetHeight || 0
+    ));
+    // Ensure a sensible minimum height so controls aren't clipped
+    const minH = 360;
+    const finalH = Math.max(height, minH);
+    Streamlit.setFrameHeight(finalH);
+  } catch (e) {
+    // Fallback to a safe default if measurement fails
+    Streamlit.setFrameHeight(620);
+  }
+}
+
+function updateFrameHeightDebounced() {
+  if (_resizeRaf) cancelAnimationFrame(_resizeRaf);
+  if (_resizeTimeout) clearTimeout(_resizeTimeout);
+  _resizeRaf = requestAnimationFrame(() => {
+    _resizeTimeout = setTimeout(updateFrameHeightImmediate, 50);
+  });
+}
+
 function handleImageLoad(img) {
   if (img.dataset.full && !img.dataset.fullLoaded) {
     const hiRes = new Image();
@@ -43,6 +74,7 @@ function handleImageLoad(img) {
     img.classList.remove('loading');
     window.swipeProgress.loaded++;
     updateSwipeProgress();
+    updateFrameHeightDebounced();
   }
 }
 
@@ -290,6 +322,9 @@ class SwipeCards {
         });
       });
     }
+
+    // Ensure the Streamlit iframe height tracks content
+    updateFrameHeightDebounced();
   }
 
   setMode(mode) {
@@ -311,6 +346,7 @@ class SwipeCards {
 
     this.updateGridListeners();
     this.bindEvents();
+    updateFrameHeightDebounced();
   }
 
   updateGridListeners() {
@@ -556,6 +592,7 @@ class SwipeCards {
     };
     const handlePanStart = (e) => {
       if (this.mode !== 'inspect') return;
+      // Allow mouse panning, but not if starting in header or on resize handle
       if (!panShouldStart(e.target)) return;
       const { vEl, hEl } = panViewports();
       if (!vEl && !hEl) return;
@@ -768,6 +805,9 @@ class SwipeCards {
           // Always store grid reference
           this.agGridInstances.set(`${cardIndex}_centered`, true);
         }, 200); // Longer delay to ensure centering is complete
+
+        // Update frame height after data renders and centering completes
+        updateFrameHeightDebounced();
       }
     };
     
@@ -1250,6 +1290,7 @@ class SwipeCards {
           this.render(); // Render the 'All done' message
         }
         this.isAnimating = false;
+        updateFrameHeightDebounced();
       }, 300);
     }
   }
@@ -1282,6 +1323,7 @@ class SwipeCards {
           this.render();
         }
         this.isAnimating = false;
+        updateFrameHeightDebounced();
       }, 300);
     }
   }
@@ -1311,6 +1353,7 @@ class SwipeCards {
     this.render();
     this.bindEvents();
     this.isAnimating = false;
+    updateFrameHeightDebounced();
   }
 
   addNewCardToStack() {
@@ -1342,6 +1385,7 @@ class SwipeCards {
           this.initializeAgGrid(nextCardIndex, card.row_index);
         }, 20);
       }
+      updateFrameHeightDebounced();
     }
   }
 
@@ -1475,9 +1519,40 @@ function onRender(event) {
   // Always create a fresh instance to avoid state persistence issues
   swipeCards = new SwipeCards(container, cards, table_data, highlight_cells, highlight_rows, highlight_columns, display_mode, centerTableRow, centerTableColumn);
   
-  // Set the frame height based on content (adjust for table mode)
-  const frameHeight = display_mode === 'table' ? 720 : 620;
-  Streamlit.setFrameHeight(frameHeight);
+  // Update frame height now and observe for subsequent changes
+  updateFrameHeightImmediate();
+
+  // Observe size changes to keep iframe height in sync
+  try {
+    if (!window._swipecards_resizeObserver) {
+      const ro = new ResizeObserver(() => updateFrameHeightDebounced());
+      ro.observe(document.documentElement);
+      ro.observe(document.body);
+      ro.observe(container);
+      window._swipecards_resizeObserver = ro;
+    }
+  } catch (e) {
+    // ResizeObserver may not be available in very old browsers
+  }
+
+  // Listen to viewport changes
+  window.addEventListener('resize', () => {
+    updateFrameHeightDebounced();
+    try {
+      // Nudge AG-Grid instances to recompute viewport if present,
+      // but keep column widths as measured (no forced stretch)
+      if (window.swipeCards && window.swipeCards.agGridInstances) {
+        window.swipeCards.agGridInstances.forEach((grid) => {
+          try {
+            if (grid && grid.api && grid.api.onGridSizeChanged) {
+              grid.api.onGridSizeChanged();
+            }
+          } catch (e) {}
+        });
+      }
+    } catch (e) {}
+  }, { passive: true });
+  window.addEventListener('orientationchange', updateFrameHeightDebounced, { passive: true });
 }
 
 // Setup theme monitoring for dynamic theme changes
@@ -1520,5 +1595,5 @@ function setupThemeMonitoring() {
 Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender)
 // Tell Streamlit that the component is ready to receive events
 Streamlit.setComponentReady()
-// Initial frame height (reduced for tighter spacing)
-Streamlit.setFrameHeight(620)
+// Initial frame height
+updateFrameHeightImmediate()

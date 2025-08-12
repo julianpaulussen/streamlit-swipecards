@@ -38,27 +38,29 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: var(--bg-color);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
   transition: background-color 0.3s ease;
 }
 
 .swipe-container {
   width: 100%;
-  max-width: 400px;
-  height: 600px;
+  max-width: 100%;
+  height: auto;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  margin: 0 auto;
+  padding: 0 8px;
 }
 
 .cards-stack {
   position: relative;
-  width: 320px;
+  width: 100%;
+  max-width: 360px; /* unified desktop card width */
   height: 450px;
   margin-bottom: 15px;
 }
@@ -333,7 +335,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 450px;
+  min-height: 320px;
   color: var(--text-primary);
   text-align: center;
   background: var(--card-bg);
@@ -385,12 +387,12 @@ body {
 /* Mobile responsiveness */
 @media (max-width: 480px) {
   .swipe-container {
-    max-width: 95%;
-    height: 550px;
+    max-width: 100%;
+    padding: 0 6px;
   }
 
   .cards-stack {
-    width: 280px;
+    width: 100%;
     height: 400px;
   }
   
@@ -523,22 +525,23 @@ body {
 
 /* Adjust card size for table mode */
 .swipe-container.table-mode {
-  max-width: 450px;
+  max-width: 100%;
 }
 
 .swipe-container.table-mode .cards-stack {
-  width: 380px;
+  width: 100%;
+  max-width: 360px; /* unified desktop card width */
   height: 480px;
 }
 
 /* Mobile responsiveness for table cards */
 @media (max-width: 480px) {
   .swipe-container.table-mode {
-    max-width: 95%;
+    max-width: 100%;
   }
 
   .swipe-container.table-mode .cards-stack {
-    width: 320px;
+    width: 100%;
     height: 420px;
   }
   
