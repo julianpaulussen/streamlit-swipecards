@@ -615,10 +615,12 @@ body {
 }
 
 /* In swipe mode, hide column resize handles */
-.swipe-container.swipe-mode .ag-grid-container .ag-header-cell-resize,
-.swipe-container.swipe-mode .ag-grid-container .ag-resizer {
-  display: none !important;
-  pointer-events: none !important;
+@media (pointer: coarse) {
+  .swipe-container.swipe-mode .ag-grid-container .ag-header-cell-resize,
+  .swipe-container.swipe-mode .ag-grid-container .ag-resizer {
+    display: none !important;
+    pointer-events: none !important;
+  }
 }
 
 /* In inspect mode, allow manual panning by user */
