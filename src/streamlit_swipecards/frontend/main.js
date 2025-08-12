@@ -531,8 +531,8 @@ class SwipeCards {
     const gridOptions = {
       columnDefs: columnDefs,
       defaultColDef: {
-        flex: 1,
-        minWidth: 100,
+        // Remove flex so columns can shrink to content
+        minWidth: 60,
         resizable: true
       },
       rowModelType: 'infinite',
@@ -553,11 +553,24 @@ class SwipeCards {
       rowSelection: 'none',
       onGridReady: (params) => {
         params.api.setDatasource(dataSource);
-        // Auto-size columns to fit
-        params.api.sizeColumnsToFit();
       },
       onFirstDataRendered: (params) => {
-        params.api.sizeColumnsToFit();
+        // 1) Auto-size columns to their content (including header)
+        const allColIds = [];
+        const cols = params.columnApi.getColumns() || [];
+        cols.forEach(c => allColIds.push(c.getColId()));
+        if (allColIds.length > 0) {
+          params.columnApi.autoSizeColumns(allColIds, false);
+        }
+
+        // 2) Cap widths at the original fixed width (120px) to avoid overly wide columns
+        // This removes unused width for small columns while preserving the existing max width behavior.
+        const currentState = params.columnApi.getColumnState();
+        const cappedState = currentState.map(s => ({
+          colId: s.colId,
+          width: Math.min(s.width || 120, 120)
+        }));
+        params.columnApi.applyColumnState({ state: cappedState, applyOrder: false });
         
         // Scroll to current row or centered view
         const rowIndexToCenter = card.center_table_row !== null ? card.center_table_row : (this.centerTableRow !== null ? this.centerTableRow : currentRowIndex);
