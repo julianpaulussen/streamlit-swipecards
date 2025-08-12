@@ -21,6 +21,7 @@
   --text-secondary: #666666;
   --border-color: #e0e0e0;
   --card-border-color: #333333;
+  --card-border: 1px solid var(--card-border-color);
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -32,6 +33,7 @@
   --text-secondary: #a6a6a6;
   --border-color: #464748;
   --card-border-color: #fafafa;
+  --card-border: 1px solid var(--card-border-color);
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -77,7 +79,7 @@ body {
   display: flex;
   flex-direction: column;
   user-select: none;
-  border: 1px solid var(--card-border-color);
+  border: var(--card-border);
 }
 
 .swipe-card:active {
@@ -151,7 +153,7 @@ body {
   background: var(--card-bg);
   position: relative;
   z-index: 2;
-  border-top: 1px solid var(--card-border-color);
+  border-top: var(--card-border);
 }
 
 .card-name {
@@ -372,7 +374,7 @@ body {
   text-align: center;
   background: var(--card-bg);
   border-radius: 16px;
-  border: 1px solid var(--card-border-color);
+  border: var(--card-border);
   padding: 20px;
 }
 

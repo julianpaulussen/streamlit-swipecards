@@ -49,6 +49,7 @@ cards = [
 result = streamlit_swipecards(
     cards=cards,
     display_mode="cards",
+    show_border=False,
     key="my_swipe_cards"
 )
 
@@ -70,6 +71,7 @@ if result:
 | `highlight_columns` | `list[dict] \| None` | Column highlighting configuration |
 | `center_table_row` | `int \| None` | Row to center in table view |
 | `center_table_column` | `str \| None` | Column to center in table view |
+| `show_border` | `bool` | Show border around cards (default `True`) |
 | `key` | `str \| None` | Unique component key |
 
 **Returns:** `dict | None` - Interaction data including swiped cards, last action, and statistics

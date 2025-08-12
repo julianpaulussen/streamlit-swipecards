@@ -65,6 +65,7 @@ def streamlit_swipecards(
     display_mode: str = "cards",
     center_table_row: Optional[int] = None,
     center_table_column: Optional[Union[str, int]] = None,
+    show_border: bool = True,
     key: Optional[str] = None,
 ):
     """
@@ -111,6 +112,8 @@ def streamlit_swipecards(
         Row index to center the table view on (legacy mode).
     center_table_column : str or int, optional
         Column name or index to center the table view on (legacy mode).
+    show_border : bool, optional
+        Whether to display a border around cards. Defaults to True.
     key : str, optional
         Unique key for the component
         
@@ -213,6 +216,7 @@ def streamlit_swipecards(
         display_mode=display_mode,
         centerTableRow=center_table_row,
         centerTableColumn=center_table_column,
+        show_border=show_border,
         key=key,
         default=None
     )

@@ -1546,14 +1546,19 @@ function onRender(event) {
     highlight_columns = [],
     display_mode = 'cards',
     centerTableRow = null,
-    centerTableColumn = null
+    centerTableColumn = null,
+    show_border = true
   } = event.detail.args;
-  
+
   // Apply theme detection immediately
   detectAndApplyTheme();
-  
+
   // Set up theme monitoring for dynamic updates
   setupThemeMonitoring();
+
+  // Apply card border preference
+  const borderValue = show_border ? '1px solid var(--card-border-color)' : 'none';
+  document.documentElement.style.setProperty('--card-border', borderValue);
   
   const root = document.getElementById('root');
   root.innerHTML = '<div class="swipe-container"></div>';

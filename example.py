@@ -20,7 +20,10 @@ Users can swipe through cards containing images or data with intuitive gestures.
 
 st.write("## 📱 Interactive Examples")
 
-# Mode selection
+# Border toggle and mode selection
+st.write("Choose customization options:")
+show_border = st.checkbox("Show card borders", True)
+
 mode = st.radio(
     "Select display mode:",
     ["Image Cards", "Table Cards"],
@@ -61,6 +64,7 @@ if mode == "Image Cards":
     result = streamlit_swipecards(
         cards=sample_cards,
         display_mode="cards",
+        show_border=show_border,
         key="image_example",
     )
 else:  # Table Cards
@@ -219,6 +223,7 @@ else:  # Table Cards
     result = streamlit_swipecards(
         cards=table_cards,
         display_mode="table",
+        show_border=show_border,
         key="table_example"
     )
 # Show the result only when explicitly requested (when Get Results is clicked)
@@ -294,6 +299,7 @@ st.markdown("""
 |-----------|------|-------------|----------|
 | `cards` | list[dict] | List of card objects to display | Yes |
 | `display_mode` | str | Display mode: "cards" for images or "table" for data tables | Yes |
+| `show_border` | bool | Whether to display a border around cards | No |
 | `key` | str | Unique component key for state management | Yes |
 
 ### Card Object (Image Cards)
