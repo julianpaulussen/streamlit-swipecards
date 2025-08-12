@@ -331,6 +331,12 @@ body {
   transform: scale(0.95);
 }
 
+.action-btn:disabled {
+  filter: grayscale(1);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-pass {
   background: linear-gradient(135deg, #ff6b6b, #ee5a24);
 }

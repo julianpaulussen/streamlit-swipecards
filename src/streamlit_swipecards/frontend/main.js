@@ -286,14 +286,20 @@ class SwipeCards {
 
     if (this.currentIndex >= this.cards.length) {
       this.container.innerHTML = `
-        <div class="no-more-cards">
-          <h3>🎉 All done!</h3>
-          <p>No more cards to swipe</p>
-          <div class="results-section">
-            <button class="results-btn" onclick="swipeCards.goBack()" ${this.swipedCards.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>↶ Go Back</button>
-            <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
-            <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
+        <div class="cards-stack">
+          <div class="swipe-card no-more-cards">
+            <h3>🎉 All done!</h3>
+            <p>No more cards to swipe</p>
           </div>
+        </div>
+        <div class="action-buttons">
+          <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()" disabled>❌</button>
+          <button class="action-btn btn-back" onclick="swipeCards.goBack()">↶</button>
+          <button class="action-btn btn-like" onclick="swipeCards.swipeRight()" disabled>💚</button>
+        </div>
+        <div class="results-section">
+          <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
+          <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
         </div>
       `;
       return;
