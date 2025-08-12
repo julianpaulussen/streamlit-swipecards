@@ -100,6 +100,36 @@ body {
   opacity: 0;
 }
 
+.return-from-left {
+  animation: return-from-left 0.3s ease-out;
+}
+
+.return-from-right {
+  animation: return-from-right 0.3s ease-out;
+}
+
+@keyframes return-from-left {
+  from {
+    transform: translateX(-400px) rotate(-30deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes return-from-right {
+  from {
+    transform: translateX(400px) rotate(30deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+}
+
 .card-image {
   width: 100%;
   height: 75%;

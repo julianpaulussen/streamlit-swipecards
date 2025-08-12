@@ -1340,20 +1340,33 @@ class SwipeCards {
 
     // Only set animating flag when we actually have work to do
     this.isAnimating = true;
-    
+
     const lastSwiped = this.swipedCards.pop();
     this.currentIndex = lastSwiped.index;
-    
+
     // Store the last action but don't send to Streamlit immediately
     this.lastAction = {
       action: 'back',
       cardIndex: this.currentIndex
     };
-    
+
     this.render();
     this.bindEvents();
-    this.isAnimating = false;
-    updateFrameHeightDebounced();
+
+    const topCard = this.container.querySelector('.swipe-card:first-child');
+    if (topCard) {
+      const directionClass =
+        lastSwiped.action === 'left' ? 'return-from-left' : 'return-from-right';
+      topCard.classList.add(directionClass);
+      setTimeout(() => {
+        topCard.classList.remove('return-from-left', 'return-from-right');
+        this.isAnimating = false;
+        updateFrameHeightDebounced();
+      }, 300);
+    } else {
+      this.isAnimating = false;
+      updateFrameHeightDebounced();
+    }
   }
 
   addNewCardToStack() {
