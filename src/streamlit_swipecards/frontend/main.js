@@ -222,41 +222,9 @@ class SwipeCards {
             this.setMode(newMode);
             return;
           }
-
-          const centerBtn =
-            e.target && e.target.closest && e.target.closest('.center-btn');
-          if (centerBtn && this.container.contains(centerBtn)) {
-            e.preventDefault();
-            e.stopPropagation();
-            const cardEl = centerBtn.closest('.swipe-card');
-            if (cardEl) {
-              const idx = parseInt(cardEl.getAttribute('data-index'), 10);
-              this.centerTable(idx);
-            }
-          }
         },
         true,
       ); // capture to win against other listeners
-
-      // Visual feedback for center button presses
-      this.container.addEventListener(
-        'pointerdown',
-        (e) => {
-          const btn = e.target && e.target.closest && e.target.closest('.center-btn');
-          if (btn && this.container.contains(btn)) {
-            btn.classList.add('pressed');
-          }
-        },
-        true,
-      );
-
-      const clearPress = () => {
-        this.container
-          .querySelectorAll('.center-btn.pressed')
-          .forEach((b) => b.classList.remove('pressed'));
-      };
-      document.addEventListener('pointerup', clearPress, true);
-      document.addEventListener('pointercancel', clearPress, true);
 
       this._delegatedToggle = true;
     }
@@ -387,11 +355,6 @@ class SwipeCards {
     const toggleBtns = this.container.querySelectorAll('.mode-toggle-btn');
     toggleBtns.forEach(btn => {
       btn.textContent = mode === 'swipe' ? 'Inspect' : 'Swipe';
-    });
-
-    const centerBtns = this.container.querySelectorAll('.center-btn');
-    centerBtns.forEach(btn => {
-      btn.disabled = false;
     });
 
     this.updateGridListeners();
@@ -529,7 +492,6 @@ class SwipeCards {
     tableHTML += '<div class="card-header">';
     tableHTML += `<h3 class="card-name">${card.name || `Row ${rowIndex + 1}`}</h3>`;
     tableHTML += '<div class="card-header-buttons">';
-    tableHTML += '<button class="center-btn">Center</button>';
     tableHTML += `<button class="mode-toggle-btn">${modeLabel}</button>`;
     tableHTML += '</div>';
     tableHTML += '</div>';
@@ -899,54 +861,6 @@ class SwipeCards {
       if (overlay) overlay.remove();
       window.swipeProgress.loaded++;
       updateSwipeProgress();
-    }
-  }
-
-  centerTable(cardIndex) {
-    const grid = this.agGridInstances && this.agGridInstances.get(cardIndex);
-    const gridContainer = document.getElementById(`ag-grid-${cardIndex}`);
-    if (!grid || !gridContainer) return;
-
-    const api = grid.api || grid;
-    const columnApi =
-      grid.columnApi ||
-      (api.getColumnApi ? api.getColumnApi() : (grid.gridOptions && grid.gridOptions.columnApi));
-
-    const card = this.cards[cardIndex];
-    const rowIndex = card.center_table_row ?? this.centerTableRow;
-    const colId = card.center_table_column ?? this.centerTableColumn;
-
-    const hasRow = typeof rowIndex === 'number' && rowIndex >= 0;
-    const hasCol = colId !== undefined && colId !== null && colId !== '';
-
-    if (api) {
-      if (hasRow) {
-        api.ensureIndexVisible(rowIndex, 'middle');
-      }
-      if (hasCol) {
-        api.ensureColumnVisible(colId, 'middle');
-      }
-      if (hasRow && hasCol) {
-        api.setFocusedCell(rowIndex, colId);
-      }
-    }
-
-    const vViewport = gridContainer.querySelector('.ag-body-viewport');
-    if (vViewport && hasRow) {
-      const rowHeight = (grid.gridOptions && grid.gridOptions.rowHeight) || 30;
-      const targetTop = rowIndex * rowHeight - (vViewport.clientHeight - rowHeight) / 2;
-      vViewport.scrollTo({ top: targetTop, behavior: 'smooth' });
-    }
-
-    const hViewport = gridContainer.querySelector('.ag-center-cols-viewport');
-    if (hViewport && hasCol && columnApi) {
-      const column = columnApi.getColumn(colId);
-      if (column) {
-        const columnLeft = column.getLeft();
-        const columnWidth = column.getActualWidth();
-        const targetLeft = columnLeft + columnWidth / 2 - hViewport.clientWidth / 2;
-        hViewport.scrollTo({ left: targetLeft, behavior: 'smooth' });
-      }
     }
   }
 

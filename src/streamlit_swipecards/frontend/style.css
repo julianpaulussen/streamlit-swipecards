@@ -246,8 +246,7 @@ body {
   gap: 8px;
 }
 
-.mode-toggle-btn,
-.center-btn {
+.mode-toggle-btn {
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
@@ -262,13 +261,6 @@ body {
 }
 
 .swipe-container.inspect-mode .mode-toggle-btn {
-  background: var(--button-gradient);
-  color: #fff;
-  border: none;
-}
-
-.center-btn:active,
-.center-btn.pressed {
   background: var(--button-gradient);
   color: #fff;
   border: none;
