@@ -68,6 +68,8 @@ if mode == "Image Cards":
         last_card_message="This is the last page. You can add your own text here",
         key="image_example",
     )
+    if result:
+        st.session_state["swipe_results"] = result
 else:  # Table Cards
     st.subheader("📊 Table Cards Mode")
     
@@ -93,7 +95,7 @@ else:  # Table Cards
     st.markdown("- 👆 **Swipe right** or click 💚 to like the row")
     st.markdown("- 👆 **Swipe left** or click ❌ to pass the row")
     st.markdown("- 🔄 Click ↶ to go back")
-    st.markdown("- 📊 Click to get results when done")
+    
 
     # Create table cards - each card represents a different row with its own configuration
     table_cards = [
@@ -228,10 +230,12 @@ else:  # Table Cards
         last_card_message="This is the last page. You can add your own text here",
         key="table_example"
     )
-# Show the result only when explicitly requested (when Get Results is clicked)
-if result and result.get('totalSwiped', 0) > 0:
+    if result:
+        st.session_state["swipe_results"] = result
+
+if st.session_state.get("swipe_results"):
     st.write("### Results:")
-    st.json(result)
+    st.json(st.session_state["swipe_results"])
 
 st.write("## 🛠️ Code Examples")
 
