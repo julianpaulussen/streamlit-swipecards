@@ -298,7 +298,6 @@ class SwipeCards {
           <button class="action-btn btn-like" onclick="swipeCards.swipeRight()" disabled>💚</button>
         </div>
         <div class="results-section">
-          <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
           <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
         </div>
       `;
@@ -352,7 +351,6 @@ class SwipeCards {
         <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">💚</button>
       </div>
       <div class="results-section">
-        <button class="results-btn" onclick="swipeCards.getResults()">📊 Get Results</button>
         <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
       </div>
     `;

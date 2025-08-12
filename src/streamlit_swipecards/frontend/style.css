@@ -223,29 +223,8 @@ body {
 .results-section {
   margin-top: 8px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
-}
-
-.results-btn {
-  background: var(--button-gradient);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  transition: transform 0.2s ease;
-}
-
-.results-btn:hover {
-  transform: scale(1.05);
-}
-
-.results-btn:active {
-  transform: scale(0.95);
 }
 
 .swipe-counter {
@@ -459,12 +438,7 @@ body {
     height: 55px;
     font-size: 22px;
   }
-  
-  .results-btn {
-    font-size: 14px;
-    padding: 10px 20px;
-  }
-  
+
   .swipe-counter {
     font-size: 11px;
   }
