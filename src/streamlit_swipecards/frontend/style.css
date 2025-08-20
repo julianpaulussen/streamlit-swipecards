@@ -31,7 +31,7 @@
   --btn-pass-fg: ;
   --btn-back-bg: ;
   --btn-back-fg: ;
-  --btn-border: ;
+  --btn-border: var(--text-color);
 }
 
 /* Dark theme overrides */
@@ -44,6 +44,7 @@
   --card-border-color: #fafafa;
   --card-border: 1px solid var(--card-border-color);
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --btn-border: var(--text-color);
 }
 
 body {
@@ -493,17 +494,17 @@ body {
 }
 
 .data-table th {
-  background: var(--button-gradient);
-  color: white;
+  background: var(--background-color);
+  color: var(--text-color);
   padding: 10px 8px;
   text-align: left;
   font-weight: 600;
   font-size: calc(var(--table-font-size, 14px) - 2px);
-  border: none;
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 10;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  text-shadow: none;
 }
 
 .data-table td {
@@ -714,8 +715,8 @@ body {
 /* AG-Grid theme customization to match our design */
 .ag-grid-container .ag-theme-alpine {
   --ag-background-color: var(--card-bg);
-  --ag-header-background-color: transparent;
-  --ag-header-foreground-color: white;
+  --ag-header-background-color: var(--background-color);
+  --ag-header-foreground-color: var(--text-color);
   --ag-odd-row-background-color: var(--card-bg);
   --ag-row-hover-color: var(--bg-color);
   --ag-selected-row-background-color: rgba(0, 123, 255, 0.1);
@@ -729,22 +730,22 @@ body {
   color: var(--text-primary);
 }
 
-/* Custom header styling to match our gradient */
+/* Header styling aligned with Streamlit theme */
 .ag-grid-container .ag-header {
-  background: var(--button-gradient) !important;
+  background: var(--background-color) !important;
   border-radius: 8px 8px 0 0;
 }
 
 .ag-grid-container .ag-header-cell {
   background: transparent !important;
-  color: white !important;
+  color: var(--text-color) !important;
   font-weight: 600 !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
-  border-right: 1px solid rgba(255,255,255,0.2) !important;
+  text-shadow: none !important;
+  border-right: 1px solid var(--border-color) !important;
 }
 
 .ag-grid-container .ag-header-cell-label {
-  color: white !important;
+  color: var(--text-color) !important;
 }
 
 /* Row styling */

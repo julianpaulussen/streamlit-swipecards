@@ -71,8 +71,9 @@ def streamlit_swipecards(
     table_font_size: Optional[int] = 14,
     table_max_rows: Optional[int] = None,
     table_max_columns: Optional[int] = None,
-    use_theme_highlight: bool = True,
-    use_theme_buttons: bool = False,
+    # Deprecated: theme flags are ignored; component always follows Streamlit theme
+    use_theme_highlight: Optional[bool] = None,
+    use_theme_buttons: Optional[bool] = None,
     last_card_message: Optional[str] = None,
     key: Optional[str] = None,
 ):
@@ -131,10 +132,10 @@ def streamlit_swipecards(
     table_max_columns : int, optional
         Maximum number of columns to render per table card (visual trimming only). If None, show all columns.
     use_theme_highlight : bool, optional
-        If True, use Streamlit theme colors for default cell/row/column highlighting when no explicit color is provided.
-        If False, fall back to the previous default highlight palette.
+        Deprecated. The component now always uses the active Streamlit theme when no explicit highlight color is provided.
+        This parameter is ignored and kept for backward compatibility.
     use_theme_buttons : bool, optional
-        If True, style action buttons (like/back/pass) using the Streamlit theme. If False, use the previous gradient scheme.
+        Deprecated. The component now always uses the active Streamlit theme for buttons. This parameter is ignored.
     last_card_message : str, optional
         Custom message to display when all cards have been swiped.
     key : str, optional
@@ -244,8 +245,6 @@ def streamlit_swipecards(
         table_font_size=table_font_size,
         table_max_rows=table_max_rows,
         table_max_columns=table_max_columns,
-        use_theme_highlight=use_theme_highlight,
-        use_theme_buttons=use_theme_buttons,
         last_card_message=last_card_message,
         key=key,
         default=None

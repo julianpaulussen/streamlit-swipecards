@@ -23,7 +23,6 @@ st.write("## 📱 Interactive Examples")
 # Border toggle and mode selection
 st.write("Choose customization options:")
 show_border = st.checkbox("Show card borders", True)
-use_theme_buttons = False
 
 view_option = st.radio(
     "Select view:",
@@ -84,7 +83,6 @@ if mode == "Image Cards":
         cards=sample_cards,
         display_mode="cards",
         show_border=show_border,
-        use_theme_buttons=use_theme_buttons,
         view=view,
         last_card_message="This is the last page. You can add your own text here",
         key="image_example",
@@ -116,8 +114,6 @@ else:  # Table Cards
     st.markdown("- 👆 **Swipe right** or click 💚 to like the row")
     st.markdown("- 👆 **Swipe left** or click ❌ to pass the row")
     st.markdown("- 🔄 Click ↶ to go back")
-
-    use_theme_highlight = True
 
     # Create table cards - each card represents a different row with its own configuration
     table_cards = [
@@ -249,8 +245,6 @@ else:  # Table Cards
         cards=table_cards,
         display_mode="table",
         show_border=show_border,
-        use_theme_buttons=use_theme_buttons,
-        use_theme_highlight=use_theme_highlight,
         table_font_size=table_font_size,
         table_max_rows=int(table_max_rows) if table_max_rows else None,
         table_max_columns=int(table_max_columns) if table_max_columns else None,
@@ -336,8 +330,6 @@ st.markdown("""
 | `cards` | list[dict] | List of card objects to display | Yes |
 | `display_mode` | str | Display mode: "cards" for images or "table" for data tables | Yes |
 | `show_border` | bool | Whether to display a border around cards | No |
-| `use_theme_buttons` | bool | Use Streamlit theme for like/back/pass buttons | No |
-| `use_theme_highlight` | bool | Use theme colors for default highlights in table mode | No |
 | `table_font_size` | int | Table font size (px) in table mode | No |
 | `table_max_rows` | int | Max rows to render per table card | No |
 | `table_max_columns` | int | Max columns to render per table card | No |

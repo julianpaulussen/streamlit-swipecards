@@ -1,7 +1,7 @@
 # 🃏 Streamlit Swipe Cards
 
 [![PyPI version](https://badge.fury.io/py/streamlit-swipecards.svg)](https://badge.fury.io/py/streamlit-swipecards)
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.2+-red.svg)](https://streamlit.io)
 
 A modern, interactive card-swiping component for Streamlit applications. Build interfaces with smooth animations for both image cards and data table rows.
@@ -79,10 +79,10 @@ if result:
 | `table_font_size` | `int` | Table font size in px (default `14`) |
 | `table_max_rows` | `int \| None` | Max rows to render per table card (visual trim) |
 | `table_max_columns` | `int \| None` | Max columns to render per table card (visual trim) |
-| `use_theme_highlight` | `bool` | Use Streamlit theme for default highlights when no color is given (default `True`) |
-| `use_theme_buttons` | `bool` | Use Streamlit theme for like/back/pass buttons (default `False`) |
 | `last_card_message` | `str \| None` | Message shown after all cards are swiped |
 | `key` | `str \| None` | Unique component key |
+\
+Note: The component now always follows the active Streamlit theme for button colors and default table highlights. Legacy parameters `use_theme_highlight` and `use_theme_buttons` are deprecated and ignored.
 
 **Returns:** `dict | None` - Interaction data including swiped cards, last action, and statistics
 
@@ -114,7 +114,7 @@ if result:
     "description": "Engineering Team",    # optional - card subtitle
     "pills": ["Senior", "Remote"],        # optional - status tags
     "highlight_cells": [                  # optional - cell highlighting
-        {"row": 0, "column": "Salary"}   # with use_theme_highlight=True: uses theme
+        {"row": 0, "column": "Salary"}
     ],
     "highlight_rows": [                   # optional - row highlighting
         {"row": 0}
@@ -148,10 +148,9 @@ The component returns detailed interaction data:
 
 ## 🎨 Theme Integration
 
-- Buttons and highlights adapt to the active Streamlit theme when enabled.
-- Set `use_theme_buttons=True` to color the Like/Back/Pass buttons using your app’s `primaryColor` and text colors. Disable to use the original gradient styles.
-- Set `use_theme_highlight=True` to use theme-derived backgrounds/borders for default cell/row/column highlights when no explicit `color` is provided in the highlight specs. Disable to fall back to the previous default palette.
-- Adjust table readability with `table_font_size` (px), and optionally reduce rendered data with `table_max_rows` and `table_max_columns` to keep layouts clean on small cards.
+- Buttons and default table highlights adapt automatically to the active Streamlit theme.
+- No flags required: the component derives colors from your app theme (or defaults if none is set).
+- Adjust table readability with `table_font_size` (px); optionally trim rendered data with `table_max_rows` and `table_max_columns` for smaller layouts.
 
 ## 🚀 Example App
 

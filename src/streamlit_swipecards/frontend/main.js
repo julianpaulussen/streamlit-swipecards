@@ -263,8 +263,7 @@ class SwipeCards {
     this.tableFontSize = opts.tableFontSize ?? 14;
     this.tableMaxRows = opts.tableMaxRows ?? null;
     this.tableMaxColumns = opts.tableMaxColumns ?? null;
-    this.useThemeHighlight = opts.useThemeHighlight ?? true;
-    this.useThemeButtons = opts.useThemeButtons ?? true;
+    // Theme flags removed: always follow Streamlit theme when available
     this.currentIndex = 0;
     this.swipedCards = [];
     this.isDragging = false;
@@ -1004,7 +1003,7 @@ class SwipeCards {
             const highlight = this.highlightRows.find(h => h.row === rIndex);
             let color = highlight?.color;
             if (color === 'random') color = this.getRandomColor();
-            if (!color && this.useThemeHighlight && window._swipecardsTheme?.primary) {
+            if (!color && window._swipecardsTheme?.primary) {
               const rgb = hexToRgb(window._swipecardsTheme.primary);
               const bg = toRgbaString(rgb, 0.12);
               const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
@@ -1017,7 +1016,7 @@ class SwipeCards {
             const highlight = this.highlightColumns.find(h => h.column === col);
             let color = highlight?.color;
             if (color === 'random') color = this.getRandomColor();
-            if (!color && this.useThemeHighlight && window._swipecardsTheme?.primary) {
+            if (!color && window._swipecardsTheme?.primary) {
               const rgb = hexToRgb(window._swipecardsTheme.primary);
               const bg = toRgbaString(rgb, 0.12);
               const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
@@ -1057,7 +1056,7 @@ class SwipeCards {
     if (highlight) {
       let color = highlight.color;
       if (color === 'random') color = this.getRandomColor();
-      if (!color && this.useThemeHighlight && window._swipecardsTheme?.primary) {
+      if (!color && window._swipecardsTheme?.primary) {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.18);
         const bd = toRgbaString(darkenRgb(rgb, 20), 0.9);
@@ -1085,7 +1084,7 @@ class SwipeCards {
       }
       
       // Use provided color or default
-      color = color || '#FFD700'; // Gold as default
+      color = color || '#FFD700'; // Gold as default when theme color is not used
       
       return {
         backgroundColor: color,
@@ -1190,8 +1189,8 @@ class SwipeCards {
       let color = highlight.color;
       if (color === 'random') color = this.getRandomColor();
 
-      // Theme-based default if no explicit color and enabled
-      if (!color && this.useThemeHighlight && window._swipecardsTheme?.primary) {
+      // Theme-based default if no explicit color
+      if (!color && window._swipecardsTheme?.primary) {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.18);
         const bd = toRgbaString(darkenRgb(rgb, 20), 0.9);
@@ -1214,7 +1213,7 @@ class SwipeCards {
     if (highlight) {
       let color = highlight.color;
       if (color === 'random') color = this.getRandomColor();
-      if (!color && this.useThemeHighlight && window._swipecardsTheme?.primary) {
+      if (!color && window._swipecardsTheme?.primary) {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.12);
         const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
@@ -1240,7 +1239,7 @@ class SwipeCards {
     if (highlight) {
       let color = highlight.color;
       if (color === 'random') color = this.getRandomColor();
-      if (!color && this.useThemeHighlight && window._swipecardsTheme?.primary) {
+      if (!color && window._swipecardsTheme?.primary) {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.12);
         const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
@@ -1641,8 +1640,6 @@ function onRender(event) {
     table_font_size = 14,
     table_max_rows = null,
     table_max_columns = null,
-    use_theme_highlight = true,
-    use_theme_buttons = true,
     last_card_message = null
   } = event.detail.args;
 
@@ -1664,9 +1661,11 @@ function onRender(event) {
   if (table_font_size) {
     document.documentElement.style.setProperty('--table-font-size', `${table_font_size}px`);
   }
-  // Apply button theming via CSS variables when requested
+  // Apply button theming via CSS variables using Streamlit theme
   try {
-    if (use_theme_buttons && window._swipecardsTheme?.primary) {
+    const textCol = (window._swipecardsTheme?.text || '').trim() ||
+                    getComputedStyle(document.documentElement).getPropertyValue('--text-color')?.trim();
+    if (window._swipecardsTheme?.primary) {
       const base = hexToRgb(window._swipecardsTheme.primary) || { r: 102, g: 126, b: 234 };
       const likeBg = toRgbaString(base, 1);
       const likeFg = bestTextOn(base);
@@ -1676,7 +1675,7 @@ function onRender(event) {
       const backRgb = lightenRgb(base, 15);
       const backBg = toRgbaString(backRgb, 1);
       const backFg = '#FFA500'; // force orange icon for visibility
-      const borderCol = likeBg;
+      const borderCol = textCol || '#666666';
       const root = document.documentElement.style;
       root.setProperty('--btn-like-bg', likeBg);
       root.setProperty('--btn-like-fg', likeFg);
@@ -1693,7 +1692,11 @@ function onRender(event) {
       root.removeProperty('--btn-pass-fg');
       root.removeProperty('--btn-back-bg');
       root.removeProperty('--btn-back-fg');
-      root.removeProperty('--btn-border');
+      if (textCol) {
+        root.setProperty('--btn-border', textCol);
+      } else {
+        root.removeProperty('--btn-border');
+      }
     }
   } catch (e) {}
   
@@ -1746,8 +1749,6 @@ function onRender(event) {
       tableFontSize: table_font_size,
       tableMaxRows: table_max_rows,
       tableMaxColumns: table_max_columns,
-      useThemeHighlight: use_theme_highlight,
-      useThemeButtons: use_theme_buttons,
     }
   );
   
