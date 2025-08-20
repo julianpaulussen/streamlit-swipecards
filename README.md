@@ -13,7 +13,7 @@ A modern, interactive card-swiping component for Streamlit applications. Build i
 - **Dual Display Modes**: Support for both image cards and interactive data tables
 - **Touch & Mouse Support**: Works seamlessly on desktop and mobile devices
 - **Responsive Views**: Choose mobile or desktop layouts for card width
-- **Interactive Actions**: Like 💚, pass ❌, and undo ↶ functionality
+- **Interactive Actions**: Like ✔️, pass ❌, and undo ↶ functionality
 - **Advanced Table Features**: Cell, row, and column highlighting with AG-Grid integration
 - **Performance Optimized**: Automatic dataset caching for improved loading times
 - **Return Values**: Get detailed feedback on user interactions and swipe patterns
@@ -167,7 +167,7 @@ streamlit run example.py
 
 ```bash
 # Clone the repository
-git clone https://github.com/lejuliennn/streamlit-swipecards.git
+git clone https://github.com/julianpaulussen/streamlit-swipecards.git
 cd streamlit-swipecards
 
 # Install dependencies
@@ -203,6 +203,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 Issues: [GitHub Issues](https://github.com/lejuliennn/streamlit-swipecards/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/lejuliennn/streamlit-swipecards/discussions)
-- 📧 Email: julien.playsde@gmail.com
+- Issues: [GitHub Issues](https://github.com/julianpaulussen/streamlit-swipecards/issues)
+- Discussions: [GitHub Discussions](https://github.com/julianpaulussen/streamlit-swipecards/discussions)
+- Email: julien.playsde@gmail.com

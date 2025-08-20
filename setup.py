@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="streamlit-swipecards",
-    version="0.3.2",
+    version="0.3.3",
     author="Julian",
     author_email="julien.playsde@gmail.com",
     description="Streamlit Swipecards allow you to add interactive swipeable cards to your app. Supports both image cards and table row swiping with cell highlighting.",

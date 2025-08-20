@@ -23,7 +23,7 @@ st.write("## 📱 Interactive Examples")
 # Border toggle and mode selection
 st.write("Choose customization options:")
 show_border = st.checkbox("Show card borders", True)
-use_theme_buttons = st.checkbox("Use theme for buttons", False)
+use_theme_buttons = False
 
 view_option = st.radio(
     "Select view:",
@@ -117,9 +117,7 @@ else:  # Table Cards
     st.markdown("- 👆 **Swipe left** or click ❌ to pass the row")
     st.markdown("- 🔄 Click ↶ to go back")
 
-    use_theme_highlight = st.checkbox("Use theme for highlights", True,
-        help="When no explicit color is provided for cell/row/column highlights, use the current theme colors.")
-    
+    use_theme_highlight = True
 
     # Create table cards - each card represents a different row with its own configuration
     table_cards = [

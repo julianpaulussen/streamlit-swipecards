@@ -352,8 +352,8 @@ class SwipeCards {
           <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()" disabled>❌</button>
           <button class="action-btn btn-back" onclick="swipeCards.goBack()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 12L8 8V10.5C8 10.5 16 10.5 16 10.5C18.2091 10.5 20 12.2909 20 14.5V16C20 18.2091 18.2091 20 16 20H12" stroke="#FFA500" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-              <polygon points="4,12 8,8 8,16" fill="#FFA500"/>
+              <path d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C8.5 21 5.5 18.5 4 15.5" stroke="#FFA500" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              <path d="M2 14L4 12.5L6 14" stroke="#FFA500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             </svg>
           </button>
           <button class="action-btn btn-like" onclick="swipeCards.swipeRight()" disabled>✔️</button>
@@ -410,8 +410,8 @@ class SwipeCards {
         <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()">❌</button>
         <button class="action-btn btn-back" onclick="swipeCards.goBack()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 12L8 8V10.5C8 10.5 16 10.5 16 10.5C18.2091 10.5 20 12.2909 20 14.5V16C20 18.2091 18.2091 20 16 20H12" stroke="#FFA500" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <polygon points="4,12 8,8 8,16" fill="#FFA500"/>
+            <path d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C8.5 21 5.5 18.5 4 15.5" stroke="#FFA500" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M2 16L4 13L6 16" stroke="#FFA500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
           </svg>
         </button>
         <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">✔️</button>
