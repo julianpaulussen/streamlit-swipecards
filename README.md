@@ -1,7 +1,7 @@
 # 🃏 Streamlit Swipe Cards
 
 [![PyPI version](https://badge.fury.io/py/streamlit-swipecards.svg)](https://badge.fury.io/py/streamlit-swipecards)
-[![Python 3.10+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.2+-red.svg)](https://streamlit.io)
 
 A modern, interactive card-swiping component for Streamlit applications. Build interfaces with smooth animations for both image cards and data table rows.
