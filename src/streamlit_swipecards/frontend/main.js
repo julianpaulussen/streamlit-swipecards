@@ -167,6 +167,37 @@ function detectAndApplyTheme() {
   return isDark;
 }
 
+// Apply Streamlit-provided theme (if available via event.detail.theme)
+function applyStreamlitTheme(theme) {
+  if (!theme) return;
+  try {
+    const root = document.documentElement.style;
+    if (theme.primaryColor) root.setProperty('--primary-color', theme.primaryColor);
+    if (theme.backgroundColor) {
+      root.setProperty('--background-color', theme.backgroundColor);
+      root.setProperty('--bg-color', theme.backgroundColor);
+    }
+    if (theme.secondaryBackgroundColor) {
+      root.setProperty('--secondary-background-color', theme.secondaryBackgroundColor);
+      root.setProperty('--card-bg', theme.secondaryBackgroundColor);
+    }
+    if (theme.textColor) {
+      root.setProperty('--text-color', theme.textColor);
+      root.setProperty('--text-primary', theme.textColor);
+    }
+    if (theme.font) {
+      root.setProperty('--font', theme.font);
+    }
+    // Base can be 'light' or 'dark'
+    if (theme.base) {
+      document.documentElement.setAttribute('data-theme', theme.base.toLowerCase() === 'dark' ? 'dark' : 'light');
+      document.body.className = theme.base.toLowerCase() === 'dark' ? 'dark-theme' : 'light-theme';
+    }
+  } catch (e) {
+    console.log('Could not apply Streamlit theme directly:', e);
+  }
+}
+
 class SwipeCards {
   constructor(container, cards, tableData = null, highlightCells = [], highlightRows = [], highlightColumns = [], displayMode = 'cards', centerTableRow = null, centerTableColumn = null, lastCardMessage = 'No more cards to swipe') {
     this.container = container;
@@ -265,7 +296,7 @@ class SwipeCards {
         <div class="action-buttons">
           <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()" disabled>❌</button>
           <button class="action-btn btn-back" onclick="swipeCards.goBack()">↶</button>
-          <button class="action-btn btn-like" onclick="swipeCards.swipeRight()" disabled>💚</button>
+          <button class="action-btn btn-like" onclick="swipeCards.swipeRight()" disabled>✔️</button>
         </div>
         <div class="results-section">
           <div class="swipe-counter">Total swiped: ${this.swipedCards.length}</div>
@@ -302,7 +333,7 @@ class SwipeCards {
       cardsHTML += `
         <div class="swipe-card ${positionClass}" data-index="${cardIndex}">
           ${cardContent}
-          <div class="action-indicator like">💚</div>
+          <div class="action-indicator like">✔️</div>
           <div class="action-indicator pass">❌</div>
         </div>
       `;
@@ -318,7 +349,7 @@ class SwipeCards {
       <div class="action-buttons">
         <button class="action-btn btn-pass" onclick="swipeCards.swipeLeft()">❌</button>
         <button class="action-btn btn-back" onclick="swipeCards.goBack()">↶</button>
-        <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">💚</button>
+        <button class="action-btn btn-like" onclick="swipeCards.swipeRight()">✔️</button>
       </div>
       <div class="results-section">
         <div class="swipe-counter">Swiped: ${this.swipedCards.length} | Remaining: ${this.cards.length - this.currentIndex}</div>
@@ -1419,7 +1450,7 @@ class SwipeCards {
       const newCardHTML = `
         <div class="swipe-card" data-index="${nextCardIndex}">
           ${cardContent}
-          <div class="action-indicator like">💚</div>
+          <div class="action-indicator like">✔️</div>
           <div class="action-indicator pass">❌</div>
         </div>
       `;
@@ -1530,6 +1561,11 @@ function onRender(event) {
     last_card_message = null
   } = event.detail.args;
 
+  // If Streamlit theme is provided, apply it directly first
+  if (event.detail && event.detail.theme) {
+    applyStreamlitTheme(event.detail.theme);
+  }
+
   // Apply theme detection immediately
   detectAndApplyTheme();
 
@@ -1552,6 +1588,10 @@ function onRender(event) {
 
   // Apply desktop view styling if requested
   if (view === 'desktop') {
+    container.classList.add('desktop-view');
+  }
+  // Also allow opting into desktop width via display_mode alias
+  if (display_mode === 'desktop-view') {
     container.classList.add('desktop-view');
   }
   

@@ -38,7 +38,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: var(--font, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
   background: var(--bg-color);
   margin: 0;
   padding: 0;
@@ -547,7 +547,7 @@ body {
 
 /* Wider cards for desktop view */
 .swipe-container.desktop-view .cards-stack {
-  max-width: 600px;
+  max-width: 800px;
 }
 
 /* Mobile responsiveness for table cards */
