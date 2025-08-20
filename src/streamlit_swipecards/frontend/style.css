@@ -23,6 +23,15 @@
   --card-border-color: #333333;
   --card-border: 1px solid var(--card-border-color);
   --button-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Table and buttons */
+  --table-font-size: 14px;
+  --btn-like-bg: ;
+  --btn-like-fg: ;
+  --btn-pass-bg: ;
+  --btn-pass-fg: ;
+  --btn-back-bg: ;
+  --btn-back-fg: ;
+  --btn-border: ;
 }
 
 /* Dark theme overrides */
@@ -270,7 +279,7 @@ body {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  border: none;
+  border: 2px solid var(--btn-border, rgba(0, 0, 0, 0.15));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -279,6 +288,11 @@ body {
   font-weight: bold;
   transition: transform 0.2s ease;
   color: white;
+}
+
+/* Ensure border visibility in dark theme */
+[data-theme="dark"] .action-btn {
+  border-color: var(--btn-border, rgba(255, 255, 255, 0.25));
 }
 
 /* Disable interactions when in inspect mode */
@@ -296,6 +310,7 @@ body {
 
 .action-btn:hover {
   transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
 }
 
 .action-btn:active {
@@ -309,15 +324,25 @@ body {
 }
 
 .btn-pass {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: var(--btn-pass-bg, linear-gradient(135deg, #ff6b6b, #ee5a24));
+  color: var(--btn-pass-fg, #fff);
 }
 
 .btn-back {
-  background: linear-gradient(135deg, #feca57, #ff9ff3);
+  background: var(--btn-back-bg, transparent);
+  color: var(--btn-back-fg, #FFA500);
+  border-color: var(--btn-border, transparent);
+}
+
+.btn-back svg {
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
 }
 
 .btn-like {
-  background: linear-gradient(135deg, #48cae4, #023e8a);
+  background: var(--btn-like-bg, linear-gradient(135deg, #48cae4, #023e8a));
+  color: var(--btn-like-fg, #fff);
 }
 
 .action-indicator {
@@ -460,7 +485,7 @@ body {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: var(--table-font-size, 14px);
   color: var(--text-primary);
   background: var(--card-bg);
   border-radius: 8px;
@@ -470,10 +495,10 @@ body {
 .data-table th {
   background: var(--button-gradient);
   color: white;
-  padding: 8px 6px;
+  padding: 10px 8px;
   text-align: left;
   font-weight: 600;
-  font-size: 10px;
+  font-size: calc(var(--table-font-size, 14px) - 2px);
   border: none;
   position: sticky;
   top: 0;
@@ -482,14 +507,14 @@ body {
 }
 
 .data-table td {
-  padding: 6px 6px;
+  padding: 8px 8px;
   border: 1px solid var(--border-color);
   word-wrap: break-word;
   max-width: 80px;
   vertical-align: top;
   background: var(--card-bg);
   transition: all 0.3s ease;
-  font-size: 10px;
+  font-size: var(--table-font-size, 14px);
   color: var(--text-primary);
 }
 
@@ -697,7 +722,7 @@ body {
   --ag-border-color: var(--border-color);
   --ag-foreground-color: var(--text-primary);
   --ag-secondary-foreground-color: var(--text-secondary);
-  --ag-font-size: 10px;
+  --ag-font-size: var(--table-font-size, 14px);
   --ag-font-family: inherit;
   font-family: inherit;
   border-radius: 8px;
@@ -736,8 +761,8 @@ body {
 /* Cell styling */
 .ag-grid-container .ag-cell {
   border-right: 1px solid var(--border-color) !important;
-  font-size: 10px !important;
-  padding: 4px 6px !important;
+  font-size: var(--table-font-size, 14px) !important;
+  padding: 6px 8px !important;
   color: var(--text-primary) !important;
   background-color: var(--card-bg) !important;
 }

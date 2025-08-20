@@ -76,6 +76,11 @@ if result:
 | `center_table_column` | `str \| None` | Column to center in table view |
 | `view` | `str` | Layout: `"mobile"` (default) or `"desktop"` for wider cards |
 | `show_border` | `bool` | Show border around cards (default `True`) |
+| `table_font_size` | `int` | Table font size in px (default `14`) |
+| `table_max_rows` | `int \| None` | Max rows to render per table card (visual trim) |
+| `table_max_columns` | `int \| None` | Max columns to render per table card (visual trim) |
+| `use_theme_highlight` | `bool` | Use Streamlit theme for default highlights when no color is given (default `True`) |
+| `use_theme_buttons` | `bool` | Use Streamlit theme for like/back/pass buttons (default `False`) |
 | `last_card_message` | `str \| None` | Message shown after all cards are swiped |
 | `key` | `str \| None` | Unique component key |
 
@@ -109,13 +114,13 @@ if result:
     "description": "Engineering Team",    # optional - card subtitle
     "pills": ["Senior", "Remote"],        # optional - status tags
     "highlight_cells": [                  # optional - cell highlighting
-        {"row": 0, "column": "Salary", "color": "#FFB6C1"}
+        {"row": 0, "column": "Salary"}   # with use_theme_highlight=True: uses theme
     ],
     "highlight_rows": [                   # optional - row highlighting
-        {"row": 0, "color": "#E3F2FD"}
+        {"row": 0}
     ],
     "highlight_columns": [                # optional - column highlighting
-        {"column": "Performance", "color": "#E8F5E8"}
+        {"column": "Performance"}
     ],
     "center_table_row": 0,                # optional - center row
     "center_table_column": "Salary"       # optional - center column
@@ -140,6 +145,13 @@ The component returns detailed interaction data:
     "remainingCards": 8    # Cards left in stack
 }
 ```
+
+## 🎨 Theme Integration
+
+- Buttons and highlights adapt to the active Streamlit theme when enabled.
+- Set `use_theme_buttons=True` to color the Like/Back/Pass buttons using your app’s `primaryColor` and text colors. Disable to use the original gradient styles.
+- Set `use_theme_highlight=True` to use theme-derived backgrounds/borders for default cell/row/column highlights when no explicit `color` is provided in the highlight specs. Disable to fall back to the previous default palette.
+- Adjust table readability with `table_font_size` (px), and optionally reduce rendered data with `table_max_rows` and `table_max_columns` to keep layouts clean on small cards.
 
 ## 🚀 Example App
 
