@@ -74,15 +74,13 @@ if result:
 | `highlight_columns` | `list[dict] \| None` | Column highlighting configuration |
 | `center_table_row` | `int \| None` | Row to center in table view |
 | `center_table_column` | `str \| None` | Column to center in table view |
-| `view` | `str` | Layout: `"mobile"` (default) or `"desktop"` for wider cards |
+| `view` | `str` | Layout: `"mobile"` (360px), `"tablet"` (800px), or `"desktop"` (full width) |
 | `show_border` | `bool` | Show border around cards (default `True`) |
 | `table_font_size` | `int` | Table font size in px (default `14`) |
 | `table_max_rows` | `int \| None` | Max rows to render per table card (visual trim) |
 | `table_max_columns` | `int \| None` | Max columns to render per table card (visual trim) |
 | `last_card_message` | `str \| None` | Message shown after all cards are swiped |
 | `key` | `str \| None` | Unique component key |
-\
-Note: The component now always follows the active Streamlit theme for button colors and default table highlights. Legacy parameters `use_theme_highlight` and `use_theme_buttons` are deprecated and ignored.
 
 **Returns:** `dict | None` - Interaction data including swiped cards, last action, and statistics
 

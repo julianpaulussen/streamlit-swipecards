@@ -1710,8 +1710,10 @@ function onRender(event) {
     container.classList.add('table-mode');
   }
 
-  // Apply desktop view styling if requested
-  if (view === 'desktop') {
+  // Apply view styling based on the view parameter
+  if (view === 'tablet') {
+    container.classList.add('tablet-view');
+  } else if (view === 'desktop') {
     container.classList.add('desktop-view');
   }
   // Also allow opting into desktop width via display_mode alias

@@ -122,7 +122,7 @@ def streamlit_swipecards(
     center_table_column : str or int, optional
         Column name or index to center the table view on (legacy mode).
     view : str
-        Screen view mode: "mobile" for default sizing, "desktop" for wider cards on large screens.
+        Screen view mode: "mobile" for default sizing, "tablet" for medium-width cards, "desktop" for full-width cards on large screens.
     show_border : bool, optional
         Whether to display a border around cards. Defaults to True.
     table_font_size : int, optional

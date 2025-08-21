@@ -567,13 +567,30 @@ body {
 
 .swipe-container.table-mode .cards-stack {
   width: 100%;
-  max-width: 360px; /* unified desktop card width */
+  max-width: 360px; /* default mobile width for table cards */
   height: 480px;
 }
 
-/* Wider cards for desktop view */
-.swipe-container.desktop-view .cards-stack {
+/* Tablet view - medium width cards (previously desktop behavior) */
+.swipe-container.tablet-view .cards-stack {
   max-width: 800px;
+}
+
+/* Tablet view for table mode - override default table width */
+.swipe-container.table-mode.tablet-view .cards-stack {
+  max-width: 800px;
+}
+
+/* Desktop view - full width cards that take advantage of available space */
+.swipe-container.desktop-view .cards-stack {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Desktop view for table mode - override default table width */
+.swipe-container.table-mode.desktop-view .cards-stack {
+  max-width: 100%;
+  width: 100%;
 }
 
 /* Mobile responsiveness for table cards */

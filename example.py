@@ -26,10 +26,11 @@ show_border = st.checkbox("Show card borders", True)
 
 view_option = st.radio(
     "Select view:",
-    ["Mobile", "Desktop"],
+    ["Mobile", "Tablet", "Desktop"],
     horizontal=True
 )
-view = "desktop" if view_option == "Desktop" else "mobile"
+view_mapping = {"Mobile": "mobile", "Tablet": "tablet", "Desktop": "desktop"}
+view = view_mapping[view_option]
 
 mode = st.radio(
     "Select display mode:",
@@ -329,6 +330,7 @@ st.markdown("""
 |-----------|------|-------------|----------|
 | `cards` | list[dict] | List of card objects to display | Yes |
 | `display_mode` | str | Display mode: "cards" for images or "table" for data tables | Yes |
+| `view` | str | Layout size: "mobile" (360px), "tablet" (800px), or "desktop" (full width) | No |
 | `show_border` | bool | Whether to display a border around cards | No |
 | `table_font_size` | int | Table font size (px) in table mode | No |
 | `table_max_rows` | int | Max rows to render per table card | No |
