@@ -67,6 +67,7 @@ def streamlit_swipecards(
     center_table_column: Optional[Union[str, int]] = None,
     view: str = "mobile",
     show_border: bool = True,
+    colors: Optional[dict] = None,
     # New styling and behavior parameters
     table_font_size: Optional[int] = 14,
     table_max_rows: Optional[int] = None,
@@ -125,6 +126,20 @@ def streamlit_swipecards(
         Screen view mode: "mobile" for default sizing, "tablet" for medium-width cards, "desktop" for full-width cards on large screens.
     show_border : bool, optional
         Whether to display a border around cards. Defaults to True.
+    colors : dict, optional
+        Optional color overrides for the component. Values should be valid CSS colors.
+        Supported keys (either top-level or nested under "buttons") include:
+        - like_bg / like.bg: background for the Like button
+        - like_fg / like.fg: text color for the Like button
+        - pass_bg / pass.bg: background for the Pass button
+        - pass_fg / pass.fg: text color for the Pass button
+        - back_bg / back.bg: background for the Back button
+        - back_fg / back.fg: text color for the Back button
+        - btn_border: border color for action buttons
+        - card_bg: card background color
+        - background_color: overall background color
+        - secondary_background_color: secondary background (also used as card background if card_bg not set)
+        - text_color: primary text color
     table_font_size : int, optional
         Font size (in px) for table cells and headers in table mode. Defaults to 14.
     table_max_rows : int, optional
@@ -242,6 +257,7 @@ def streamlit_swipecards(
         centerTableColumn=center_table_column,
         view=view,
         show_border=show_border,
+        colors=colors or None,
         table_font_size=table_font_size,
         table_max_rows=table_max_rows,
         table_max_columns=table_max_columns,

@@ -79,6 +79,7 @@ if result:
 | `table_font_size` | `int` | Table font size in px (default `14`) |
 | `table_max_rows` | `int \| None` | Max rows to render per table card (visual trim) |
 | `table_max_columns` | `int \| None` | Max columns to render per table card (visual trim) |
+| `colors` | `dict \| None` | Optional color overrides for buttons and base theme |
 | `last_card_message` | `str \| None` | Message shown after all cards are swiped |
 | `key` | `str \| None` | Unique component key |
 
@@ -149,6 +150,46 @@ The component returns detailed interaction data:
 - Buttons and default table highlights adapt automatically to the active Streamlit theme.
 - No flags required: the component derives colors from your app theme (or defaults if none is set).
 - Adjust table readability with `table_font_size` (px); optionally trim rendered data with `table_max_rows` and `table_max_columns` for smaller layouts.
+
+### Custom Colors
+
+You can override component colors via the `colors` parameter. Provide valid CSS colors. Keys can be top-level or nested under `buttons`.
+
+Example (customize button backgrounds and text):
+
+```python
+result = streamlit_swipecards(
+    cards=cards,
+    colors={
+        # Buttons (top-level or nested under "buttons")
+        "like_bg": "#22c55e",   # green
+        "like_fg": "#ffffff",
+        "pass_bg": "#ef4444",   # red
+        "pass_fg": "#ffffff",
+        "back_bg": "#374151",   # gray
+        "back_fg": "#ffffff",
+        "btn_border": "#ffffff",
+        # Base colors (optional)
+        "card_bg": "#1f2937",
+        "background_color": "#0b0f16",
+        "secondary_background_color": "#111827",
+        "text_color": "#e5e7eb",
+    },
+)
+```
+
+Nested form also works:
+
+```python
+colors={
+    "buttons": {
+        "like": {"bg": "#22c55e", "fg": "#fff"},
+        "pass": {"bg": "#ef4444", "fg": "#fff"},
+        "back": {"bg": "#374151", "fg": "#fff"},
+        "border": "#fff",
+    }
+}
+```
 
 ## 🚀 Example App
 

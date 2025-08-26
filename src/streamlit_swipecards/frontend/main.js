@@ -1650,6 +1650,7 @@ function onRender(event) {
     centerTableColumn = null,
     view = 'mobile',
     show_border = true,
+    colors = null,
     table_font_size = 14,
     table_max_rows = null,
     table_max_columns = null,
@@ -1753,6 +1754,60 @@ function onRender(event) {
       root.setProperty('--btn-border', borderCol);
     }
   } catch (e) {}
+
+  // Apply explicit color overrides from Python after theme and defaults
+  try {
+    if (colors && typeof colors === 'object') {
+      const root = document.documentElement.style;
+
+      // Helper to safely read nested values: a.b.c or fallback keys
+      const get = (obj, path) => {
+        try {
+          return path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
+        } catch (_) { return undefined; }
+      };
+
+      // Common top-level or nested mappings for buttons
+      const likeBg = get(colors, 'buttons.like.bg') ?? get(colors, 'like.bg') ?? colors.like_bg ?? colors.likeBg;
+      const likeFg = get(colors, 'buttons.like.fg') ?? get(colors, 'like.fg') ?? colors.like_fg ?? colors.likeFg;
+      const passBg = get(colors, 'buttons.pass.bg') ?? get(colors, 'pass.bg') ?? colors.pass_bg ?? colors.passBg;
+      const passFg = get(colors, 'buttons.pass.fg') ?? get(colors, 'pass.fg') ?? colors.pass_fg ?? colors.passFg;
+      const backBg = get(colors, 'buttons.back.bg') ?? get(colors, 'back.bg') ?? colors.back_bg ?? colors.backBg;
+      const backFg = get(colors, 'buttons.back.fg') ?? get(colors, 'back.fg') ?? colors.back_fg ?? colors.backFg;
+      const btnBorder = get(colors, 'buttons.border') ?? colors.btn_border ?? colors.button_border ?? colors.border;
+
+      if (likeBg) root.setProperty('--btn-like-bg', likeBg);
+      if (likeFg) root.setProperty('--btn-like-fg', likeFg);
+      if (passBg) root.setProperty('--btn-pass-bg', passBg);
+      if (passFg) root.setProperty('--btn-pass-fg', passFg);
+      if (backBg) root.setProperty('--btn-back-bg', backBg);
+      if (backFg) root.setProperty('--btn-back-fg', backFg);
+      if (btnBorder) root.setProperty('--btn-border', btnBorder);
+
+      // General colors
+      const cardBg = colors.card_bg ?? colors.cardBg;
+      const bg = colors.background_color ?? colors.backgroundColor;
+      const secondaryBg = colors.secondary_background_color ?? colors.secondaryBackgroundColor;
+      const text = colors.text_color ?? colors.textColor;
+
+      if (bg) {
+        root.setProperty('--background-color', bg);
+        root.setProperty('--bg-color', bg);
+      }
+      if (secondaryBg) {
+        root.setProperty('--secondary-background-color', secondaryBg);
+        // Only override card bg with secondary if explicit card_bg not set
+        if (!cardBg) root.setProperty('--card-bg', secondaryBg);
+      }
+      if (cardBg) root.setProperty('--card-bg', cardBg);
+      if (text) {
+        root.setProperty('--text-color', text);
+        root.setProperty('--text-primary', text);
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to apply explicit color overrides', e);
+  }
   
   const root = document.getElementById('root');
   root.innerHTML = '<div class="swipe-container"></div>';
