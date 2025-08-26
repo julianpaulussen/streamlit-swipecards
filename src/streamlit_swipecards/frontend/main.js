@@ -99,7 +99,18 @@ function detectAndApplyTheme() {
     }
     // Method 3: Check Streamlit app background color
     else {
-      const streamlitApp = parentDoc.querySelector('.stApp, .main, [data-testid="stAppViewContainer"], .css-1d391kg, .css-fg4pbf');
+      const streamlitSelectors = [
+        '.stApp', '.main', '[data-testid="stAppViewContainer"]',
+        '.css-1d391kg', '.css-fg4pbf', '[data-testid="stApp"]',
+        '.streamlit-container', '.st-emotion-cache-uf99v8'
+      ];
+      
+      let streamlitApp = null;
+      for (const selector of streamlitSelectors) {
+        streamlitApp = parentDoc.querySelector(selector);
+        if (streamlitApp) break;
+      }
+      
       if (streamlitApp) {
         const computedStyle = window.parent.getComputedStyle(streamlitApp);
         const bgColor = computedStyle.backgroundColor;
@@ -112,7 +123,8 @@ function detectAndApplyTheme() {
           isDark = brightness < 128;
         }
         // Check for known dark colors
-        else if (bgColor.includes('14, 17, 23') || bgColor.includes('38, 39, 48') || bgColor.includes('11, 11, 11')) {
+        else if (bgColor.includes('14, 17, 23') || bgColor.includes('38, 39, 48') || 
+                 bgColor.includes('11, 11, 11') || bgColor.includes('0, 0, 0')) {
           isDark = true;
         }
       }
@@ -130,6 +142,8 @@ function detectAndApplyTheme() {
     // Copy Streamlit theme colors into component variables
     const parentStyle = window.parent.getComputedStyle(parentDoc.documentElement);
     const docStyle = document.documentElement.style;
+    
+    // Get colors from parent
     const primary = parentStyle.getPropertyValue('--primary-color');
     const bg = parentStyle.getPropertyValue('--background-color');
     const secondaryBg = parentStyle.getPropertyValue('--secondary-background-color');
@@ -149,7 +163,6 @@ function detectAndApplyTheme() {
       docStyle.setProperty('--text-primary', text.trim());
     }
 
-    // Do not override text/background variables here; follow Streamlit's theme.
     // Persist theme snapshot for JS usage
     window._swipecardsTheme = {
       primary: (primary || '').trim(),
@@ -1663,20 +1676,57 @@ function onRender(event) {
   }
   // Apply button theming via CSS variables using Streamlit theme
   try {
+    const root = document.documentElement.style;
     const textCol = (window._swipecardsTheme?.text || '').trim() ||
                     getComputedStyle(document.documentElement).getPropertyValue('--text-color')?.trim();
-    if (window._swipecardsTheme?.primary) {
-      const base = hexToRgb(window._swipecardsTheme.primary) || { r: 102, g: 126, b: 234 };
+    
+    // Get theme colors from multiple sources
+    let primaryColor = window._swipecardsTheme?.primary;
+    let backgroundColor = window._swipecardsTheme?.background || 
+                         getComputedStyle(document.documentElement).getPropertyValue('--background-color')?.trim();
+    let secondaryBgColor = window._swipecardsTheme?.secondaryBackground || 
+                          getComputedStyle(document.documentElement).getPropertyValue('--secondary-background-color')?.trim();
+    
+    // Try to get colors from parent Streamlit app if not available
+    if (!primaryColor || !backgroundColor) {
+      try {
+        const parentDoc = window.parent.document;
+        const parentStyle = window.parent.getComputedStyle(parentDoc.documentElement);
+        
+        if (!primaryColor) {
+          primaryColor = parentStyle.getPropertyValue('--primary-color')?.trim();
+        }
+        if (!backgroundColor) {
+          backgroundColor = parentStyle.getPropertyValue('--background-color')?.trim();
+        }
+        if (!secondaryBgColor) {
+          secondaryBgColor = parentStyle.getPropertyValue('--secondary-background-color')?.trim();
+        }
+      } catch (e) {
+        console.log('Could not access parent document for theme colors');
+      }
+    }
+    
+    // Determine if we're in dark mode
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    if (primaryColor) {
+      const base = hexToRgb(primaryColor) || { r: 102, g: 126, b: 234 };
+      
+      // Create theme-appropriate button colors
       const likeBg = toRgbaString(base, 1);
       const likeFg = bestTextOn(base);
-      const passRgb = lightenRgb(base, 35);
+      
+      // For pass button, use a complementary color that works with the theme
+      const passRgb = isDark ? lightenRgb(base, 20) : darkenRgb(base, 20);
       const passBg = toRgbaString(passRgb, 1);
       const passFg = bestTextOn(passRgb);
-      const backRgb = lightenRgb(base, 15);
-      const backBg = toRgbaString(backRgb, 1);
-      const backFg = '#FFA500'; // force orange icon for visibility
-      const borderCol = textCol || '#666666';
-      const root = document.documentElement.style;
+      
+      // For back button, use secondary background with contrasting text
+      const backBg = secondaryBgColor || (isDark ? '#262730' : '#ffffff');
+      const backFg = textCol || (isDark ? '#fafafa' : '#262730');
+      const borderCol = textCol || (isDark ? '#fafafa' : '#262730');
+      
       root.setProperty('--btn-like-bg', likeBg);
       root.setProperty('--btn-like-fg', likeFg);
       root.setProperty('--btn-pass-bg', passBg);
@@ -1685,18 +1735,22 @@ function onRender(event) {
       root.setProperty('--btn-back-fg', backFg);
       root.setProperty('--btn-border', borderCol);
     } else {
-      const root = document.documentElement.style;
-      root.removeProperty('--btn-like-bg');
-      root.removeProperty('--btn-like-fg');
-      root.removeProperty('--btn-pass-bg');
-      root.removeProperty('--btn-pass-fg');
-      root.removeProperty('--btn-back-bg');
-      root.removeProperty('--btn-back-fg');
-      if (textCol) {
-        root.setProperty('--btn-border', textCol);
-      } else {
-        root.removeProperty('--btn-border');
-      }
+      // Fallback: use theme-appropriate colors based on background
+      const borderCol = textCol || (isDark ? '#fafafa' : '#262730');
+      const backBg = secondaryBgColor || backgroundColor || (isDark ? '#262730' : '#F0F2F6');
+      const backFg = textCol || (isDark ? '#fafafa' : '#262730');
+      
+      // Use consistent theme-based colors for all buttons
+      const buttonBg = isDark ? '#262730' : '#F0F2F6';
+      const buttonFg = isDark ? '#fafafa' : '#262730';
+      
+      root.setProperty('--btn-like-bg', buttonBg);
+      root.setProperty('--btn-like-fg', buttonFg);
+      root.setProperty('--btn-pass-bg', buttonBg);
+      root.setProperty('--btn-pass-fg', buttonFg);
+      root.setProperty('--btn-back-bg', buttonBg);
+      root.setProperty('--btn-back-fg', buttonFg);
+      root.setProperty('--btn-border', borderCol);
     }
   } catch (e) {}
   
