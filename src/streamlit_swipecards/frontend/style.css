@@ -325,14 +325,14 @@ body {
 }
 
 .btn-pass {
-  background: var(--btn-pass-bg, var(--primary-color, #e6e6e6));
-  color: var(--btn-pass-fg, #fff);
+  background: var(--btn-pass-bg, #262730);
+  color: var(--btn-pass-fg, #fafafa);
 }
 
 .btn-back {
-  background: var(--btn-back-bg, var(--secondary-background-color, transparent));
-  color: var(--btn-back-fg, var(--text-color, #e6e6e6));
-  border-color: var(--btn-border, var(--text-color, transparent));
+  background: var(--btn-back-bg, #262730);
+  color: var(--btn-back-fg, #fafafa);
+  border-color: var(--btn-border, #fafafa);
 }
 
 .btn-back svg {
@@ -342,8 +342,8 @@ body {
 }
 
 .btn-like {
-  background: var(--btn-like-bg, var(--primary-color, #e6e6e6));
-  color: var(--btn-like-fg, #fff);
+  background: var(--btn-like-bg, #262730);
+  color: var(--btn-like-fg, #fafafa);
 }
 
 .action-indicator {
