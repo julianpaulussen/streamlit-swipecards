@@ -26,9 +26,9 @@ def _load_dataset_cached(file_path: str, file_mtime: float) -> pd.DataFrame:
         pd.DataFrame: Loaded dataset
     """
     if file_path.endswith('.csv'):
-        return pd.read_csv(file_path)
+        return pd.read_csv(file_path, dtype=str).fillna("")
     elif file_path.endswith(('.xlsx', '.xls')):
-        return pd.read_excel(file_path)
+        return pd.read_excel(file_path, dtype=str).fillna("")
     else:
         raise ValueError("Unsupported file format. Use CSV or Excel files.")
 
