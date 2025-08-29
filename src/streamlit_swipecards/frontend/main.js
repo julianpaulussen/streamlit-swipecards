@@ -908,6 +908,19 @@ class SwipeCards {
         if (allColIds.length > 0) {
           params.columnApi.autoSizeColumns(allColIds, false);
         }
+        // 2) If the widget is wider than the total of the autosized columns,
+        //    expand columns to utilize available width (keep as-is otherwise).
+        try {
+          const gridWidth = gridContainer.getBoundingClientRect().width || gridContainer.clientWidth || 0;
+          const displayed = params.columnApi.getAllDisplayedColumns() || [];
+          const totalColumnsWidth = displayed.reduce((sum, col) => sum + (col.getActualWidth ? col.getActualWidth() : 0), 0);
+          if (gridWidth > 0 && totalColumnsWidth > 0 && gridWidth > totalColumnsWidth) {
+            // Make columns grow to (approximately) the widget width
+            params.api.sizeColumnsToFit();
+          }
+        } catch (e) {
+          // Non-fatal: fallback is to keep autosized widths
+        }
         // Do not cap widths; allow full resize in Inspect mode
         
         // Scroll to current row or centered view
