@@ -1140,11 +1140,10 @@ class SwipeCards {
             if (!color && window._swipecardsTheme?.primary) {
               const rgb = hexToRgb(window._swipecardsTheme.primary);
               const bg = toRgbaString(rgb, 0.12);
-              const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
-              style = `background-color: ${bg}; border: 1px solid ${bd}; font-weight: 500;`;
+              style = `background-color: ${bg}; border: 1px solid #111111; font-weight: 500;`;
             } else {
               color = color || '#E3F2FD';
-              style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
+              style = `background-color: ${color}; border: 1px solid #111111; font-weight: 500;`;
             }
           } else if (isColumnHighlighted) {
             const highlight = this.highlightColumns.find(h => h.column === col);
@@ -1153,11 +1152,10 @@ class SwipeCards {
             if (!color && window._swipecardsTheme?.primary) {
               const rgb = hexToRgb(window._swipecardsTheme.primary);
               const bg = toRgbaString(rgb, 0.12);
-              const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
-              style = `background-color: ${bg}; border: 1px solid ${bd}; font-weight: 500;`;
+              style = `background-color: ${bg}; border: 1px solid #111111; font-weight: 500;`;
             } else {
               color = color || '#E8F5E8';
-              style = `background-color: ${color}; border: 1px solid ${this.darkenColor(color, 20)}; font-weight: 500;`;
+              style = `background-color: ${color}; border: 1px solid #111111; font-weight: 500;`;
             }
           }
 
@@ -1255,7 +1253,7 @@ class SwipeCards {
       
       return {
         backgroundColor: color,
-        border: `1px solid ${this.darkenColor(color, 20)}`,
+        border: `1px solid #111111`,
         fontWeight: '500'
       };
     }
@@ -1280,7 +1278,7 @@ class SwipeCards {
       
       return {
         backgroundColor: color,
-        border: `1px solid ${this.darkenColor(color, 20)}`,
+        border: `1px solid #111111`,
         fontWeight: '500'
       };
     }
@@ -1351,10 +1349,10 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.12);
         const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
-        return { backgroundColor: bg, border: `1px solid ${bd}`, fontWeight: '500' };
+        return { backgroundColor: bg, border: `1px solid #111111`, fontWeight: '500' };
       }
       color = color || '#E3F2FD';
-      return { backgroundColor: color, border: `1px solid ${this.darkenColor(color, 20)}`, fontWeight: '500' };
+      return { backgroundColor: color, border: `1px solid #111111`, fontWeight: '500' };
     }
     return null;
   }
@@ -1377,10 +1375,10 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.12);
         const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
-        return { backgroundColor: bg, border: `1px solid ${bd}`, fontWeight: '500' };
+        return { backgroundColor: bg, border: `1px solid #111111`, fontWeight: '500' };
       }
       color = color || '#E8F5E8';
-      return { backgroundColor: color, border: `1px solid ${this.darkenColor(color, 20)}`, fontWeight: '500' };
+      return { backgroundColor: color, border: `1px solid #111111`, fontWeight: '500' };
     }
     return null;
   }
