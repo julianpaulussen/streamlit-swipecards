@@ -209,6 +209,28 @@ body {
   max-width: 100%;
 }
 
+/* Show all pills button */
+.pills-show-more-btn {
+  appearance: none;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 26px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.pills-show-more-btn:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
 /* Dark theme pills */
 [data-theme="dark"] .card-pill {
   background: var(--border-color);
@@ -219,6 +241,66 @@ body {
 .card-pill:hover {
   background: var(--text-secondary);
   color: var(--card-bg);
+}
+
+/* Pills Modal */
+.pills-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.pills-modal {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  max-width: 90vw;
+  width: 520px;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+}
+
+.pills-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pills-modal-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pills-modal-close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pills-modal-body {
+  padding: 12px;
+  overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Prevent background scroll when modal open (within iframe) */
+html.pills-modal-open, body.pills-modal-open {
+  overflow: hidden;
 }
 
 .action-buttons {

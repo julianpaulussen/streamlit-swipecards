@@ -291,6 +291,8 @@ class SwipeCards {
     this.mode = 'swipe'; // Default mode
     this.moveRaf = null; // Track scheduled move frame
     this.isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    this.pillsModalOpen = false; // Track pills modal state
+    this.maxVisiblePills = 3; // Max pills shown inline before collapsing
 
     // Bind swipe handlers once so we can add/remove them easily
     this.handleStart = this.handleStart.bind(this);
@@ -318,6 +320,34 @@ class SwipeCards {
             e.stopPropagation();
             const newMode = this.mode === 'swipe' ? 'inspect' : 'swipe';
             this.setMode(newMode);
+            return;
+          }
+
+          // Show-more pills button (backward-compatible with previous class)
+          const showAllBtn = e.target && e.target.closest && (e.target.closest('.pills-show-more-btn') || e.target.closest('.pills-show-all-btn'));
+          if (showAllBtn && this.container.contains(showAllBtn)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const cardEl = showAllBtn.closest('.swipe-card');
+            const cardIndex = cardEl ? parseInt(cardEl.getAttribute('data-index')) : this.currentIndex;
+            this.openPillsModal(cardIndex);
+            return;
+          }
+
+          // Close modal via header close button or overlay click
+          const closeBtn = e.target && e.target.closest && e.target.closest('.pills-modal-close');
+          if (closeBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.closePillsModal();
+            return;
+          }
+
+          const overlay = e.target && e.target.classList && e.target.classList.contains('pills-modal-overlay');
+          if (overlay) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.closePillsModal();
             return;
           }
         },
@@ -1387,12 +1417,18 @@ class SwipeCards {
     if (!pills || !Array.isArray(pills) || pills.length === 0) {
       return '';
     }
-    
-    const pillsHTML = pills.map(pill => 
+    const visible = pills.slice(0, this.maxVisiblePills);
+    const hiddenCount = Math.max(0, pills.length - visible.length);
+
+    const pillsHTML = visible.map(pill => 
       `<span class="card-pill">${this.escapeHtml(pill)}</span>`
     ).join('');
-    
-    return `<div class="card-pills">${pillsHTML}</div>`;
+
+    const showAllBtn = hiddenCount > 0
+      ? `<button type="button" class="pills-show-more-btn" aria-label="Show more pills (${hiddenCount} more)" title="Show more (${hiddenCount} more)">+${hiddenCount}</button>`
+      : '';
+
+    return `<div class="card-pills">${pillsHTML}${showAllBtn}</div>`;
   }
   
   escapeHtml(text) {
@@ -1440,9 +1476,14 @@ class SwipeCards {
   handleStart(e) {
     if (this.mode !== 'swipe') return;
 
-    // Ignore touches on toggle buttons so taps register as clicks on mobile
-    if (e.target.closest('.mode-toggle-btn')) {
-      // Prevent swipe initiation and let the click fire
+    // Block swipe initiation when pills modal is open
+    if (this.pillsModalOpen) {
+      e.stopPropagation();
+      return;
+    }
+
+    // Ignore touches on toggle buttons and show-all pills buttons
+    if (e.target.closest('.mode-toggle-btn') || e.target.closest('.pills-show-more-btn') || e.target.closest('.pills-modal')) {
       e.stopPropagation();
       return;
     }
@@ -1462,6 +1503,51 @@ class SwipeCards {
     }
 
     e.preventDefault();
+  }
+
+  openPillsModal(cardIndex) {
+    try {
+      const card = this.cards[cardIndex] || this.cards[this.currentIndex];
+      const pills = (card && Array.isArray(card.pills)) ? card.pills : [];
+      if (!pills.length) return;
+
+      // Build overlay
+      let overlay = this.container.querySelector('.pills-modal-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'pills-modal-overlay';
+        this.container.appendChild(overlay);
+      }
+
+      const modal = document.createElement('div');
+      modal.className = 'pills-modal';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+
+      const header = document.createElement('div');
+      header.className = 'pills-modal-header';
+      header.innerHTML = `<div class="pills-modal-title">All Pills (${pills.length})</div><button class="pills-modal-close" aria-label="Close">×</button>`;
+
+      const body = document.createElement('div');
+      body.className = 'pills-modal-body';
+      body.innerHTML = pills.map(p => `<span class="card-pill">${this.escapeHtml(p)}</span>`).join('');
+
+      modal.appendChild(header);
+      modal.appendChild(body);
+      overlay.innerHTML = '';
+      overlay.appendChild(modal);
+
+      // Mark open and prevent swipe actions underneath
+      this.pillsModalOpen = true;
+      document.documentElement.classList.add('pills-modal-open');
+    } catch (_) {}
+  }
+
+  closePillsModal() {
+    const overlay = this.container.querySelector('.pills-modal-overlay');
+    if (overlay) overlay.remove();
+    this.pillsModalOpen = false;
+    document.documentElement.classList.remove('pills-modal-open');
   }
 
   handleMove(e) {
