@@ -530,6 +530,11 @@ body {
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   position: relative;
+  /* Ensure highlighted cells are not constrained in width in fallback table */
+  max-width: none;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .data-table td[style*="background-color"]::before {
@@ -660,6 +665,13 @@ body {
   .swipe-container.swipe-mode .ag-grid-container .ag-resizer {
     display: none !important;
     pointer-events: none !important;
+  }
+}
+
+/* Ensure highlighted fallback cells are never width-capped on small screens */
+@media (max-width: 480px) {
+  .data-table td[style*="background-color"] {
+    max-width: none !important;
   }
 }
 

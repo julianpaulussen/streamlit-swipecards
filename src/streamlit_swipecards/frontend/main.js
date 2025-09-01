@@ -467,6 +467,29 @@ class SwipeCards {
 
     this.updateGridListeners();
     this.bindEvents();
+
+    // When entering inspect mode, expand any highlighted cell's column
+    // on the front (active) card so its content isn't clipped.
+    if (mode === 'inspect') {
+      try {
+        const front = this.container.querySelector('.swipe-card.card-front');
+        if (front) {
+          const cardIndex = parseInt(front.getAttribute('data-index'));
+          const card = this.cards[cardIndex];
+          if (card && (card.highlight_cells?.length || this.highlightCells.length)) {
+            const rowIndexToCenter =
+              card.center_table_row !== null && card.center_table_row !== undefined
+                ? card.center_table_row
+                : (this.centerTableRow !== null && this.centerTableRow !== undefined
+                    ? this.centerTableRow
+                    : card.row_index);
+            this.autosizeHighlightedColumnsForCard(cardIndex, rowIndexToCenter);
+          }
+        }
+      } catch (_) {
+        // Non-fatal if autosize on toggle fails
+      }
+    }
     updateFrameHeightDebounced();
   }
 
@@ -813,45 +836,61 @@ class SwipeCards {
       ? tableData.rows.slice(0, this.tableMaxRows || tableData.rows.length)
       : [];
 
-    // Prepare column definitions
-    const columnDefs = effectiveColumns.map(col => ({
-      field: col,
-      headerName: col,
-      flex: 1,
-      minWidth: 60,
-      resizable: true,
-      sortable: false,
-      filter: false,
-      cellStyle: (params) => {
-        const rowIndex = params.node.rowIndex;
-        const columnField = params.colDef.field;
-        
-        // Apply cell highlighting first (highest priority)
-        const isCellHighlighted = this.isCellHighlightedForCard(rowIndex, columnField, columnField, highlightCells);
-        if (isCellHighlighted) {
-          const style = this.getHighlightStyleObjectForCard(rowIndex, columnField, columnField, highlightCells);
-          return style;
-        }
-        
-        // Apply row highlighting
-        const isRowHighlighted = this.isRowHighlightedForCard(rowIndex, highlightRows);
-        if (isRowHighlighted) {
-          const style = this.getRowHighlightStyleObjectForCard(rowIndex, highlightRows);
-          return style;
-        }
-        
-        // Apply column highlighting
-        const isColumnHighlighted = this.isColumnHighlightedForCard(columnField, highlightColumns);
-        if (isColumnHighlighted) {
-          const style = this.getColumnHighlightStyleObjectForCard(columnField, highlightColumns);
-          return style;
-        }
-        
+    // Build a quick lookup for highlighted column ids (respecting numeric indices under trimming)
+    const highlightedColIds = new Set(
+      (highlightCells || [])
+        .map(h => (typeof h?.column === 'number' ? effectiveColumns[h.column] : h?.column))
+        .filter(Boolean)
+    );
 
-        
-        return null;
-      }
-    }));
+    // Prepare column definitions
+    const isInspect = this.mode === 'inspect';
+    const columnDefs = effectiveColumns.map(col => {
+      const isHighlightedCol = highlightedColIds.has(col);
+      return {
+        field: col,
+        headerName: col,
+        // In inspect mode, avoid flex sizing so columns can exceed the viewport
+        // and enable horizontal scrolling; in swipe mode, keep flex for tidy fit.
+        // Also avoid flex on highlighted columns so width autosizing isn't overridden.
+        ...((isInspect || isHighlightedCol) ? {} : { flex: 1 }),
+        minWidth: 60,
+        // Prevent sizeColumnsToFit() from shrinking highlighted columns
+        suppressSizeToFit: isInspect || isHighlightedCol,
+        resizable: true,
+        sortable: false,
+        filter: false,
+        // Let highlighted columns wrap if they still exceed viewport width
+        ...(isHighlightedCol ? { wrapText: true, autoHeight: true } : {}),
+        cellStyle: (params) => {
+          const rowIndex = params.node.rowIndex;
+          const columnField = params.colDef.field;
+
+          // Apply cell highlighting first (highest priority)
+          const isCellHighlighted = this.isCellHighlightedForCard(rowIndex, columnField, columnField, highlightCells);
+          if (isCellHighlighted) {
+            const style = this.getHighlightStyleObjectForCard(rowIndex, columnField, columnField, highlightCells);
+            return style;
+          }
+
+          // Apply row highlighting
+          const isRowHighlighted = this.isRowHighlightedForCard(rowIndex, highlightRows);
+          if (isRowHighlighted) {
+            const style = this.getRowHighlightStyleObjectForCard(rowIndex, highlightRows);
+            return style;
+          }
+
+          // Apply column highlighting
+          const isColumnHighlighted = this.isColumnHighlightedForCard(columnField, highlightColumns);
+          if (isColumnHighlighted) {
+            const style = this.getColumnHighlightStyleObjectForCard(columnField, highlightColumns);
+            return style;
+          }
+
+          return null;
+        }
+      };
+    });
     
     // Prepare row data
     const rowData = effectiveRows.map(row => {
@@ -908,18 +947,39 @@ class SwipeCards {
         if (allColIds.length > 0) {
           params.columnApi.autoSizeColumns(allColIds, false);
         }
+        // 1b) Ensure highlighted columns are fully auto-sized immediately in all modes
+        try {
+          const cardHighlights = (card.highlight_cells || this.highlightCells || []).filter(h => h);
+          if (cardHighlights.length > 0) {
+            const colIds = Array.from(new Set(cardHighlights.map(h => {
+              if (typeof h.column === 'number') {
+                return effectiveColumns[h.column];
+              }
+              return h.column;
+            }).filter(Boolean)));
+            if (colIds.length > 0) {
+              colIds.forEach(id => params.api.ensureColumnVisible(id, 'middle'));
+              // Delay slightly so target row paints before measuring
+              setTimeout(() => {
+                try { params.columnApi.autoSizeColumns(colIds, false); } catch (_) {}
+              }, 50);
+            }
+          }
+        } catch (_) {}
         // 2) If the widget is wider than the total of the autosized columns,
         //    expand columns to utilize available width (keep as-is otherwise).
-        try {
-          const gridWidth = gridContainer.getBoundingClientRect().width || gridContainer.clientWidth || 0;
-          const displayed = params.columnApi.getAllDisplayedColumns() || [];
-          const totalColumnsWidth = displayed.reduce((sum, col) => sum + (col.getActualWidth ? col.getActualWidth() : 0), 0);
-          if (gridWidth > 0 && totalColumnsWidth > 0 && gridWidth > totalColumnsWidth) {
-            // Make columns grow to (approximately) the widget width
-            params.api.sizeColumnsToFit();
+        if (this.mode !== 'inspect') {
+          try {
+            const gridWidth = gridContainer.getBoundingClientRect().width || gridContainer.clientWidth || 0;
+            const displayed = params.columnApi.getAllDisplayedColumns() || [];
+            const totalColumnsWidth = displayed.reduce((sum, col) => sum + (col.getActualWidth ? col.getActualWidth() : 0), 0);
+            if (gridWidth > 0 && totalColumnsWidth > 0 && gridWidth > totalColumnsWidth) {
+              // Make columns grow to (approximately) the widget width in swipe mode only
+              params.api.sizeColumnsToFit();
+            }
+          } catch (e) {
+            // Non-fatal: fallback is to keep autosized widths
           }
-        } catch (e) {
-          // Non-fatal: fallback is to keep autosized widths
         }
         // Do not cap widths; allow full resize in Inspect mode
         
@@ -949,6 +1009,8 @@ class SwipeCards {
         if (colIdToCenter !== undefined && colIdToCenter !== null && colIdToCenter !== '') {
           params.api.ensureColumnVisible(colIdToCenter, 'middle');
         }
+
+        // (Kept) Highlight autosize handled above for both modes
 
         // After centering, adjust visibility based on card position
         setTimeout(() => {
@@ -992,6 +1054,52 @@ class SwipeCards {
       if (overlay) overlay.remove();
       window.swipeProgress.loaded++;
       updateSwipeProgress();
+    }
+  }
+
+  // Expand the highlighted cell's column(s) for a given card so the
+  // highlighted content is fully visible. Safe to call anytime after
+  // the grid has been created for that card.
+  autosizeHighlightedColumnsForCard(cardIndex, rowIndex) {
+    try {
+      const grid = this.agGridInstances?.get(cardIndex);
+      if (!grid) return;
+      const card = this.cards?.[cardIndex];
+      if (!card) return;
+      const tableData = card.table_data || this.tableData;
+      if (!tableData) return;
+
+      // Respect visual trimming settings to map numeric indices correctly
+      const effectiveColumns = Array.isArray(tableData.columns)
+        ? tableData.columns.slice(0, this.tableMaxColumns || tableData.columns.length)
+        : [];
+
+      const highlights = (card.highlight_cells || this.highlightCells || []).filter(h => h);
+      if (highlights.length === 0) return;
+
+      const colIds = Array.from(new Set(highlights.map(h => {
+        if (typeof h.column === 'number') {
+          return effectiveColumns[h.column];
+        }
+        return h.column;
+      }).filter(Boolean)));
+      if (colIds.length === 0) return;
+
+      // Center the row/columns, then autosize after a short delay to ensure
+      // DOM rendering has caught up.
+      try { grid.ensureIndexVisible?.(rowIndex, 'middle'); } catch (_) {}
+      colIds.forEach(id => { try { grid.ensureColumnVisible?.(id, 'middle'); } catch (_) {} });
+
+      const columnApi = grid.getColumnApi ? grid.getColumnApi() : null;
+      if (!columnApi) return;
+
+      setTimeout(() => {
+        try {
+          columnApi.autoSizeColumns(colIds, false);
+        } catch (_) {}
+      }, 60);
+    } catch (_) {
+      // Silently ignore; autosize is a non-critical enhancement
     }
   }
 
@@ -1620,6 +1728,19 @@ class SwipeCards {
       gridContainer.style.opacity = '1';
       gridContainer.style.zIndex = '';
       console.log(`Made card ${cardIndex} visible as front card`);
+      // Also immediately autosize and center highlighted columns for this front card
+      try {
+        const card = this.cards?.[cardIndex];
+        if (card) {
+          const rowIndexToCenter =
+            card.center_table_row !== null && card.center_table_row !== undefined
+              ? card.center_table_row
+              : (this.centerTableRow !== null && this.centerTableRow !== undefined
+                  ? this.centerTableRow
+                  : card.row_index);
+          this.autosizeHighlightedColumnsForCard(cardIndex, rowIndexToCenter);
+        }
+      } catch (_) {}
     }
   }
   
