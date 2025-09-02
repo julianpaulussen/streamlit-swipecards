@@ -243,4 +243,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Issues: [GitHub Issues](https://github.com/julianpaulussen/streamlit-swipecards/issues)
 - Discussions: [GitHub Discussions](https://github.com/julianpaulussen/streamlit-swipecards/discussions)
-- Email: julien.playsde@gmail.com
