@@ -944,8 +944,8 @@ class SwipeCards {
     };
 
     // Grid options
-    // Set a fixed row height for table rows
-    const rowHeight = 27;
+    // Default row height based on font size (original behavior)
+    const defaultRowHeight = Math.max(24, Math.round((this.tableFontSize || 14) + 12));
     const headerHeight = Math.max(28, Math.round((this.tableFontSize || 14) + 14));
     const gridOptions = {
       columnDefs: columnDefs,
@@ -959,7 +959,15 @@ class SwipeCards {
       suppressVerticalScroll: false,
       domLayout: 'normal',
       headerHeight: headerHeight,
-      rowHeight: rowHeight,
+      rowHeight: defaultRowHeight,
+      // Only adjust height for highlighted rows to 27px
+      getRowHeight: (params) => {
+        const rowIndex = params.node?.rowIndex ?? -1;
+        if (this.isRowHighlightedForCard(rowIndex, highlightRows)) {
+          return 27;
+        }
+        return defaultRowHeight;
+      },
       animateRows: false,
       suppressMovableColumns: true,
       suppressMenuHide: true,
@@ -1172,10 +1180,10 @@ class SwipeCards {
             if (!color && window._swipecardsTheme?.primary) {
               const rgb = hexToRgb(window._swipecardsTheme.primary);
               const bg = toRgbaString(rgb, 0.12);
-              style = `background-color: ${bg}; border: 1px solid #111111; font-weight: 500;`;
+              style = `background-color: ${bg}; border: 1px solid #111111; outline: 2px solid #111111; outline-offset: -2px; font-weight: 500;`;
             } else {
               color = color || '#E3F2FD';
-              style = `background-color: ${color}; border: 1px solid #111111; font-weight: 500;`;
+              style = `background-color: ${color}; border: 1px solid #111111; outline: 2px solid #111111; outline-offset: -2px; font-weight: 500;`;
             }
           } else if (isColumnHighlighted) {
             const highlight = this.highlightColumns.find(h => h.column === col);
@@ -1224,11 +1232,11 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.18);
         const bd = toRgbaString(darkenRgb(rgb, 20), 0.9);
-        return `background-color: ${bg}; border: 1px solid transparent; position: relative; z-index: 2; box-shadow: inset 0 0 0 1px ${bd}; outline: 2px solid ${bd}; outline-offset: -2px;`;
+        return `background-color: ${bg}; border: 1px solid transparent; position: relative; z-index: 2; box-shadow: inset 0 0 0 1px ${bd}; outline: 3px solid ${bd}; outline-offset: -3px;`;
       }
       color = color || '#FFD700';
       const bd = this.darkenColor(color, 20);
-      return `background-color: ${color}; border: 1px solid transparent; position: relative; z-index: 2; box-shadow: inset 0 0 0 1px ${bd}; outline: 2px solid ${bd}; outline-offset: -2px;`;
+      return `background-color: ${color}; border: 1px solid transparent; position: relative; z-index: 2; box-shadow: inset 0 0 0 1px ${bd}; outline: 3px solid ${bd}; outline-offset: -3px;`;
     }
     return '';
   }
@@ -1256,8 +1264,8 @@ class SwipeCards {
         backgroundColor: color,
         border: '1px solid transparent',
         boxShadow: `inset 0 0 0 1px ${bd}`,
-        outline: `2px solid ${bd}`,
-        outlineOffset: '-2px',
+        outline: `3px solid ${bd}`,
+        outlineOffset: '-3px',
         fontWeight: 'bold',
         position: 'relative',
         zIndex: 2,
@@ -1294,6 +1302,8 @@ class SwipeCards {
       return {
         backgroundColor: color,
         border: `1px solid #111111`,
+        outline: '2px solid #111111',
+        outlineOffset: '-2px',
         fontWeight: '500'
       };
     }
@@ -1368,12 +1378,12 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.18);
         const bd = toRgbaString(darkenRgb(rgb, 20), 0.9);
-        return { backgroundColor: bg, border: '1px solid transparent', boxShadow: `inset 0 0 0 1px ${bd}`, outline: `2px solid ${bd}`, outlineOffset: '-2px', fontWeight: 'bold', position: 'relative', zIndex: 2, boxSizing: 'border-box' };
+        return { backgroundColor: bg, border: '1px solid transparent', boxShadow: `inset 0 0 0 1px ${bd}`, outline: `3px solid ${bd}`, outlineOffset: '-3px', fontWeight: 'bold', position: 'relative', zIndex: 2, boxSizing: 'border-box' };
       }
       // Fallback to previous default
       color = color || '#FFD700';
       const bd = this.darkenColor(color, 20);
-      return { backgroundColor: color, border: '1px solid transparent', boxShadow: `inset 0 0 0 1px ${bd}`, outline: `2px solid ${bd}`, outlineOffset: '-2px', fontWeight: 'bold', position: 'relative', zIndex: 2, boxSizing: 'border-box' };
+      return { backgroundColor: color, border: '1px solid transparent', boxShadow: `inset 0 0 0 1px ${bd}`, outline: `3px solid ${bd}`, outlineOffset: '-3px', fontWeight: 'bold', position: 'relative', zIndex: 2, boxSizing: 'border-box' };
     }
     return null;
   }
@@ -1392,10 +1402,10 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.12);
         const bd = toRgbaString(darkenRgb(rgb, 25), 0.8);
-        return { backgroundColor: bg, border: `1px solid #111111`, fontWeight: '500' };
+        return { backgroundColor: bg, border: `1px solid #111111`, outline: '2px solid #111111', outlineOffset: '-2px', fontWeight: '500' };
       }
       color = color || '#E3F2FD';
-      return { backgroundColor: color, border: `1px solid #111111`, fontWeight: '500' };
+      return { backgroundColor: color, border: `1px solid #111111`, outline: '2px solid #111111', outlineOffset: '-2px', fontWeight: '500' };
     }
     return null;
   }
