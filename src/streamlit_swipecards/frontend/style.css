@@ -567,7 +567,9 @@ html.pills-modal-open, body.pills-modal-open {
 
 .data-table {
   width: 100%;
-  border-collapse: collapse;
+  /* Use separate borders to avoid collapsed-border conflicts hiding highlights */
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: var(--table-font-size, 14px);
   color: var(--text-primary);
   background: var(--card-bg);
@@ -603,7 +605,8 @@ html.pills-modal-open, body.pills-modal-open {
 
 .data-table tbody tr:hover {
   background-color: var(--bg-color);
-  transform: scale(1.02);
+  /* Avoid scaling rows – it creates stacking contexts and hides borders */
+  transform: none;
 }
 
 
@@ -617,6 +620,14 @@ html.pills-modal-open, body.pills-modal-open {
   white-space: normal;
   word-break: break-word;
   overflow-wrap: anywhere;
+  /* Keep highlighted borders above neighbors */
+  z-index: 1;
+}
+
+/* If a cell is highlighted via inline border, ensure it paints on top */
+.data-table td[style*="border:"] {
+  position: relative;
+  z-index: 1;
 }
 
 .data-table td[style*="background-color"]::before {
@@ -867,7 +878,8 @@ html.pills-modal-open, body.pills-modal-open {
 
 .ag-grid-container .ag-row:hover {
   background-color: var(--bg-color) !important;
-  transform: scale(1.01);
+  /* Avoid scaling rows – it can hide cell borders after autosize */
+  transform: none;
 }
 
 /* Cell styling */

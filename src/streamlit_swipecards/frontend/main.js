@@ -1222,10 +1222,11 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.18);
         const bd = toRgbaString(darkenRgb(rgb, 20), 0.9);
-        return `background-color: ${bg}; border: 2px solid ${bd};`;
+        return `background-color: ${bg}; border: 1px solid transparent; position: relative; z-index: 2; box-shadow: inset 0 0 0 1px ${bd}; outline: 2px solid ${bd}; outline-offset: -2px;`;
       }
       color = color || '#FFD700';
-      return `background-color: ${color}; border: 2px solid ${this.darkenColor(color, 20)};`;
+      const bd = this.darkenColor(color, 20);
+      return `background-color: ${color}; border: 1px solid transparent; position: relative; z-index: 2; box-shadow: inset 0 0 0 1px ${bd}; outline: 2px solid ${bd}; outline-offset: -2px;`;
     }
     return '';
   }
@@ -1248,10 +1249,17 @@ class SwipeCards {
       // Use provided color or default
       color = color || '#FFD700'; // Gold as default when theme color is not used
       
+      const bd = this.darkenColor(color, 20);
       return {
         backgroundColor: color,
-        border: `2px solid ${this.darkenColor(color, 20)}`,
-        fontWeight: 'bold'
+        border: '1px solid transparent',
+        boxShadow: `inset 0 0 0 1px ${bd}`,
+        outline: `2px solid ${bd}`,
+        outlineOffset: '-2px',
+        fontWeight: 'bold',
+        position: 'relative',
+        zIndex: 2,
+        boxSizing: 'border-box',
       };
     }
     return null;
@@ -1356,11 +1364,12 @@ class SwipeCards {
         const rgb = hexToRgb(window._swipecardsTheme.primary);
         const bg = toRgbaString(rgb, 0.18);
         const bd = toRgbaString(darkenRgb(rgb, 20), 0.9);
-        return { backgroundColor: bg, border: `2px solid ${bd}`, fontWeight: 'bold' };
+        return { backgroundColor: bg, border: '1px solid transparent', boxShadow: `inset 0 0 0 1px ${bd}`, outline: `2px solid ${bd}`, outlineOffset: '-2px', fontWeight: 'bold', position: 'relative', zIndex: 2, boxSizing: 'border-box' };
       }
       // Fallback to previous default
       color = color || '#FFD700';
-      return { backgroundColor: color, border: `2px solid ${this.darkenColor(color, 20)}`, fontWeight: 'bold' };
+      const bd = this.darkenColor(color, 20);
+      return { backgroundColor: color, border: '1px solid transparent', boxShadow: `inset 0 0 0 1px ${bd}`, outline: `2px solid ${bd}`, outlineOffset: '-2px', fontWeight: 'bold', position: 'relative', zIndex: 2, boxSizing: 'border-box' };
     }
     return null;
   }
