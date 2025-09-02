@@ -890,8 +890,9 @@ class SwipeCards {
         resizable: true,
         sortable: false,
         filter: false,
-        // Let highlighted columns wrap if they still exceed viewport width
-        ...(isHighlightedCol ? { wrapText: true, autoHeight: true } : {}),
+        // Keep a fixed row height even for highlighted columns
+        // Do not enable wrap/autoHeight which would override rowHeight
+        ...(isHighlightedCol ? { wrapText: false, autoHeight: false } : {}),
         cellStyle: (params) => {
           const rowIndex = params.node.rowIndex;
           const columnField = params.colDef.field;
@@ -943,7 +944,8 @@ class SwipeCards {
     };
 
     // Grid options
-    const rowHeight = Math.max(24, Math.round((this.tableFontSize || 14) + 12));
+    // Set a fixed row height for table rows
+    const rowHeight = 27;
     const headerHeight = Math.max(28, Math.round((this.tableFontSize || 14) + 14));
     const gridOptions = {
       columnDefs: columnDefs,
